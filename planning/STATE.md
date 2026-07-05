@@ -28,12 +28,22 @@
 - gh active account: **initcron** (admin on repo). Commits authored as `initcron <bean@initcron.org>`.
 - `old/` + `references.txt` purged from history and gitignored — keep private.
 
-## Polish follow-ups (not blocking)
+## Polish follow-ups
 
-- ⬜ **Homepage still shows the Docusaurus scaffold** (`<title>Easy to Use</title>`, template banner in
-  `site/src/pages/index.tsx`). Replace with a course-branded landing page.
-- ⬜ Fill the two `setup/` stub pages (prerequisites, gpu-reality) with real content.
-- ⬜ (CI) Actions warns Node 20 actions forced to Node 24 — cosmetic; bump action versions later.
+- ✅ **Homepage rebranded** — course title/tagline, "Start the Course →" CTA, 3 value props (📦🪜💻). Live.
+- ✅ **Setup pages authored** — `setup/prerequisites` (install quickstart, fixed `--cask rancher`) +
+  `setup/gpu-reality` (analogy + Mermaid). Live.
+- ⬜ (CI, cosmetic) Actions warns Node 20 actions forced to Node 24 — bump action versions someday.
+- Note: GitHub Pages "Deploy" step can intermittently fail with "try again later" (transient) — just
+  `gh run rerun <id> --failed`.
+
+## Next: M2 · Serving Local Models the Universal Way
+
+Follow the proven M1 pattern (lesson w/ analogies+Mermaid → lab → live validation → quiz). M2 scope:
+DMR demo → open engines (Ollama/llama.cpp/LocalAI) → **OpenAI-compatible endpoint as the universal
+contract** (`/v1/...`) → GGUF + laptop model selection → two wiring patterns. Lab: containerize a small
+Python client hitting the OpenAI-compatible API at `host.docker.internal:11434/v1`; this begins the
+hand-authored `compose.yaml`.
 
 ## Key decisions locked (don't re-litigate)
 
