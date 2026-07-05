@@ -1,0 +1,144 @@
+---
+sidebar_position: 3
+title: 'Quiz: Module 5'
+---
+
+import Quiz from '@site/src/components/Quiz';
+
+# Module 5 Quiz
+
+Test your understanding of the four-part GenAI application anatomy, the naive-RAG pipeline, vector databases, where naive RAG breaks, and the native-Ollama / containerised-app pattern on Apple Silicon.
+
+<Quiz questions={[
+  {
+    prompt: 'A GenAI application that uses RAG has four core components. Which of the following are they? (Select all that apply)',
+    multiSelect: true,
+    options: [
+      {
+        text: 'LLM endpoint — generates text given a prompt',
+        correct: true,
+        explanation: 'Correct. The LLM endpoint is the generation engine. In M5 this is qwen2.5:1.5b served by native Ollama on :11434.',
+      },
+      {
+        text: 'Embedding model — converts text to dense vectors for similarity search',
+        correct: true,
+        explanation: 'Correct. The embedding model (nomic-embed-text in M5) converts both your documents and your query into 768-dimensional vectors so they can be compared by semantic proximity.',
+      },
+      {
+        text: 'Vector database — stores embeddings and performs similarity search',
+        correct: true,
+        explanation: 'Correct. ChromaDB stores the chunk embeddings and returns the top-k most similar chunks when a query vector is provided.',
+      },
+      {
+        text: 'Application layer — orchestrates the pipeline and serves the UI',
+        correct: true,
+        explanation: 'Correct. The Streamlit app in M5 is the application layer: it chunks documents, calls Ollama for embeddings, writes to ChromaDB, retrieves chunks, builds the augmented prompt, and displays results.',
+      },
+      {
+        text: 'Fine-tuning pipeline — updates model weights on your domain data',
+        correct: false,
+        explanation: 'RAG does not update model weights. It provides relevant context at query time instead. Fine-tuning is a separate (and much more expensive) technique that RAG is specifically designed to avoid.',
+      },
+    ],
+  },
+  {
+    prompt: 'Why does the compose.yaml pin ChromaDB to version 0.5.20 instead of using the latest tag?',
+    options: [
+      {
+        text: 'Version 0.5.20 is the only version that supports Docker volumes for persistence.',
+        correct: false,
+        explanation: 'All recent ChromaDB versions support persistent storage. The pin is about API compatibility with the langchain-chroma client, not volume support.',
+      },
+      {
+        text: 'langchain-chroma ships a client that targets the 0.5.x HTTP API. Running ChromaDB 0.6.x causes a version handshake failure, so the server is pinned to match the client.',
+        correct: true,
+        explanation: 'Correct. This is a common pattern with fast-moving OSS stacks: the client library and server must agree on the API version. Pinning the server image removes that ambiguity. Never use latest for a version-sensitive component.',
+      },
+      {
+        text: 'ChromaDB 0.6.x removed the HTTP server mode; 0.5.20 is the last version that exposes :8000.',
+        correct: false,
+        explanation: 'ChromaDB 0.6.x still exposes an HTTP server. The pin is an API compatibility constraint between the langchain-chroma Python client and the ChromaDB server, not a feature removal.',
+      },
+      {
+        text: 'Version 0.5.20 uses less memory than later versions, which is important for the 16 GB laptop constraint.',
+        correct: false,
+        explanation: 'Memory usage is not the reason for the pin. The compose.yaml already sets an explicit memory limit of 768M for the chromadb service. The pin is purely about client/server API version compatibility.',
+      },
+    ],
+  },
+  {
+    prompt: 'In the correct order, what are the steps of the naive-RAG query phase (after documents have already been ingested)?',
+    options: [
+      {
+        text: 'Chunk the question → store in ChromaDB → retrieve similar chunks → generate answer',
+        correct: false,
+        explanation: 'The question is not chunked or stored. Chunking and storing happen in the ingest phase for source documents. The query phase starts with embedding the question.',
+      },
+      {
+        text: 'Embed the question → retrieve top-k similar chunks from ChromaDB → build augmented prompt → generate answer',
+        correct: true,
+        explanation: 'Correct. The question is converted to a vector (using the same embedding model as ingest), ChromaDB finds the nearest stored vectors, the retrieved chunk text is pasted into the prompt as context, and the LLM generates a grounded response.',
+      },
+      {
+        text: 'Generate a draft answer → embed the draft → retrieve corrections from ChromaDB → refine the answer',
+        correct: false,
+        explanation: 'This describes a refinement loop, which naive RAG does not do. Naive RAG retrieves once before generation, not after. The ability to retrieve iteratively or refine based on draft answers is what agentic RAG (M6) adds.',
+      },
+      {
+        text: 'Search ChromaDB by keyword → retrieve matching documents → summarise documents → generate answer',
+        correct: false,
+        explanation: 'ChromaDB does not perform keyword search. It performs vector similarity search — the question is embedded into the same vector space as the stored chunks, and nearest-neighbour search finds semantically similar content regardless of exact word matches.',
+      },
+    ],
+  },
+  {
+    prompt: 'You ingest acme-runbooks.md and ask "What happens if checkout is overloaded?" — but the answer returned is about the payments service, not the 503 runbook. Which naive-RAG failure mode does this illustrate?',
+    options: [
+      {
+        text: 'Stale index — the vector store was not updated with the latest runbook version.',
+        correct: false,
+        explanation: 'A stale index would mean the 503 runbook is missing entirely. The issue here is that the question\'s embedding landed closer to the payments chunk than to the 503 chunk — a query mismatch, not a missing document.',
+      },
+      {
+        text: 'Query mismatch — the question\'s embedding is semantically closer to the payments runbook chunk than to the checkout 503 runbook, so the wrong chunk is retrieved.',
+        correct: true,
+        explanation: 'Correct. Naive RAG retrieves by vector proximity. If the phrasing of your question lands closer to a different document in the embedding space, you get the wrong result even if the right document is indexed. This is the most common naive-RAG failure and motivates query rewriting in agentic RAG.',
+      },
+      {
+        text: 'Wrong chunk boundary — the 503 runbook was split across two chunks and neither contains enough context.',
+        correct: false,
+        explanation: 'Wrong chunk boundaries cause incomplete answers (the retrieved chunk cuts off mid-procedure). The symptom here — wrong topic retrieved entirely — is a query mismatch.',
+      },
+      {
+        text: 'No query rewriting — the question contains a typo that degraded the similarity score.',
+        correct: false,
+        explanation: 'The question as stated contains no typo. While query rewriting is a real failure mode, the described symptom (wrong topic retrieved) is more directly explained by query mismatch: the question embedding happened to be nearer to the payments chunks.',
+      },
+    ],
+  },
+  {
+    prompt: 'The genai-app container sets OLLAMA_BASE_URL=http://host.docker.internal:11434. Why is host.docker.internal used instead of localhost?',
+    options: [
+      {
+        text: 'localhost inside a Docker container refers to that container\'s own loopback (127.0.0.1), not the host machine. host.docker.internal is a Docker-managed DNS name that resolves to the host, where native Ollama is running.',
+        correct: true,
+        explanation: 'Correct. This is the Apple-Silicon pattern: Ollama runs natively for Metal acceleration; containers cannot reach host-side services via localhost. Docker provides host.docker.internal exactly for this use case. On Linux you would use --add-host=host-gateway or run an ollama container instead.',
+      },
+      {
+        text: 'host.docker.internal is faster than localhost because it bypasses the container\'s network stack.',
+        correct: false,
+        explanation: 'The reason is not performance — it is reachability. localhost inside a container is the container\'s own 127.0.0.1. host.docker.internal resolves to the host machine\'s IP on the Docker bridge network, which is where native Ollama listens.',
+      },
+      {
+        text: 'Docker containers block all traffic to 127.0.0.1 for security reasons.',
+        correct: false,
+        explanation: 'Docker does not block loopback traffic for security. 127.0.0.1 inside a container is simply the container\'s own loopback — no service on the host listens there. The container is a separate network namespace.',
+      },
+      {
+        text: 'Ollama only accepts connections from host.docker.internal and rejects requests from standard hostnames.',
+        correct: false,
+        explanation: 'Ollama has no such restriction. The constraint is purely about network namespacing: the container\'s localhost is not the host\'s localhost. host.docker.internal resolves to the host IP, allowing the container to reach any host-side service including Ollama.',
+      },
+    ],
+  },
+]} />
