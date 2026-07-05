@@ -259,18 +259,20 @@ That's portability: the sender packs once, any receiver unpacks the byte-identic
 
 ## Step 7 — Selective pull (the KitOps payoff)
 
-A serving node needs the weights, but not the dataset or code layers. Fetch only the `model` layer:
+A serving node needs the weights, but not the dataset or code layers. Fetch only the `model` layer
+(same `--plain-http` flag as the local push/pull above):
 
 ```bash
-kit unpack localhost:5001/acme-docs-model:1.0.0 --filter=model -d ./weights-only
+kit unpack --plain-http localhost:5001/acme-docs-model:1.0.0 --filter=model -d ./weights-only
 ```
 
 **Expected output:**
 ```
-# grabs the model layer without the code/config — e.g. serving nodes pull weights, not datasets
+Unpacking to ./weights-only
+Unpacking model SmolLM2-135M-Instruct to ./model/SmolLM2-135M-Instruct-Q4_K_M.gguf
 ```
 
-Check what was downloaded — only the model, not `prompts.txt`:
+Check what was downloaded — **only** the model layer, no `Kitfile` or `prompts.txt`:
 
 ```bash
 ls ./weights-only/
@@ -278,7 +280,7 @@ ls ./weights-only/
 
 **Expected output:**
 ```
-Kitfile  model/
+model/
 ```
 
 Valid `--filter` values: `model`, `code`, `docs`, `datasets`, `prompts`. Use this to route different layers to different pipeline stages: serving nodes grab `model`; eval pipelines grab `datasets`; CI linting grabs `code`.
@@ -302,11 +304,22 @@ Valid `--filter` values: `model`, `code`, `docs`, `datasets`, `prompts`. Use thi
 
 ## Clean up
 
-Stop and remove the local registry container when done:
+Remove the local registry container, the ModelKits from `kit`'s local storage, and the artifacts this
+lab created (the ~100 MB model, the signing keys, and the unpack test directories):
 
 ```bash
-docker stop m4-registry && docker rm m4-registry
+# 1. stop + remove the local registry
+docker rm -f m4-registry
+
+# 2. remove the ModelKits from kit's local cache
+kit remove localhost:5001/acme-docs-model:1.0.0
+kit remove ghcr.io/<your-user>/acme-docs-model:1.0.0   # if you tagged for GHCR
+
+# 3. remove the downloaded model + unpack test dirs (from labs/m4/)
+rm -rf labs/m4/model /tmp/m4-clean labs/m4/weights-only
 ```
+
+This keeps your disk clean — the packaged model is ~100 MB and `kit`'s cache holds a full copy too.
 
 ---
 
