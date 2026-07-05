@@ -38,7 +38,8 @@ All tools used in this course are **free and open source**. Docker Desktop is *n
 | **GitHub account** | Active account for pushing images to GHCR. |
 | **Container registry** | Docker Hub, GHCR, or Quay — any one works. |
 
-:::note Windows + NVIDIA GPU
+:::note[Windows + NVIDIA GPU]
+
 If you have a Windows machine with an NVIDIA GPU, the NVIDIA Container Toolkit lets you run the model server *inside* a container with full GPU acceleration. The course covers this path in the GPU track. Without a GPU, the CPU-vLLM track covers the same learning at lower throughput.
 :::
 
@@ -124,7 +125,8 @@ docker run --rm curlimages/curl \
 
 If you see a `"response":"..."` line, your environment is ready. If the request times out, see the troubleshooting note below.
 
-:::tip Troubleshooting: Ollama not reachable from container
+:::tip[Troubleshooting: Ollama not reachable from container]
+
 By default Ollama listens only on `127.0.0.1:11434`. For containers to reach it you need it to listen on all interfaces. Stop Ollama, set the environment variable, and restart:
 
 ```bash

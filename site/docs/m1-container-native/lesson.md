@@ -78,7 +78,8 @@ graph TB
 
 `host.docker.internal` is a magic hostname that every major container runtime resolves to the host machine's IP — the bridge between the containerized world and the native model server.
 
-:::tip Why not just put Ollama in a container anyway?
+:::tip[Why not just put Ollama in a container anyway?]
+
 You can — it just runs on CPU. For development with a 1.5B model the slowdown is tolerable. For anything larger, or for production throughput, native is the only correct answer on Mac.
 :::
 

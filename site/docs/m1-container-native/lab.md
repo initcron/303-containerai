@@ -16,7 +16,8 @@ title: 'Lab: Prove the Wiring'
 
 **Rancher Desktop** (recommended): open the app; wait for the green "Running" status in the menu bar.
 
-:::note Other runtimes — same commands, different start step
+:::note[Other runtimes — same commands, different start step]
+
 - **Colima:** `colima start`
 - **OrbStack:** launch the app from Applications
 - **Podman Desktop:** `podman machine start`
@@ -76,7 +77,8 @@ curl -s http://localhost:11434/api/tags
 {"models":[{"name":"qwen2.5:1.5b","model":"qwen2.5:1.5b",...}]}
 ```
 
-:::info Why native on Mac?
+:::info[Why native on Mac?]
+
 macOS containers have no GPU access — the Metal GPU is only reachable by native processes. A model inside a container falls back to CPU and runs 3–6x slower. Ollama runs natively and uses Metal; everything else is containerised. See [Lesson §3](./lesson#3-the-apple-silicon-gpu-reality) for the full explanation.
 :::
 
@@ -159,8 +161,7 @@ You have proved the foundational wiring. Every later module builds on this exact
 
 ## Troubleshooting
 
-:::warning `Could not resolve host: host.docker.internal`
-
+:::warning[`Could not resolve host: host.docker.internal`]
 Your container runtime isn't injecting the `host.docker.internal` hostname into the container's DNS.
 
 - **Rancher Desktop:** this works by default — make sure you're on v1.9 or later
@@ -168,8 +169,7 @@ Your container runtime isn't injecting the `host.docker.internal` hostname into 
 - **OrbStack / Podman Desktop:** supported by default
 :::
 
-:::warning `Connection refused` on port 11434
-
+:::warning[`Connection refused` on port 11434]
 Ollama isn't running or isn't bound to all interfaces.
 
 ```bash
@@ -184,8 +184,7 @@ curl http://localhost:11434/api/tags
 ```
 :::
 
-:::warning `model "qwen2.5:1.5b" not found`
-
+:::warning[`model "qwen2.5:1.5b" not found`]
 Pull the model:
 
 ```bash
@@ -193,8 +192,7 @@ ollama pull qwen2.5:1.5b
 ```
 :::
 
-:::warning Container pull is slow (first run)
-
+:::warning[Container pull is slow (first run)]
 `curlimages/curl:latest` is ~3 MB — it downloads once and is cached. Subsequent runs start in under a second.
 :::
 

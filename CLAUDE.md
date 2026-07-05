@@ -105,6 +105,13 @@ Each module folder (`site/docs/mN-*/`) contains `lesson.md`, `lab.md`, `quiz.mdx
 - In authored lab prose use plain `docker`/`docker compose` (learners have it on PATH); the `~/.rd/bin`
   prefix is only for our automated validation on this machine.
 
+### Admonitions (Docusaurus 3 syntax — IMPORTANT)
+- Titled callouts MUST use the **bracket** form `:::warning[My title]`, NOT the space form
+  `:::warning My title` (the space form does NOT render in Docusaurus 3 — it prints literally).
+- The opening `:::type[title]` goes on its own line, then a blank line, then content, then a closing `:::`.
+  Never glue content onto the marker line.
+- Types: `note`, `tip`, `info`, `warning`, `danger`.
+
 ### Quizzes
 - Use the custom `<Quiz>` MDX component (`@site/src/components/Quiz`). 4–6 questions per module,
   each option with an `explanation`, at least one `multiSelect` where it fits. Questions test the
