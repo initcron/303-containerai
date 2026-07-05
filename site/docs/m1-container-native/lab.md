@@ -202,7 +202,7 @@ ollama pull qwen2.5:1.5b
 
 You proved the container → native-model wiring: a containerised process reached the natively-served Ollama and received a real AI response. This is the foundation every later module uses:
 
-- **M2** wraps Ollama behind an OpenAI-compatible proxy service and puts *that* endpoint in the `compose.yaml`
+- **M2** builds a containerized client that speaks Ollama's OpenAI-compatible `/v1` endpoint and puts *that client* in the growing `compose.yaml` (the model stays native)
 - **M5** adds a containerised RAG app that uses the same `host.docker.internal:11434` call to generate answers over Acme's runbooks
 - **M6** adds an agent container that calls the same endpoint as a reasoning tool
 

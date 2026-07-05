@@ -17,7 +17,7 @@ Docker 4.40+ ships a built-in model runner. One command and you have a served mo
 docker model run ai/gpt-oss
 ```
 
-Docker downloads the quantized weights, serves them, and exposes the standard `/v1` API — no Ollama, no separate process, nothing extra on the host. It's fully open-source and available in Docker CE. For a quick demo or a team that lives entirely in Docker's toolchain, it is the slickest on-ramp.
+Docker downloads the quantized weights, serves them, and exposes the standard `/v1` API — no Ollama, no separate process, nothing extra on the host. It's fully open-source and available in Docker CE. For a quick demo or a team that lives entirely in Docker's toolchain, it is the slickest on-ramp. (`ai/gpt-oss` is a 20B model — run it on a machine with plenty of RAM; on the 16 GB reference laptop stick with the smaller models in §4.)
 
 This course takes a different path: *runtime-agnostic* open engines. Docker Model Runner is good to know, but the patterns ahead work identically on Docker, Rancher Desktop, Podman, bare Linux, and Windows + WSL2 — no Docker tooling required. The principles apply to Docker Model Runner too; the engines below are what you'll wire in the labs.
 
