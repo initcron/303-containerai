@@ -35,6 +35,15 @@ const sidebars: SidebarsConfig = {
         'm3-vllm/quiz',
       ],
     },
+    {
+      type: 'category',
+      label: 'M4 · Packaging Models as OCI Artifacts',
+      items: [
+        'm4-packaging/lesson',
+        'm4-packaging/lab',
+        'm4-packaging/quiz',
+      ],
+    },
   ],
 };
 
