@@ -17,6 +17,15 @@ const sidebars: SidebarsConfig = {
         'm1-container-native/quiz',
       ],
     },
+    {
+      type: 'category',
+      label: 'M2 · Serving Local Models',
+      items: [
+        'm2-serving/lesson',
+        'm2-serving/lab',
+        'm2-serving/quiz',
+      ],
+    },
   ],
 };
 
