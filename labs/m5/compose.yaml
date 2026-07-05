@@ -37,8 +37,6 @@ services:
       - CHROMA_PORT=8000
       - LLM_MODEL=qwen2.5:1.5b
       - EMBEDDING_MODEL=nomic-embed-text
-    volumes:
-      - ./docs:/app/seed-docs:ro
     depends_on:
       - chromadb
     deploy:

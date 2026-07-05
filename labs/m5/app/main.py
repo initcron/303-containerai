@@ -8,6 +8,7 @@ import os
 import time
 import tempfile
 import streamlit as st
+import chromadb
 from langchain_ollama import OllamaLLM, OllamaEmbeddings
 from langchain_chroma import Chroma
 from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -28,7 +29,7 @@ EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "nomic-embed-text")
 
 # Page config
 st.set_page_config(
-    page_title="Lightweight GenAI Stack",
+    page_title="Acme Docs Assistant",
     page_icon="🤖",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -87,12 +88,17 @@ def init_embeddings():
 
 
 def init_vectorstore():
-    """Initialize ChromaDB vector store"""
+    """Connect to the ChromaDB *container* over HTTP (CHROMA_HOST:CHROMA_PORT).
+
+    Vectors live in the chromadb service (persisted by its chroma_data volume), not
+    inside this app container — so ingested chunks survive an app restart.
+    """
     embeddings = init_embeddings()
+    client = chromadb.HttpClient(host=CHROMA_HOST, port=int(CHROMA_PORT))
     return Chroma(
+        client=client,
         collection_name="documents",
         embedding_function=embeddings,
-        persist_directory="/app/chroma_db"
     )
 
 
@@ -186,8 +192,8 @@ def display_rag_pipeline_info():
 
 
 def main():
-    st.title("🤖 Lightweight GenAI Stack")
-    st.caption(f"Running on {LLM_MODEL} | Memory-efficient RAG with ChromaDB | **Learning Mode**")
+    st.title("🤖 Acme Docs Assistant")
+    st.caption(f"Running on {LLM_MODEL} | Naive RAG over Acme runbooks with ChromaDB | enable **Show RAG Details** for Learning Mode")
 
     # Get vectorstore stats
     stats = get_vectorstore_stats()

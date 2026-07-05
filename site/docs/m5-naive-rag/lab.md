@@ -238,10 +238,10 @@ The first embedding call warms up `nomic-embed-text` on Ollama. Expect 10–30 s
 After processing, the sidebar metrics update:
 
 ```
-Chunks: 3    Documents: 1
+Chunks: 2    Documents: 1
 ```
 
-The four runbook sections (Payments, Database backups, Checkout errors, On-call escalation) produced three chunks after splitting.
+The four runbook sections (Payments, Database backups, Checkout errors, On-call escalation) are short, so the 500-character splitter packed them into **two** chunks. (Larger documents produce more — the count depends on the text, `chunk_size`, and `chunk_overlap`.)
 
 ---
 
@@ -253,14 +253,14 @@ In the chat input at the bottom of the page, type:
 How do I restart the payments service?
 ```
 
-The **Learning Mode** panel opens automatically and shows the pipeline running in real time:
+With **Show RAG Details** enabled in the sidebar (it's on by default), a **🔍 RAG Pipeline Running** panel — the course's "Learning Mode" — expands and shows the pipeline in real time:
 
 ```
 Step 1: Converting query to embedding...
    ✅ Generated 768-dim vector (0.Xs)
 
 Step 2: Searching for similar chunks...
-   ✅ Found 3 relevant chunks (0.Xs)
+   ✅ Found 2 relevant chunks (0.Xs)
 
 Step 3: Retrieved Context:
    📄 Chunk 1 (Page ?): To restart the Acme payments service, run:
