@@ -1,0 +1,144 @@
+---
+sidebar_position: 3
+title: 'Quiz: Module 2'
+---
+
+import Quiz from '@site/src/components/Quiz';
+
+# Module 2 Quiz
+
+Test your understanding of model-serving engines, the OpenAI-compatible contract, and the wiring patterns from the lesson and lab.
+
+<Quiz questions={[
+  {
+    prompt: 'Which of the following model-serving engines expose an OpenAI-compatible `/v1` API? (Select all that apply)',
+    multiSelect: true,
+    options: [
+      {
+        text: 'Ollama',
+        correct: true,
+        explanation: 'Correct. Ollama exposes both its native /api/generate endpoint and the OpenAI-compatible /v1/chat/completions on the same port (:11434). The lab uses this endpoint directly.',
+      },
+      {
+        text: 'vLLM',
+        correct: true,
+        explanation: 'Correct. vLLM is a high-throughput inference server (covered in M3) that exposes an OpenAI-compatible /v1 API. The same client.py from this lab works against it without any changes.',
+      },
+      {
+        text: 'LocalAI',
+        correct: true,
+        explanation: 'Correct. LocalAI is a multi-backend container that presents a single OpenAI-compatible /v1 interface while routing underneath to llama.cpp, Whisper, or other backends.',
+      },
+      {
+        text: 'llama.cpp server',
+        correct: true,
+        explanation: 'Correct. llama.cpp ships a built-in HTTP server that exposes the OpenAI-compatible /v1 API, making it interchangeable with Ollama, vLLM, and LocalAI at the API layer.',
+      },
+      {
+        text: 'PostgreSQL',
+        correct: false,
+        explanation: 'PostgreSQL is a relational database, not a model-serving engine. It has no /v1 API and does not produce language model completions.',
+      },
+    ],
+  },
+  {
+    prompt: 'Your team builds a Python client against Ollama on a dev laptop. Six months later, operations moves the model to a vLLM server on a GPU VM. Which files must change?',
+    options: [
+      {
+        text: 'client.py, Dockerfile, and compose.yaml all need updating for the new engine.',
+        correct: false,
+        explanation: 'None of these files need to change. The OpenAI-compatible contract is identical on both engines. Application code, the image, and the Compose definition are all engine-agnostic.',
+      },
+      {
+        text: 'Only the Dockerfile needs updating to install the vLLM client library.',
+        correct: false,
+        explanation: 'No vLLM-specific library is needed. The Python openai SDK works against any OpenAI-compatible endpoint — Ollama, vLLM, or cloud. The Dockerfile does not change.',
+      },
+      {
+        text: 'Only OPENAI_BASE_URL changes — from the Ollama address to the vLLM service address. No code, image, or Compose logic changes.',
+        correct: true,
+        explanation: 'Correct. This is the wall-socket principle from the lesson: the application talks to the /v1 contract, not to a specific engine. Swapping what sits behind that contract requires only an environment variable update.',
+      },
+      {
+        text: 'The model name in client.py must be hard-coded to match the vLLM model ID.',
+        correct: false,
+        explanation: 'The model name is already read from the MODEL environment variable — it is never hard-coded in client.py. Swapping models is also just an env var change, not a code change.',
+      },
+    ],
+  },
+  {
+    prompt: 'The M1 lab called Ollama\'s `/api/generate` endpoint. The M2 lab switches to `/v1/chat/completions`. What is the key structural difference in the response?',
+    options: [
+      {
+        text: '`/v1/chat/completions` streams the response word-by-word; `/api/generate` always returns everything at once.',
+        correct: false,
+        explanation: 'Both endpoints support streaming and non-streaming modes independently. The difference is the response shape, not streaming behavior.',
+      },
+      {
+        text: '`/api/generate` returns a flat JSON object with a `"response"` string; `/v1/chat/completions` returns a `choices` array where the text lives at `choices[0].message.content`.',
+        correct: true,
+        explanation: 'Correct. The /api/generate shape is Ollama-specific. The /v1/chat/completions shape is the OpenAI contract that the openai SDK, LangChain, LlamaIndex, and every other major framework expect — making the client interchangeable across engines.',
+      },
+      {
+        text: '`/v1/chat/completions` returns the text in `data[0].text`; `/api/generate` uses `choices[0].message.content`.',
+        correct: false,
+        explanation: 'Those paths are transposed. The OpenAI-compatible /v1/chat/completions response puts the text at choices[0].message.content. The Ollama-native /api/generate puts it in a flat "response" field at the top level.',
+      },
+      {
+        text: 'The two endpoints return identically shaped JSON — the path is just an alias.',
+        correct: false,
+        explanation: 'The shapes are meaningfully different. /api/generate is a flat Ollama-specific object; /v1/chat/completions follows the OpenAI schema with a choices array, message objects, usage statistics, and a system_fingerprint field.',
+      },
+    ],
+  },
+  {
+    prompt: 'Pattern A (Mac / Apple Silicon) reaches Ollama via `http://host.docker.internal:11434`. Pattern B (Windows + NVIDIA GPU) uses `http://ollama:11434`. What accounts for the different hostname?',
+    options: [
+      {
+        text: 'NVIDIA drivers remap port 11434, so Pattern B uses a Compose service name to abstract the port change.',
+        correct: false,
+        explanation: 'The port is identical in both patterns (:11434). The hostname differs because the model server is in a different location relative to the app container — not because of port remapping.',
+      },
+      {
+        text: 'On Apple Silicon, Metal GPU access is unavailable inside containers, so Ollama must run as a native process reachable via host.docker.internal. On NVIDIA Linux/Windows, GPU passthrough works, so Ollama runs inside a Compose container and is addressed by its service name.',
+        correct: true,
+        explanation: 'Correct. The hypervisor on Apple Silicon exposes no virtual GPU, forcing the model server native. On NVIDIA Linux/Windows, GPU passthrough lets the model server run in a container on the same Compose network — reachable by its service name without host.docker.internal.',
+      },
+      {
+        text: 'Pattern A routes traffic through the host VPN; Pattern B is for local-network use only.',
+        correct: false,
+        explanation: 'Neither pattern uses a VPN. Both are local development patterns. The hostname difference reflects where the model server runs: native host process vs Compose container.',
+      },
+      {
+        text: 'host.docker.internal only works on Docker Desktop, so Windows users must use the Compose service name instead.',
+        correct: false,
+        explanation: 'host.docker.internal works on Rancher Desktop, Colima, OrbStack, and Podman across platforms — it is not a Docker Desktop exclusive. Pattern B uses a Compose service name because Ollama is on the same Compose network, not because host.docker.internal is unavailable.',
+      },
+    ],
+  },
+  {
+    prompt: 'In `client.py`, the `openai` SDK is initialized with `api_key="ollama"`. Why is a non-empty dummy value required even though Ollama never validates API keys?',
+    options: [
+      {
+        text: 'Ollama reads the key to select which model weights to load from disk.',
+        correct: false,
+        explanation: 'Ollama does not use the API key for any purpose — including model selection. The model is specified in the request body via the "model" field. Ollama ignores the Authorization header entirely.',
+      },
+      {
+        text: 'The openai SDK enforces a non-empty api_key client-side before sending any request. Ollama ignores the value server-side, but the SDK raises an error if the field is absent or empty.',
+        correct: true,
+        explanation: 'Correct. The SDK performs a client-side check before making any network call and refuses to proceed if api_key is missing or empty. Any non-empty string satisfies it. "ollama" is a common convention; "sk-fake" or any other non-empty value works equally well. When you later point the client at a real OpenAI endpoint, you replace it with the actual key.',
+      },
+      {
+        text: 'An empty api_key causes Ollama to return HTTP 401, so a non-empty placeholder avoids the server-side error.',
+        correct: false,
+        explanation: 'Ollama does not return 401 for missing or invalid API keys — it ignores the Authorization header entirely. The constraint is purely client-side in the openai SDK library, not a server-side Ollama behavior.',
+      },
+      {
+        text: 'Docker\'s networking layer strips HTTP Authorization headers unless they contain a non-empty token.',
+        correct: false,
+        explanation: 'Docker networking does not inspect or modify HTTP headers. The constraint comes entirely from the openai SDK library running inside the container — it checks api_key before making any network call.',
+      },
+    ],
+  },
+]} />
