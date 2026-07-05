@@ -16,12 +16,13 @@ const config: Config = {
 
   // Set the production url of your site here
   url: 'https://schoolofdevops.github.io',
-  // Set the /<baseUrl>/ pathname under which your site is served
-  baseUrl: '/',
+  // Set the /<baseUrl>/ pathname under which your site is served.
+  // Project Pages at https://schoolofdevops.github.io/303-containerai/
+  baseUrl: '/303-containerai/',
 
   // GitHub pages deployment config.
   organizationName: 'schoolofdevops',
-  projectName: 'containerai',
+  projectName: '303-containerai',
 
   onBrokenLinks: 'throw',
 
@@ -75,7 +76,7 @@ const config: Config = {
           label: 'Course',
         },
         {
-          href: 'https://github.com/schoolofdevops/containerai',
+          href: 'https://github.com/schoolofdevops/303-containerai',
           label: 'GitHub',
           position: 'right',
         },
