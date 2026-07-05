@@ -296,7 +296,7 @@ OPENAI_BASE_URL=http://host.docker.internal:8080/v1 \
   docker compose -f labs/m2/compose.yaml run --rm client
 ```
 
-:::note[Illustration only — don't run this now]
+:::warning[Illustration only — do NOT run this command now]
 
 There is no engine listening on `:8080` in this lab, so the command above is a *demonstration of the seam*, not a step to execute. If you did run it with nothing at that address, you'd get a `Connection error` from the SDK — proof that the only thing that changed was the target URL, not a single line of code. You perform this swap for real against a live engine in M3.
 :::
@@ -378,6 +378,26 @@ The first `docker compose run` (or `docker build`) pulls `python:3.12-slim` from
 installs the `openai` package. Expect ~1–2 minutes on a fresh machine. Subsequent builds hit the
 layer cache and finish in seconds.
 :::
+
+---
+
+## Step 6 — Clean up
+
+Your client ran with `--rm`, so no containers are left behind — but Compose created a network
+(`m2_default`) worth removing to keep things tidy. From `labs/m2/`:
+
+```bash
+docker compose down
+```
+
+**Expected output:**
+```
+[+] Running 1/1
+ ✔ Network m2_default  Removed
+```
+
+The model keeps running natively on your host — that's fine, it's shared by every module. This
+"build up, tear down" habit keeps your 16 GB laptop's footprint flat as the course grows.
 
 ---
 
