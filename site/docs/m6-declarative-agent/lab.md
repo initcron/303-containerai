@@ -113,11 +113,13 @@ These three files concatenated are the system prompt. The agent has no behavior 
 
 ## Step 3: Skim agent.py — the minimal glue
 
+It's a short, dependency-light file (~130 lines of stdlib). Read the whole thing:
+
 ```bash
-head -60 agent/agent.py
+cat agent/agent.py
 ```
 
-The key sections to notice:
+The key sections to notice (the guardrail/route/handle functions are in the second half):
 
 - **`load_persona()`** — reads SOUL.md, AGENTS.md, and SKILL.md and joins them. The model receives these as its system prompt on every call.
 - **`guardrail(query)`** — regex match against unsafe keywords. Runs before any LLM call.
@@ -259,11 +261,13 @@ ToolHive pulls `ghcr.io/stackloklabs/gofetch/server:1.0.5` and starts the server
 thv list
 ```
 
-**Expected output:**
+**Expected output** (ToolHive may take a few seconds after `thv run` to show the server — if you see
+"No MCP servers found", wait ~5s and retry; the **PORT is random** on each run, and columns/image paths
+vary by ToolHive version):
 
 ```
-NAME   PACKAGE                       STATUS   URL                          PORT
-fetch  gofetch/server:1.0.5          running  http://127.0.0.1:34267/mcp   34267
+NAME   PACKAGE                                     STATUS   URL                          PORT    GROUP    CREATED
+fetch  ghcr.io/stackloklabs/gofetch/server:1.0.5   running  http://127.0.0.1:XXXXX/mcp   XXXXX   default  ...
 ```
 
 ToolHive runs more than just the server container. Check Docker directly:
@@ -311,10 +315,20 @@ If you use VS Code with the MCP extension, add the ToolHive endpoint to your MCP
 
 The same endpoint serves both the containerized agent stack and your IDE — ToolHive manages the server lifecycle in both cases.
 
-### Stop the MCP server
+### Stop and remove the MCP server
+
+`thv stop` only stops the containers — they remain on disk (along with the ingress/egress/DNS
+sidecars). Remove them fully with `thv rm`:
 
 ```bash
 thv stop fetch
+thv rm fetch
+```
+
+Confirm nothing is left behind:
+
+```bash
+docker ps -a | grep fetch || echo "all fetch containers removed"
 ```
 
 ---
