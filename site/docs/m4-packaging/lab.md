@@ -155,15 +155,22 @@ The default `gh` token does **not** include the `write:packages` scope, which GH
 
 **Fix — option A (gh CLI):**
 ```bash
-gh auth refresh -h github.com -s write:packages
+gh auth refresh -h github.com -s write:packages,read:packages
 ```
-Then use the token it generates:
+This opens a **device-code flow** — it prints a code and a URL and then *waits*. Complete it promptly in
+a real interactive terminal (don't background it, or the code expires). If you have more than one GitHub
+account in `gh`, target the right one with `-u <account>`. Then **verify the scope actually landed**:
+```bash
+gh auth status   # the active account must now list 'write:packages' under Token scopes
+```
+Then log in to GHCR with that token:
 ```bash
 gh auth token | kit login ghcr.io -u <your-github-username> --password-stdin
 ```
 
-**Fix — option B (classic PAT):**
-Create a Personal Access Token at `github.com/settings/tokens` with **`write:packages`** checked, then:
+**Fix — option B (classic PAT — most reliable):**
+Create a Personal Access Token (classic) at `github.com/settings/tokens` with **`write:packages`** and
+**`read:packages`** checked, then:
 ```bash
 echo "<your-pat>" | kit login ghcr.io -u <your-github-username> --password-stdin
 ```
