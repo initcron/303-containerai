@@ -62,6 +62,15 @@ const sidebars: SidebarsConfig = {
         'm6-declarative-agent/quiz',
       ],
     },
+    {
+      type: 'category',
+      label: 'M7 · Multi-Agent Incident Crew',
+      items: [
+        'm7-multi-agent/lesson',
+        'm7-multi-agent/lab',
+        'm7-multi-agent/quiz',
+      ],
+    },
   ],
 };
 
