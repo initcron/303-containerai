@@ -37,6 +37,15 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: 'category',
+      label: 'M3B · Fine-Tuning (optional)',
+      items: [
+        'm3b-finetuning/lesson',
+        'm3b-finetuning/lab',
+        'm3b-finetuning/quiz',
+      ],
+    },
+    {
+      type: 'category',
       label: 'M4 · Packaging Models as OCI Artifacts',
       items: [
         'm4-packaging/lesson',
