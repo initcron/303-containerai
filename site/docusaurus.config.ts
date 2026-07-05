@@ -5,8 +5,8 @@ import type * as Preset from '@docusaurus/preset-classic';
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
 const config: Config = {
-  title: 'My Site',
-  tagline: 'Dinosaurs are cool',
+  title: 'Containers for GenAI & Agentic AI',
+  tagline: 'The Open-Source Way',
   favicon: 'img/favicon.ico',
 
   // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
@@ -15,15 +15,13 @@ const config: Config = {
   },
 
   // Set the production url of your site here
-  url: 'https://your-docusaurus-site.example.com',
+  url: 'https://schoolofdevops.github.io',
   // Set the /<baseUrl>/ pathname under which your site is served
-  // For GitHub pages deployment, it is often '/<projectName>/'
   baseUrl: '/',
 
   // GitHub pages deployment config.
-  // If you aren't using GitHub pages, you don't need these.
-  organizationName: 'facebook', // Usually your GitHub org/user name.
-  projectName: 'docusaurus', // Usually your repo name.
+  organizationName: 'schoolofdevops',
+  projectName: 'containerai',
 
   onBrokenLinks: 'throw',
 
@@ -35,32 +33,21 @@ const config: Config = {
     locales: ['en'],
   },
 
+  // Enable Mermaid diagrams
+  markdown: {
+    mermaid: true,
+  },
+
+  themes: ['@docusaurus/theme-mermaid'],
+
   presets: [
     [
       'classic',
       {
         docs: {
           sidebarPath: './sidebars.ts',
-          // Please change this to your repo.
-          // Remove this to remove the "edit this page" links.
-          editUrl:
-            'https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/',
         },
-        blog: {
-          showReadingTime: true,
-          feedOptions: {
-            type: ['rss', 'atom'],
-            xslt: true,
-          },
-          // Please change this to your repo.
-          // Remove this to remove the "edit this page" links.
-          editUrl:
-            'https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/',
-          // Useful options to enforce blogging best practices
-          onInlineTags: 'warn',
-          onInlineAuthors: 'warn',
-          onUntruncatedBlogPosts: 'warn',
-        },
+        blog: false,
         theme: {
           customCss: './src/css/custom.css',
         },
@@ -75,21 +62,20 @@ const config: Config = {
       respectPrefersColorScheme: true,
     },
     navbar: {
-      title: 'My Site',
+      title: 'Containers for GenAI & Agentic AI',
       logo: {
-        alt: 'My Site Logo',
+        alt: 'School of DevOps & AI Logo',
         src: 'img/logo.svg',
       },
       items: [
         {
           type: 'docSidebar',
-          sidebarId: 'tutorialSidebar',
+          sidebarId: 'courseSidebar',
           position: 'left',
-          label: 'Tutorial',
+          label: 'Course',
         },
-        {to: '/blog', label: 'Blog', position: 'left'},
         {
-          href: 'https://github.com/facebook/docusaurus',
+          href: 'https://github.com/schoolofdevops/containerai',
           label: 'GitHub',
           position: 'right',
         },
@@ -99,46 +85,29 @@ const config: Config = {
       style: 'dark',
       links: [
         {
-          title: 'Docs',
+          title: 'Course',
           items: [
             {
-              label: 'Tutorial',
+              label: 'Introduction',
               to: '/docs/intro',
             },
           ],
         },
         {
-          title: 'Community',
+          title: 'School of DevOps & AI',
           items: [
             {
-              label: 'Stack Overflow',
-              href: 'https://stackoverflow.com/questions/tagged/docusaurus',
-            },
-            {
-              label: 'Discord',
-              href: 'https://discordapp.com/invite/docusaurus',
-            },
-            {
-              label: 'X',
-              href: 'https://x.com/docusaurus',
-            },
-          ],
-        },
-        {
-          title: 'More',
-          items: [
-            {
-              label: 'Blog',
-              to: '/blog',
+              label: 'Website',
+              href: 'https://schoolofdevops.com',
             },
             {
               label: 'GitHub',
-              href: 'https://github.com/facebook/docusaurus',
+              href: 'https://github.com/schoolofdevops',
             },
           ],
         },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} My Project, Inc. Built with Docusaurus.`,
+      copyright: `Copyright © ${new Date().getFullYear()} School of DevOps & AI. Built with Docusaurus.`,
     },
     prism: {
       theme: prismThemes.github,
