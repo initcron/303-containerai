@@ -30,6 +30,18 @@ loses nothing. The recovery layers:
 **Discipline that keeps this working:** after every task or decision, UPDATE `planning/STATE.md` and
 `planning/ROADMAP.md`. Stale state is the only way this system fails.
 
+## Publishing (GitHub Pages)
+
+- **Remote:** `github.com/schoolofdevops/303-containerai` (public). Pages `build_type: workflow`, deploys
+  from `main` via `.github/workflows/deploy.yml` (builds `site/`).
+- **Live site:** https://schoolofdevops.github.io/303-containerai/
+- **Account:** publish under the **initcron** account. The owner manages the repo/Pages as `initcron` on
+  GitHub web. From the CLI, pushes use the `gouravjshah` gh token (has admin on the repo); **commits are
+  authored as `initcron <bean@initcron.org>`** (`git config user.name initcron`).
+- **Never publish private prior assets:** `old/` and `references.txt` are gitignored and were purged from
+  history — keep it that way.
+- Deploy flow: merge to `main` → push → GitHub Actions builds & deploys → verify the run is green.
+
 ## Repo layout
 
 ```
