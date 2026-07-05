@@ -1,0 +1,4 @@
+manifestVersion: "1.0.0"
+package: {name: acme-docs-model, version: "1.0.0", authors: ["School of DevOps & AI"]}
+model: {name: SmolLM2-135M-Instruct, path: ./model/SmolLM2-135M-Instruct-Q4_K_M.gguf}
+code:  [{path: ./prompts.txt, description: "System prompt / config"}]

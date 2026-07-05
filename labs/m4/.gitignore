@@ -1,0 +1,5 @@
+# Model weights — learners download these; never commit to git
+model/
+*.gguf
+*.safetensors
+*.bin
