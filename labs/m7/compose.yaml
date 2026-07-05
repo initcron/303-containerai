@@ -1,0 +1,40 @@
+# M7 · Incident Crew — the growing compose.yaml, complete. Four agent profiles run inside ONE
+# crew service, all sharing the native Ollama endpoint + the shared Chroma memory. This is the
+# declarative default. See the lab for the CrewAI framework variant (ported off Docker Model
+# Runner to native Ollama, and off supergateway to the ToolHive MCP gateway).
+#
+# Prereqs: ollama pull qwen2.5:1.5b && ollama pull nomic-embed-text
+services:
+  chromadb:
+    image: chromadb/chroma:0.5.20
+    container_name: chromadb
+    ports:
+      - "8000:8000"
+    volumes:
+      - chroma_data:/chroma/chroma
+    environment:
+      - IS_PERSISTENT=TRUE
+      - ANONYMIZED_TELEMETRY=FALSE
+    deploy:
+      resources:
+        limits:
+          memory: 768M
+    restart: unless-stopped
+
+  # The Incident Crew. One-shot: `docker compose run --rm crew "the incident text"`.
+  crew:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: acme-incident-crew:latest
+    depends_on:
+      - chromadb
+    environment:
+      - OLLAMA_BASE_URL=http://host.docker.internal:11434
+      - CHROMA_HOST=chromadb
+      - CHROMA_PORT=8000
+      - LLM_MODEL=qwen2.5:1.5b
+      - EMBEDDING_MODEL=nomic-embed-text
+
+volumes:
+  chroma_data:
