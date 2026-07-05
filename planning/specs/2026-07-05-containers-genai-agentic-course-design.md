@@ -47,17 +47,15 @@ course/
 │   ├── docs/
 │   │   ├── intro.md
 │   │   ├── setup/               # Phase 0: runtime + Ollama + prereqs + GPU reality
-│   │   ├── day-1/
-│   │   │   ├── m1-container-native/    # lesson.md, lab.md, quiz.mdx
-│   │   │   ├── m2-serving/
-│   │   │   ├── m3-vllm/
-│   │   │   └── m4-packaging/
-│   │   ├── day-2/
-│   │   │   ├── m5-naive-rag/
-│   │   │   ├── m6-declarative-agent/
-│   │   │   ├── m7-multi-agent/
-│   │   │   └── m8-security/
-│   │   └── capstone/
+│   │   ├── m1-container-native/ # lesson.md, lab.md, quiz.mdx
+│   │   ├── m2-serving/
+│   │   ├── m3-vllm/
+│   │   ├── m4-packaging/
+│   │   ├── m5-naive-rag/
+│   │   ├── m6-declarative-agent/
+│   │   ├── m7-multi-agent/
+│   │   ├── m8-security/
+│   │   └── capstone/            # all modules flat at top level (no Day grouping)
 │   ├── src/components/Quiz/      # custom <Quiz> MDX component
 │   ├── sidebars.ts
 │   └── docusaurus.config.ts
@@ -77,7 +75,7 @@ code lives in `labs/` (referenced by, but separate from, the prose in `site/docs
 
 ## 5. Module content model (3 docs/module)
 
-Each module is a sidebar **category** containing:
+Modules sit **flat at the top level of `docs/`** (no Day-1/Day-2 grouping — the Day mapping lives in `intro.md`'s program-at-a-glance table only). Each module is a sidebar **category** containing:
 
 - **Lesson** (`lesson.md`) — concepts, diagrams, "when to use which pattern", the container angle,
   the Apple-Silicon-GPU reality where relevant.
