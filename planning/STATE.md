@@ -5,19 +5,19 @@
 > and update it after every task/decision.
 
 **Last updated:** 2026-07-05
-**Active phase:** Phase 1 — scaffold Docusaurus + build M1 (vertical slice)
+**Active phase:** Phase 1 — building M1 (vertical slice). On branch `build/m1-slice`.
 **Active plan:** `planning/plans/2026-07-05-m1-vertical-slice.md`
-**Execution mode:** Superpowers subagent-driven-development (fresh implementer per task + review)
+**Execution mode:** subagent-driven, grouped into 3 waves (A=site foundation, B=M1 content+lab validation, C=finalize)
 
 ## Where we are right now
 
 - ✅ Brainstorm → spec approved & committed (`planning/specs/2026-07-05-...-design.md`).
-- ✅ M1 vertical-slice plan written (`planning/plans/2026-07-05-m1-vertical-slice.md`).
-- ✅ Environment ready: Rancher Desktop (docker 29.5.2 at `~/.rd/bin/docker`), Ollama serving,
-  `qwen2.5:1.5b` pulled. Phase 0 installs DONE — only verification+evidence remain.
-- ✅ CLAUDE.md authoring conventions written (analogies + Mermaid + optional Excalidraw).
-- 🔜 **NEXT:** execute the M1 plan task-by-task (scaffold → Quiz component → M1 lesson/lab/quiz →
-  live lab validation on Rancher Desktop → ROADMAP + README).
+- ✅ M1 vertical-slice plan written; continuity system built.
+- ✅ **Phase 0 DONE + verified** — Rancher Desktop (docker 29.5.2), Ollama serving, `qwen2.5:1.5b`,
+  container→host wiring all confirmed. Evidence: `planning/lab-tests/00-environment.md`.
+- 🔄 **Wave A IN PROGRESS** (subagent): scaffold Docusaurus + Mermaid + `<Quiz>` component + M1 stubs.
+- 🔜 **NEXT after Wave A:** Wave B — author M1 lesson (analogies + Mermaid), lab + runnable script,
+  validate lab live on Rancher Desktop, quiz. Then Wave C — ROADMAP + README + full build gate.
 
 ## Key decisions locked (don't re-litigate)
 
