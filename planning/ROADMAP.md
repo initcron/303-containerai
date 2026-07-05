@@ -26,8 +26,8 @@ Legend: ✅ done · 🔄 in progress · ⬜ pending
 | M6 · Declarative Agent (Agentic RAG + MCP) | ✅ | ✅ | ✅ | ✅ | — |
 | M7 · Multi-Agent Crew (CrewAI + LangGraph) | ✅ | ✅ | ✅ | ✅ | `compose-for-agents/crew-ai` |
 | M8 · Securing & Governing AI Workloads | ✅ | ✅ | ✅ | ✅ | — |
-| Capstone · Ship the Acme AI Platform | ⬜ | ⬜ | ⬜ | ⬜ | — |
-| Setup pages (prerequisites, gpu-reality) | ⬜ full | — | — | — | (stubs exist) |
+| Capstone · Ship the Acme AI Platform | ✅ | ✅ | ✅ | ✅ | — |
+| Setup pages (prerequisites, gpu-reality) | ✅ | — | — | — | (authored in polish) |
 
 ## Post-M1 follow-ups
 - ⬜ Extract `course-authoring` + `docusaurus-scaffold` skills from the proven M1 pattern
