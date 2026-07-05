@@ -1,0 +1,58 @@
+---
+sidebar_position: 3
+title: 'Quiz: Securing & Governing AI Workloads'
+---
+
+import Quiz from '@site/src/components/Quiz';
+
+# Quiz: Securing & Governing AI Workloads
+
+<Quiz questions={[
+  {
+    prompt: 'What are the three roles that Syft, Trivy/Grype, and Cosign play in an image supply chain? (select all that apply)',
+    multiSelect: true,
+    options: [
+      {text: 'Syft generates a Software Bill of Materials (SBOM) — an ingredients label cataloging every package in the image.', correct: true, explanation: 'Syft introspects the image and produces an SPDX-JSON or CycloneDX catalog. It is the audit artifact that answers "what exactly is in this image?"'},
+      {text: 'Trivy and Grype scan the image for known vulnerabilities — the health inspection that gates the pipeline.', correct: true, explanation: 'Both scanners check packages against their CVE advisory databases. Running two catches more findings since their feeds and matching heuristics differ.'},
+      {text: 'Cosign encrypts the image contents so they cannot be read without the private key.', correct: false, explanation: 'Cosign signs the image digest — it does not encrypt the image. The signature proves integrity and identity, not confidentiality.'},
+      {text: 'Cosign attaches a cryptographic signature to the image in the registry — a tamper-evident seal verifiable at deploy time.', correct: true, explanation: 'cosign sign stores the signature in the registry alongside the image. cosign verify checks it before the image is run — blocking substituted or tampered images.'},
+    ],
+  },
+  {
+    prompt: 'Trivy reports 2 Critical / 9 High vulnerabilities on acme-support-agent:latest. Grype reports 5 Critical / 28 High on the same image. Which statement best describes how to handle this?',
+    options: [
+      {text: 'Grype is wrong — trust only one scanner and discard the other.', correct: false, explanation: 'Both scanners are correct but use different advisory feeds and matching logic. Discarding one means missing findings that only appear in that scanner\'s database.'},
+      {text: 'Run both scanners and triage by fixable + severity: rebuild on a patched base for Critical/High findings that have a fix available; document and accept risk for unfixed ones.', correct: true, explanation: 'This is the correct triage heuristic. A Critical with a fixed version in the repo is an actionable rebuild. A High with no upstream fix requires a risk decision and mitigating controls, not indefinite blocking.'},
+      {text: 'The pipeline should fail on any finding regardless of severity or fix availability.', correct: false, explanation: 'Failing on every finding (including Medium/Low with no fix) makes CI permanently red and encourages teams to disable the gate entirely. Gate on Critical/High fixable findings.'},
+      {text: 'Medium and below should always be fixed before any deployment.', correct: false, explanation: 'Medium and below are tracked and re-scanned on a cadence, but they should not block CI — the operational cost of chasing every Medium would overwhelm the team.'},
+    ],
+  },
+  {
+    prompt: 'Which docker run flags are required to prove that a sandboxed container truly cannot reach the network or escalate privileges? (select all that apply)',
+    multiSelect: true,
+    options: [
+      {text: '--network none', correct: true, explanation: '--network none removes all network interfaces from the container. A urllib.request to any URL immediately raises URLError: network unreachable — network egress is blocked at the container-networking layer, not just firewalled.'},
+      {text: '--cap-drop ALL', correct: true, explanation: '--cap-drop ALL drops every Linux capability. Combined with --security-opt no-new-privileges, the process cannot gain capabilities that would let it escape the sandbox or modify the host.'},
+      {text: '--read-only', correct: true, explanation: '--read-only mounts the rootfs read-only. The sandboxed process cannot write files that persist after the container exits or that could be used for a follow-on exploit.'},
+      {text: '--privileged', correct: false, explanation: '--privileged is the opposite of sandboxing — it grants the container nearly full host access, including all capabilities and device access. Never use --privileged for untrusted code.'},
+    ],
+  },
+  {
+    prompt: 'In GitHub Actions, why is keyless Cosign signing (--yes, no cosign.key file) preferred over key-based signing?',
+    options: [
+      {text: 'Keyless signing is faster because it skips the cryptographic operations.', correct: false, explanation: 'Keyless signing still performs the same cryptographic operations. The difference is in key management, not performance.'},
+      {text: 'The workflow\'s OIDC identity signs via Sigstore Fulcio — no private key is stored in the repo or secrets, eliminating key rotation and key-leakage risks.', correct: true, explanation: 'With id-token: write permission, GitHub issues an OIDC token that Cosign exchanges for a short-lived signing certificate from Fulcio. No key material is ever stored — there is nothing to rotate or leak.'},
+      {text: 'Keyless signing does not require the id-token: write permission in the workflow.', correct: false, explanation: 'Keyless signing requires id-token: write so the workflow can obtain an OIDC token. Without that permission, cosign cannot exchange for a Fulcio certificate.'},
+      {text: 'Key-based signing is only available on GitHub Enterprise.', correct: false, explanation: 'Key-based signing works on any CI system — you just generate a key pair, store the private key as a secret, and pass it to cosign sign --key. Keyless is preferred in Actions because of the OIDC infrastructure GitHub provides, not because key-based is restricted.'},
+    ],
+  },
+  {
+    prompt: 'Your agent image is in production and a new CVE is published for a library it contains. Which combination of supply chain controls gives you the earliest warning and the fastest path to a clean deployment?',
+    options: [
+      {text: 'Manually check the CVE feed weekly and rebuild when you notice something.', correct: false, explanation: 'Manual weekly checks miss the gap between publication and discovery. The supply chain should detect and alert automatically, not on a human polling schedule.'},
+      {text: 'A scheduled CI pipeline re-scans the production image digest daily with Trivy and Grype; the scan gate fails and alerts the team; the team rebuilds on a patched base and the new image passes the gate before it is signed and deployed.', correct: true, explanation: 'This is the full loop: continuous re-scanning detects the new CVE, the gate blocks the stale image from being re-promoted, the rebuild + re-scan + re-sign produces a clean, verifiable artifact. The SBOM stored alongside the image also allows out-of-band analysis against new CVEs without re-pulling the image.'},
+      {text: 'Cosign verify will fail when a CVE is found, blocking the running container.', correct: false, explanation: 'Cosign verify checks the cryptographic signature, not the vulnerability status. A signed image stays signed even after a CVE is published — the signature proves identity and integrity, not security posture.'},
+      {text: 'Store the SBOM in the registry; Syft will automatically alert when a new CVE matches a listed package.', correct: false, explanation: 'Syft generates SBOMs — it does not monitor CVE feeds or send alerts. A scanner (Trivy, Grype, or a SaaS tool that ingests the SBOM) is needed for ongoing monitoring.'},
+    ],
+  },
+]} />
