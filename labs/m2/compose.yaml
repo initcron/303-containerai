@@ -1,0 +1,8 @@
+services:
+  client:
+    build: .
+    environment:
+      OPENAI_BASE_URL: http://host.docker.internal:11434/v1
+      MODEL: qwen2.5:1.5b
+    # extra_hosts not needed on Rancher Desktop/Docker Desktop; note it for plain Linux:
+    # extra_hosts: ["host.docker.internal:host-gateway"]
