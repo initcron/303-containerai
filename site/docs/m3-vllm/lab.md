@@ -28,6 +28,12 @@ The first `docker compose build` pulls a **multi-GB** base image, and the first 
 
 :::
 
+:::note[Your output won't match character-for-character — that's fine]
+
+vLLM and Docker are chatty and versioned: your `docker compose` logs will have **more lines** than shown here (route listings, a `Triton not installed` warning on CPU — both harmless), the JSON responses carry **extra `null` fields** (vLLM extends the OpenAI schema), and `docker compose` progress lines vary by Docker version. Match the **shape** of each expected output (the key fields, the model's answer), not every character.
+
+:::
+
 ---
 
 ## Step 1 — The image and the NUMA patch
@@ -228,21 +234,24 @@ On CPU this call can take tens of seconds — the first token is the slowest. Th
 
 ### 3c — Point your M2 client at vLLM (one-line change)
 
-This is the through-line of the whole course. Your M2 `client.py` reads `OPENAI_BASE_URL` and `MODEL` from the environment. Change **only the base URL** — from the Ollama address to the vLLM address — and the exact same client, image, and code talk to a completely different engine.
+This is the through-line of the whole course. Your M2 client reads `OPENAI_BASE_URL` and `MODEL` from the environment. Run the **exact same M2 client container** — no rebuild, no code change — but point it at vLLM instead of Ollama by overriding just those two environment variables. (The client's dependencies live in its image, so you run it as a container, not with host Python.)
+
+From the `labs/m3/` directory:
 
 ```bash
-OPENAI_BASE_URL=http://host.docker.internal:8009/v1 \
-MODEL=HuggingFaceTB/SmolLM2-135M-Instruct \
-  python3 client.py "In one sentence, what is a Linux container?"
+docker compose -f ../m2/compose.yaml run --rm \
+  -e OPENAI_BASE_URL=http://host.docker.internal:8009/v1 \
+  -e MODEL=HuggingFaceTB/SmolLM2-135M-Instruct \
+  client python client.py "In one sentence, what is a Linux container?"
 ```
 
 **Expected output** (135M is tiny — expect rough wording; the point is that the *same client* got an answer from a different engine):
 ```
-Linux containers are virtualized environments that run applications and services
-without requiring network connections or additional hardware.
+Linux containers are lightweight, portable software environments that package an
+application with its dependencies so it runs the same anywhere.
 ```
 
-No code changed. No SDK changed. No image rebuilt. One environment variable swapped the engine behind the `/v1` wall socket — exactly the point M2 made, now proven against a real production engine.
+No code changed. No SDK changed. No image rebuilt. Two environment variables swapped the engine behind the `/v1` wall socket — exactly the point M2 made, now proven against a real production engine. (This reuses the `client` service you built in M2 via its `compose.yaml`.)
 
 ---
 
