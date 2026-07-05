@@ -116,6 +116,18 @@ Each module folder (`site/docs/mN-*/`) contains `lesson.md`, `lab.md`, `quiz.mdx
 - Use the custom `<Quiz>` MDX component (`@site/src/components/Quiz`). 4–6 questions per module,
   each option with an `explanation`, at least one `multiSelect` where it fits. Questions test the
   lesson's *concepts* and the lab's *decisions*, not trivia.
+- **EXACT prop schema (do NOT invent another shape):**
+  ```mdx
+  <Quiz questions={[
+    { prompt: 'Question text?', multiSelect: true /* omit for single */, options: [
+      { text: 'Option A', correct: true, explanation: '...' },
+      { text: 'Option B', correct: false, explanation: '...' },
+    ]},
+  ]} />
+  ```
+  Keys are `prompt`, `options`, `multiSelect`; each option is `{text, correct, explanation}`.
+  NEVER use `text`/`type`/`correctAnswers`/`id` — the component reads `prompt`/`options[].correct` and
+  will render blank at runtime otherwise (the build won't catch it).
 
 ## Workflow
 

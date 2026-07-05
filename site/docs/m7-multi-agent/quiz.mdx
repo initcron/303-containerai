@@ -7,147 +7,51 @@ import Quiz from '@site/src/components/Quiz';
 
 # Quiz: Multi-Agent Incident Crew
 
-<Quiz
-  questions={[
-    {
-      id: 'why-multi-agent',
-      text: 'Which of the following are valid reasons to use a multi-agent crew instead of a single agent? Select all that apply.',
-      type: 'multiSelect',
-      options: [
-        {
-          id: 'a',
-          text: 'The task produces a consequential action (a command, a deployment) that requires a separate safety review.',
-          explanation: 'Correct. A Reviewer agent as a dedicated safety gate is one of the primary reasons to use a crew. The separation of the action-proposing role (Fixer) from the approval role (Reviewer) mirrors how production change-management processes work.',
-        },
-        {
-          id: 'b',
-          text: 'Specialised, narrow roles improve small-model reliability on each individual task.',
-          explanation: 'Correct. A 1.5B model handles "classify this incident in one line" or "does this passage match this incident — YES or NO?" very reliably. Asking it to do all four crew tasks in one prompt overloads the context and blurs the roles.',
-        },
-        {
-          id: 'c',
-          text: 'A multi-agent crew always runs faster than a single agent.',
-          explanation: 'Incorrect. A sequential crew makes multiple LLM calls in order, which is slower than a single call. Speed is not a motivation for the crew pattern; specialisation and review loops are.',
-        },
-        {
-          id: 'd',
-          text: 'Separation of concerns makes each agent\'s output easier to audit and each role\'s behavior easier to change.',
-          explanation: 'Correct. Each agent\'s Markdown profile is a narrow, single-purpose system prompt. Changing the Reviewer\'s approval criteria is a one-line Markdown edit that does not affect the other three agents.',
-        },
-      ],
-      correctAnswers: ['a', 'b', 'd'],
-    },
-    {
-      id: 'relevance-gate',
-      text: 'During validation, the crew proposed the payments runbook for a Kafka outage. What architectural decision prevents this failure mode in the final crew?',
-      type: 'singleSelect',
-      options: [
-        {
-          id: 'a',
-          text: 'The Reviewer rejects any fix that mentions payments when the incident is about Kafka.',
-          explanation: 'Incorrect. The Reviewer checks whether the proposed command is non-destructive and runbook-backed. If the Fixer faithfully quoted a command from the (wrong) payments runbook, the Reviewer would see a command that matches a runbook and could approve it.',
-        },
-        {
-          id: 'b',
-          text: 'A relevance gate asks the model to confirm the retrieved runbook passage actually addresses THIS incident before the Fixer acts.',
-          explanation: 'Correct. Nearest-neighbour retrieval always returns something. The gate — a separate yes/no LLM call at temperature 0 — is the only check that catches a mismatch between the retrieved chunk and the actual incident.',
-        },
-        {
-          id: 'c',
-          text: 'ChromaDB is configured to return an empty result when the similarity score is below a threshold.',
-          explanation: 'Incorrect. While distance thresholds are a valid technique, the lab uses a model-based relevance gate rather than a distance cutoff. The gate is more robust because it understands incident semantics, not just embedding proximity.',
-        },
-        {
-          id: 'd',
-          text: 'The Triage agent filters out incidents that are not in the runbook index.',
-          explanation: 'Incorrect. Triage classifies the incident\'s area and severity. It has no knowledge of the runbook index and does not filter incidents before retrieval.',
-        },
-      ],
-      correctAnswers: ['b'],
-    },
-    {
-      id: 'shared-model',
-      text: 'The four-agent crew runs on a 16 GB laptop with a total memory footprint of approximately 1.3 GB. What makes this possible?',
-      type: 'singleSelect',
-      options: [
-        {
-          id: 'a',
-          text: 'Each agent uses a different, smaller quantised model to reduce per-agent memory.',
-          explanation: 'Incorrect. All four agents share one model: qwen2.5:1.5b. There is only one model instance running.',
-        },
-        {
-          id: 'b',
-          text: 'All four agents share one native Ollama endpoint; agents are cheap Python functions and the model is the only expensive component.',
-          explanation: 'Correct. The "crew" is four Python functions that each make one HTTP call to the same Ollama endpoint. The model loads once and serves all four agents sequentially. Running four separate model instances would quadruple the memory cost for no benefit.',
-        },
-        {
-          id: 'c',
-          text: 'The crew container runs the model inside Docker using CPU inference only.',
-          explanation: 'Incorrect. The model runs natively on the host (via Ollama on Apple Silicon using Metal), not inside a container. Containers connect to it via host.docker.internal:11434.',
-        },
-        {
-          id: 'd',
-          text: 'ChromaDB stores the model weights to avoid loading them into RAM.',
-          explanation: 'Incorrect. ChromaDB stores vector embeddings for the runbook knowledge base. Model weights are served by Ollama, not ChromaDB.',
-        },
-      ],
-      correctAnswers: ['b'],
-    },
-    {
-      id: 'reviewer-role',
-      text: 'The Reviewer\'s profile says "when in doubt, REJECT." What does this design decision reveal about the crew\'s relationship to human authority?',
-      type: 'singleSelect',
-      options: [
-        {
-          id: 'a',
-          text: 'The crew is designed to be fully autonomous; REJECT means the crew handles the incident itself via a different path.',
-          explanation: 'Incorrect. REJECTED means escalate to a human on-call engineer. The crew does not handle incidents autonomously — it produces a vetted recommendation (APPROVED) or a clear escalation signal (REJECTED). Humans retain final authority.',
-        },
-        {
-          id: 'b',
-          text: 'The Reviewer is a human-in-the-loop proxy: it produces a vetted recommendation, but a human engineer decides whether to apply the fix or act on the escalation.',
-          explanation: 'Correct. The crew never applies fixes. APPROVED means "a human should consider applying this command"; REJECTED means "a human on-call engineer should investigate." The automation earns its place by doing triage, retrieval, and safety checking — not by removing humans from the loop.',
-        },
-        {
-          id: 'c',
-          text: 'The Reviewer rejects any automated action, making the crew useful only for documentation.',
-          explanation: 'Incorrect. The Reviewer approves non-destructive, runbook-backed remediation commands. The 503 incident produces APPROVED with a concrete kubectl command ready for a human to run.',
-        },
-        {
-          id: 'd',
-          text: 'A conservative REJECT bias prevents the Reviewer from ever approving anything on a small model.',
-          explanation: 'Incorrect. The 503 incident demonstrates APPROVED output on qwen2.5:1.5b. The conservative bias means "prefer a false negative (unnecessary escalation) over a false positive (wrong command approved)" — a sensible safety policy for production systems.',
-        },
-      ],
-      correctAnswers: ['b'],
-    },
-    {
-      id: 'crewai-porting',
-      text: 'To run the CrewAI reference repo on any machine without Docker Desktop, two components must be replaced. What are they?',
-      type: 'singleSelect',
-      options: [
-        {
-          id: 'a',
-          text: 'The ChromaDB volume must be replaced with a cloud vector store, and the Python version must be pinned to 3.11.',
-          explanation: 'Incorrect. ChromaDB runs fine as a container on any machine. The two components that need replacing are Docker Model Runner (DMR, which is Docker Desktop-only) and supergateway.',
-        },
-        {
-          id: 'b',
-          text: 'The Compose models:/DMR block (Docker Desktop-only model runner) must be replaced with native Ollama, and the supergateway MCP bridge must be replaced with a ToolHive-managed MCP server.',
-          explanation: 'Correct. DMR only runs on Docker Desktop; swap it out by pointing OPENAI_BASE_URL at Ollama\'s /v1 endpoint. supergateway wraps a stdio MCP server with SSE transport inside Docker; thv run duckduckgo is the portable ToolHive equivalent that runs on any machine.',
-        },
-        {
-          id: 'c',
-          text: 'The agents.yaml role definitions must be rewritten as plain Python functions, and the tasks.yaml must be converted to a Markdown profile.',
-          explanation: 'Incorrect. The CrewAI framework variant keeps agents.yaml and tasks.yaml — they are the point of using CrewAI. The porting changes only the infrastructure (model runner and MCP gateway), not the agent definitions.',
-        },
-        {
-          id: 'd',
-          text: 'The gemma3:4B model must be downgraded to qwen2.5:1.5b, and the Dockerfile must be rebuilt from scratch.',
-          explanation: 'Incorrect. The model change (gemma3:4B → smaller) is a trade-off, not a required port. The two required changes are DMR → Ollama and supergateway → ToolHive.',
-        },
-      ],
-      correctAnswers: ['b'],
-    },
-  ]}
-/>
+<Quiz questions={[
+  {
+    prompt: 'Which of the following are valid reasons to use a multi-agent crew instead of a single agent? (select all that apply)',
+    multiSelect: true,
+    options: [
+      {text: 'The task produces a consequential action (a command, a deployment) that needs a separate safety review.', correct: true, explanation: 'A Reviewer agent as a dedicated safety gate is a primary reason to use a crew — separating the action-proposing role (Fixer) from the approval role (Reviewer).'},
+      {text: 'Specialised, narrow roles improve small-model reliability on each individual task.', correct: true, explanation: 'A 1.5B model reliably handles "classify this incident in one line" or "does this passage match — YES/NO?". Asking it to do all four tasks at once overloads context and blurs roles.'},
+      {text: 'A multi-agent crew always runs faster than a single agent.', correct: false, explanation: 'A sequential crew makes multiple LLM calls, so it is slower. Speed is not the motivation; specialisation and review loops are.'},
+      {text: 'Separation of concerns makes each agent easier to audit and each role easier to change.', correct: true, explanation: "Each agent's Markdown profile is a narrow system prompt — changing the Reviewer's criteria is a one-line edit that doesn't touch the other three."},
+    ],
+  },
+  {
+    prompt: 'During validation the crew proposed the payments runbook for a Kafka outage. What prevents this failure in the final crew?',
+    options: [
+      {text: 'The Reviewer rejects any fix that mentions payments when the incident is about Kafka.', correct: false, explanation: 'The Reviewer checks non-destructive + runbook-backed. A command faithfully quoted from the (wrong) runbook still looks runbook-backed, so it could slip through.'},
+      {text: 'A relevance gate asks the model to confirm the retrieved passage actually addresses THIS incident before the Fixer acts.', correct: true, explanation: 'Nearest-neighbour retrieval always returns something. The gate — a separate YES/NO call at temp 0 — is the check that catches a mismatch between the chunk and the incident.'},
+      {text: 'ChromaDB returns an empty result when the similarity score is below a threshold.', correct: false, explanation: 'A distance threshold is valid, but the lab uses a model-based relevance gate — it understands incident semantics, not just embedding proximity.'},
+      {text: 'The Triage agent filters out incidents not in the runbook index.', correct: false, explanation: 'Triage only classifies area + severity; it has no runbook index and does not filter before retrieval.'},
+    ],
+  },
+  {
+    prompt: 'The four-agent crew runs on a 16 GB laptop at ~1.3 GB total. What makes that possible?',
+    options: [
+      {text: 'Each agent uses a different, smaller quantised model.', correct: false, explanation: 'All four agents share one model (qwen2.5:1.5b) — there is only one model instance.'},
+      {text: 'All four agents share one native Ollama endpoint; agents are cheap Python functions and the model is the only expensive component.', correct: true, explanation: 'The crew is four functions each making one HTTP call to the same endpoint. The model loads once and serves all four sequentially.'},
+      {text: 'The crew container runs the model inside Docker with CPU inference.', correct: false, explanation: 'The model runs natively (Ollama/Metal); containers reach it via host.docker.internal:11434.'},
+      {text: 'ChromaDB stores the model weights to avoid loading them into RAM.', correct: false, explanation: 'ChromaDB stores vector embeddings; weights are served by Ollama.'},
+    ],
+  },
+  {
+    prompt: 'The Reviewer\'s profile says "when in doubt, REJECT." What does that reveal about the crew\'s relationship to human authority?',
+    options: [
+      {text: 'The crew is fully autonomous; REJECT means it handles the incident another way.', correct: false, explanation: 'REJECTED means escalate to a human. The crew produces a vetted recommendation or a clear escalation — humans keep final authority.'},
+      {text: 'The Reviewer is a human-in-the-loop proxy: it produces a vetted recommendation, but a human decides whether to apply it.', correct: true, explanation: 'The crew never applies fixes. APPROVED = "a human should consider this command"; REJECTED = "a human should investigate." Automation does triage/retrieval/checking, not the final act.'},
+      {text: 'The Reviewer rejects any automated action, so the crew is only useful for documentation.', correct: false, explanation: 'The 503 incident produces APPROVED with a concrete kubectl command ready for a human to run.'},
+      {text: 'A conservative REJECT bias means it can never approve anything on a small model.', correct: false, explanation: 'The 503 incident shows APPROVED on qwen2.5:1.5b. The bias means prefer an unnecessary escalation over a wrong approval.'},
+    ],
+  },
+  {
+    prompt: 'To run the CrewAI reference repo anywhere (no Docker Desktop), which two components must be replaced?',
+    options: [
+      {text: 'ChromaDB → a cloud vector store, and pin Python to 3.11.', correct: false, explanation: 'ChromaDB runs fine as a container anywhere. The Docker-Desktop-only pieces are DMR and supergateway.'},
+      {text: 'The Compose models:/DMR block → native Ollama (point OPENAI_BASE_URL at /v1), and supergateway → a ToolHive-managed MCP server (thv run duckduckgo).', correct: true, explanation: 'DMR is Docker-Desktop-only; supergateway wraps a stdio MCP server with SSE inside Docker. ToolHive is the portable equivalent.'},
+      {text: 'Rewrite agents.yaml as Python functions and convert tasks.yaml to Markdown.', correct: false, explanation: 'CrewAI keeps agents.yaml/tasks.yaml — that is the point of the framework. Porting changes only the infrastructure.'},
+      {text: 'Downgrade gemma3:4B to qwen2.5:1.5b and rebuild the Dockerfile.', correct: false, explanation: 'The model change is a trade-off, not a required port. The two required swaps are DMR→Ollama and supergateway→ToolHive.'},
+    ],
+  },
+]} />
