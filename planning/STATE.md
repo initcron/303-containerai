@@ -46,11 +46,16 @@
 - Fixed a site-wide bug: Docusaurus admonition titles need bracket form `:::type[Title]` (space form
   renders literally). Convention now in CLAUDE.md.
 
-## Next: M3 · Production Serving with vLLM (CPU + GPU)
+- ✅ **M3 · Production Serving with vLLM** — lesson (analogies + Mermaid), lab, quiz, `labs/m3` assets.
+  CPU vLLM (SmolLM2-135M, float32) validated live end-to-end → `lab-tests/m3.md`. Live validation found
+  & fixed **5 arm64/Rancher incompatibilities** vs the Docker-Desktop reuse repo (CPU cap, swap-space,
+  numa/SYS_NICE+seccomp, bf16→float32, 360M→135M). **Requires runtime VM at 4 CPU / 6 GB.**
 
-Reuse anchor cloned at `reference-repos/vllm-cpu-example` (SmolLM2, resource presets, NUMA/thread
-tuning). CPU track is universal (runs in a container on this Mac); GPU track documented. Follow the
-proven pattern; validate the CPU vLLM lab live on Rancher Desktop.
+## Next: M4 · Packaging Models as OCI Artifacts (KitOps)
+
+No reuse repo. Package a model (+ config/prompts) as a ModelKit with KitOps/ORAS, push to GHCR, pull &
+run on a clean env to prove portability. Follow the proven pattern; validate live (kit CLI + a registry).
+Lighter than M3 (no heavy container serving).
 
 ## Key decisions locked (don't re-litigate)
 
