@@ -169,8 +169,10 @@ gh auth token | kit login ghcr.io -u <your-github-username> --password-stdin
 ```
 
 **Fix — option B (classic PAT — most reliable):**
-Create a Personal Access Token (classic) at `github.com/settings/tokens` with **`write:packages`** and
-**`read:packages`** checked, then:
+In practice GHCR often **rejects the `gh`-issued OAuth token even when `write:packages` shows up in
+`gh auth status`** (`denied: ... does not match expected scopes`). A **classic PAT** avoids this entirely
+— it's the path we recommend. Create a Personal Access Token (classic) at `github.com/settings/tokens`
+with **`write:packages`** and **`read:packages`** checked, then:
 ```bash
 echo "<your-pat>" | kit login ghcr.io -u <your-github-username> --password-stdin
 ```
