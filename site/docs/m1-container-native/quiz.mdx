@@ -3,6 +3,142 @@ sidebar_position: 3
 title: 'Quiz: Module 1'
 ---
 
-# Quiz: Module 1
+import Quiz from '@site/src/components/Quiz';
 
-Coming next.
+# Module 1 Quiz
+
+Test your understanding of container-native GenAI concepts from the lesson and lab.
+
+<Quiz questions={[
+  {
+    prompt: 'Why does this course use "container-native" instead of "Docker-native" as its design principle?',
+    options: [
+      {
+        text: 'Docker is slower than other runtimes for AI workloads.',
+        correct: false,
+        explanation: 'Performance is not the reason. Docker (dockerd/moby) is perfectly capable — the issue is licensing and portability, not speed.',
+      },
+      {
+        text: 'Docker Desktop is now paid for larger organizations, and the OCI + Compose Spec standard runs identically on Colima, OrbStack, Rancher Desktop, and Podman.',
+        correct: true,
+        explanation: 'Correct. The OCI image format and Compose Spec are open standards. By writing to the standard rather than the vendor, your stack works on any compliant runtime — freeing teams from the Docker Desktop paywall.',
+      },
+      {
+        text: 'Containers only work on Linux, so Docker Desktop is unavailable on Mac.',
+        correct: false,
+        explanation: 'Docker Desktop (and alternatives like Rancher Desktop) run fine on macOS by bundling a lightweight Linux VM. The issue is licensing cost, not OS compatibility.',
+      },
+      {
+        text: 'The OCI standard only applies to images, not to Compose files.',
+        correct: false,
+        explanation: 'Both apply: OCI covers image format and distribution, while the Compose Spec (a separate open standard) covers multi-container application definitions. Both are vendor-neutral.',
+      },
+    ],
+  },
+  {
+    prompt: 'On Apple Silicon, why should the model server (Ollama) run natively instead of inside a container?',
+    options: [
+      {
+        text: 'Containers cannot connect to the internet on Apple Silicon.',
+        correct: false,
+        explanation: 'Containers have full network access on Apple Silicon. The limitation is GPU access, not networking.',
+      },
+      {
+        text: "macOS's Hypervisor.framework exposes no virtual GPU, so a containerised model falls back to CPU and runs 3–6x slower than native Metal inference.",
+        correct: true,
+        explanation: 'Correct. The Linux VM inside the container runtime has no access to the Metal GPU or Apple Neural Engine. Ollama running natively gets direct access to unified memory and Metal, which is dramatically faster.',
+      },
+      {
+        text: 'Ollama does not support ARM64 Docker images.',
+        correct: false,
+        explanation: 'Ollama does provide ARM64 Docker images. The reason to run natively is GPU access, not architecture support.',
+      },
+      {
+        text: 'Running Ollama natively avoids port conflicts with the container network.',
+        correct: false,
+        explanation: 'Port conflicts are trivially resolved. The real reason is GPU performance: a native process has Metal access; a containerised process does not.',
+      },
+    ],
+  },
+  {
+    prompt: 'What is the purpose of `host.docker.internal` in the M1 lab command `docker run --rm curlimages/curl:latest -s http://host.docker.internal:11434/...`?',
+    options: [
+      {
+        text: 'It is a Docker Hub mirror that caches model weights locally.',
+        correct: false,
+        explanation: 'host.docker.internal has nothing to do with Docker Hub or model caching. It is a DNS hostname injected by container runtimes.',
+      },
+      {
+        text: 'It is a special hostname injected by the container runtime that resolves to the host machine\'s IP, allowing the container to reach natively-running services like Ollama.',
+        correct: true,
+        explanation: 'Correct. Container runtimes (Rancher Desktop, Colima, OrbStack, Podman) inject `host.docker.internal` into each container\'s DNS so that processes inside a container can reach services running natively on the host — such as Ollama on port 11434.',
+      },
+      {
+        text: 'It routes traffic through a VPN tunnel to a remote GPU server.',
+        correct: false,
+        explanation: 'No VPN or remote server is involved. host.docker.internal resolves to the local machine\'s IP address — typically something like 192.168.5.2 on Rancher Desktop.',
+      },
+      {
+        text: 'It is only available on Docker Desktop and does not work on Rancher Desktop.',
+        correct: false,
+        explanation: 'host.docker.internal is supported on Rancher Desktop, Colima, OrbStack, and Podman Desktop. It is a de-facto cross-runtime standard, not a Docker Desktop exclusive.',
+      },
+    ],
+  },
+  {
+    prompt: 'Which of the following are valid OCI-compliant container runtimes that can run the same compose.yaml as Rancher Desktop? (Select all that apply)',
+    multiSelect: true,
+    options: [
+      {
+        text: 'Colima',
+        correct: true,
+        explanation: 'Colima is a free, open-source container runtime for macOS and Linux built on Lima. It implements the OCI standard and supports the Compose Spec via the Docker CLI.',
+      },
+      {
+        text: 'OrbStack',
+        correct: true,
+        explanation: 'OrbStack is a fast, lightweight container runtime for macOS that is free for personal use. It is OCI-compatible and supports docker-compose out of the box.',
+      },
+      {
+        text: 'Podman Desktop',
+        correct: true,
+        explanation: 'Podman is a daemonless OCI container engine from Red Hat. Podman Desktop provides a GUI and supports the Compose Spec, making it fully interchangeable for this course.',
+      },
+      {
+        text: 'Microsoft Word',
+        correct: false,
+        explanation: 'Microsoft Word is a word processor, not a container runtime. It has no OCI support.',
+      },
+      {
+        text: 'Jupyter Notebook',
+        correct: false,
+        explanation: 'Jupyter Notebook is a Python execution environment, not a container runtime. It can run inside a container, but it is not itself an OCI runtime.',
+      },
+    ],
+  },
+  {
+    prompt: 'The M1 lab uses the Ollama `/api/generate` endpoint with `"stream":false`. In M2 and beyond, the course switches to the `/v1/chat/completions` endpoint. What is the practical benefit of the OpenAI-compatible `/v1/chat/completions` interface?',
+    options: [
+      {
+        text: 'It is faster than the native Ollama API because it uses HTTP/2.',
+        correct: false,
+        explanation: 'The performance difference is not due to protocol version — both use HTTP. The benefit is API compatibility, not speed.',
+      },
+      {
+        text: 'It is only available when using the official OpenAI API key.',
+        correct: false,
+        explanation: 'The OpenAI-compatible endpoint is implemented by Ollama, vLLM, LocalAI, and llama.cpp — all without any OpenAI API key. The point is the shared interface, not the provider.',
+      },
+      {
+        text: 'Application and agent code never needs to change when you swap the model engine (Ollama → vLLM → cloud) because they all expose the same request/response contract.',
+        correct: true,
+        explanation: 'Correct. This is the "wall socket" principle from the lesson: the same POST request works against Ollama on a dev laptop, vLLM on a GPU VM, or OpenAI in the cloud. Swapping engines requires only a URL change — no application code changes.',
+      },
+      {
+        text: 'It automatically selects the best available model based on the prompt length.',
+        correct: false,
+        explanation: 'The OpenAI-compatible API does not perform automatic model selection. You specify the model in the request. The benefit is the standard interface, not auto-selection.',
+      },
+    ],
+  },
+]} />
