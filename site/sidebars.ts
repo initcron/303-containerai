@@ -53,6 +53,15 @@ const sidebars: SidebarsConfig = {
         'm5-naive-rag/quiz',
       ],
     },
+    {
+      type: 'category',
+      label: 'M6 · Declarative Agent — Agentic RAG',
+      items: [
+        'm6-declarative-agent/lesson',
+        'm6-declarative-agent/lab',
+        'm6-declarative-agent/quiz',
+      ],
+    },
   ],
 };
 
