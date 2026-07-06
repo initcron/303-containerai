@@ -94,7 +94,7 @@ mlx_lm.lora \
   --data . \
   --iters 50 \
   --batch-size 1 \
-  --lora-layers 4 \
+  --num-layers 4 \
   --save-every 25 \
   --adapter-path ./my-adapter
 ```
@@ -105,8 +105,16 @@ mlx_lm.lora \
 | `--train` | Fine-tuning mode |
 | `--data .` | Look for `train.jsonl` / `valid.jsonl` in the current directory |
 | `--iters 50` | 50 gradient steps (fast; a real run uses 500–2000) |
-| `--lora-layers 4` | Apply LoRA to the last 4 transformer layers |
+| `--num-layers 4` | Apply LoRA to the last 4 transformer layers |
 | `--adapter-path` | Where to save the resulting adapter |
+
+:::note[Flag name varies by mlx-lm version]
+
+Recent `mlx-lm` uses `--num-layers`; **older versions used `--lora-layers`**. If you get
+`Error: No such option: --num-layers`, swap in `--lora-layers 4` (or run `mlx_lm.lora --help` to see
+which your version expects).
+
+:::
 
 **Expected output (approximate):**
 ```

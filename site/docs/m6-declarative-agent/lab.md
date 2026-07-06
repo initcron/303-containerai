@@ -247,6 +247,29 @@ The validated routing decisions at temperature 0 on `qwen2.5:1.5b`:
 
 AGENTS.md declares a `web.fetch` MCP tool for fetching public URLs. ToolHive runs this tool server as an isolated Docker container — not a compose service.
 
+### Install ToolHive (`thv`)
+
+ToolHive isn't bundled with the course tools — install its CLI first. On **macOS (Apple Silicon)**, grab
+the release binary and put it on your PATH:
+
+```bash
+curl -fsSL https://github.com/stacklok/toolhive/releases/download/v0.33.0/toolhive_0.33.0_darwin_arm64.tar.gz \
+  | tar xz -C /tmp
+sudo mv /tmp/thv /usr/local/bin/thv    # or any dir already on your PATH
+thv version                            # -> ToolHive v0.33.0
+```
+
+For Linux or Intel macs, pick the matching asset (`_linux_amd64`, `_linux_arm64`, `_darwin_amd64`) from
+the [ToolHive releases page](https://github.com/stacklok/toolhive/releases).
+
+:::note[ToolHive needs your container runtime]
+
+`thv` drives your OCI runtime to run MCP servers as containers, so Rancher Desktop (or Colima/OrbStack/
+Podman) must be running. On some setups `thv` needs `DOCKER_HOST` pointed at the runtime's socket — e.g.
+Rancher Desktop: `export DOCKER_HOST="unix://$HOME/.rd/docker.sock"`.
+
+:::
+
 ### Start the fetch MCP server
 
 ```bash
