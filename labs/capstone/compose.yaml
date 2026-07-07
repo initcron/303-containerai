@@ -1,0 +1,101 @@
+# Capstone · Acme AI Support Platform — consolidated compose.yaml.
+#
+# Runs the WHOLE platform from a single file so learners avoid the per-module
+# "chromadb container name already in use" / port 8000 conflict. ONE shared
+# ChromaDB, ONE shared volume, all three apps wired to the same vector memory.
+#
+# Quick start (from labs/capstone/):
+#   docker compose up -d chromadb genai-app          # start persistent services
+#   docker compose run --rm agent "your question"    # one-shot support agent
+#   docker compose run --rm crew  "P1: incident"     # one-shot incident crew
+#   docker compose down                              # full teardown
+#
+# Apple-Silicon pattern: Ollama runs NATIVELY on the host; every container
+# reaches it via http://host.docker.internal:11434. Never containerize the model.
+#
+# Prereqs:  ollama pull qwen2.5:1.5b  &&  ollama pull nomic-embed-text
+services:
+
+  # ── Shared vector memory ─────────────────────────────────────────────────────
+  chromadb:
+    image: chromadb/chroma:0.5.20
+    container_name: chromadb
+    ports:
+      - "8000:8000"
+    volumes:
+      - chroma_data:/chroma/chroma
+    environment:
+      - IS_PERSISTENT=TRUE
+      - ANONYMIZED_TELEMETRY=FALSE
+    deploy:
+      resources:
+        limits:
+          memory: 768M
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python3", "-c",
+             "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/heartbeat')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+  # ── M5 · Docs Assistant — long-running Streamlit RAG app ─────────────────────
+  genai-app:
+    build:
+      context: ../m5/app
+      dockerfile: Dockerfile
+    container_name: genai-app
+    ports:
+      - "8501:8501"
+    environment:
+      - OLLAMA_BASE_URL=http://host.docker.internal:11434
+      - CHROMA_HOST=chromadb
+      - CHROMA_PORT=8000
+      - LLM_MODEL=qwen2.5:1.5b
+      - EMBEDDING_MODEL=nomic-embed-text
+    depends_on:
+      chromadb:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+    restart: unless-stopped
+
+  # ── M6 · Support Agent — one-shot runner ─────────────────────────────────────
+  # Usage: docker compose run --rm agent "payments pod keeps restarting"
+  agent:
+    build:
+      context: ../m6
+      dockerfile: Dockerfile
+    image: acme-support-agent:latest
+    environment:
+      - OLLAMA_BASE_URL=http://host.docker.internal:11434
+      - CHROMA_HOST=chromadb
+      - CHROMA_PORT=8000
+      - LLM_MODEL=qwen2.5:1.5b
+      - EMBEDDING_MODEL=nomic-embed-text
+    depends_on:
+      chromadb:
+        condition: service_healthy
+
+  # ── M7 · Incident Crew — one-shot runner ─────────────────────────────────────
+  # Usage: docker compose run --rm crew "P1: payments service down"
+  crew:
+    build:
+      context: ../m7
+      dockerfile: Dockerfile
+    image: acme-incident-crew:latest
+    environment:
+      - OLLAMA_BASE_URL=http://host.docker.internal:11434
+      - CHROMA_HOST=chromadb
+      - CHROMA_PORT=8000
+      - LLM_MODEL=qwen2.5:1.5b
+      - EMBEDDING_MODEL=nomic-embed-text
+    depends_on:
+      chromadb:
+        condition: service_healthy
+
+volumes:
+  chroma_data:

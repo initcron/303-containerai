@@ -100,55 +100,126 @@ curl http://localhost:11434/v1/models
 
 For the CPU-vLLM path (SmolLM2 on a machine without Apple Silicon Metal), see the [M3 lab](../m3-vllm/lab). All downstream containers consume the model through the standard OpenAI-compatible `/v1` API — the wall-socket abstraction introduced in [M2](../m2-serving/lesson) that lets any container swap the model behind it without code changes.
 
-### Step 2 — Start the Docs Assistant (M5)
+### Step 2 — Start the platform (M5 + shared ChromaDB)
+
+All persistent services — ChromaDB and the Docs Assistant — start from the single consolidated compose file in `labs/capstone/`. This avoids the per-module port conflict (each module's `compose.yaml` binds its own `chromadb` to port 8000; running them in sequence hits "container name already in use"). The capstone compose starts ONE shared ChromaDB that all three apps use.
 
 ```bash
-cd labs/m5
-docker compose up -d
+cd labs/capstone
+docker compose up -d chromadb genai-app
 ```
 
-ChromaDB starts alongside the Streamlit app. On first run the ingest script embeds the Acme runbooks and writes them to the vector store. Visit `http://localhost:8501`, ask "How do I restart the payments service?" and you get a grounded answer with the exact `kubectl` command pulled from the runbook — not a hallucinated approximation.
+Expected output:
+
+```
+ Network capstone_default Created
+ Volume capstone_chroma_data Created
+ Container chromadb Started
+ Container genai-app Started
+```
+
+On first run the ingest script embeds the Acme runbooks and writes them to the vector store. Visit `http://localhost:8501`, ask "How do I restart the payments service?" and you get a grounded answer with the exact `kubectl` command pulled from the runbook — not a hallucinated approximation.
 
 See the [M5 lab](../m5-naive-rag/lab) for the step-by-step compose walkthrough.
 
 ### Step 3 — Run the Support Agent (M6)
 
+With ChromaDB already running, run the M6 agent as a one-shot against the same shared vector store. Stay in `labs/capstone/`:
+
 ```bash
-cd labs/m6
 docker compose run --rm agent "payments pod keeps restarting, what do I do?"
 ```
 
-Aria — the declarative agent — reads the question, decides whether it needs to retrieve from ChromaDB at all, queries ToolHive for any MCP tool the task requires, and returns a grounded, guardrailed answer. This is agentic RAG: the agent routes first, then acts — rather than blindly retrieving on every query. See the [M6 lab](../m6-declarative-agent/lab).
+Expected output (abbreviated):
+
+```
+[agent] Aria ready — ingested 5 runbook chunks. Persona from SOUL.md + AGENTS.md + SKILL.md.
+USER: payments pod keeps restarting, what do I do?
+  [decision: RETRIEVE (top dist=162.x)]
+ARIA: Run `kubectl rollout restart deploy/payments -n prod`. ...
+```
+
+Aria — the declarative agent — reads the question, decides whether it needs to retrieve from ChromaDB at all, and returns a grounded, guardrailed answer. This is agentic RAG: the agent routes first, then acts. See the [M6 lab](../m6-declarative-agent/lab).
 
 ### Step 4 — Fire the Incident Crew (M7)
 
+Still in `labs/capstone/`, run the incident crew one-shot:
+
 ```bash
-cd labs/m7
 docker compose run --rm crew "P1: payments service down, pods in CrashLoopBackOff"
 ```
 
-Four specialised agents run in sequence: Triage classifies the incident, Investigator queries the runbook, Fixer proposes the exact remediation command, Reviewer approves or escalates. One native model endpoint serves all four. The output is a structured incident response report with a traceable audit trail.
+Expected output (abbreviated):
+
+```
+[crew] Acme Incident Crew: Triage -> Investigator -> Fixer -> Reviewer
+
+[TRIAGE]      AREA: payments | SEV: critical | ...
+[INVESTIGATOR] kubectl rollout restart deploy/payments -n prod ...
+[FIXER]       kubectl rollout restart deploy/payments -n prod
+[REVIEWER]    APPROVED — ready for a human to apply
+```
+
+Four specialised agents run in sequence: Triage classifies the incident, Investigator queries the runbook, Fixer proposes the exact remediation command, Reviewer approves or escalates. One native model endpoint serves all four.
 
 See the [M7 lab](../m7-multi-agent/lab) for the full compose wiring and the approval-gate logic.
+
+:::tip[Teardown]
+
+When you are done with Steps 2–4, tear down all platform containers from `labs/capstone/`:
+
+```bash
+docker compose down
+```
+
+:::
 
 ### Step 5 — Package the model (M4)
 
 ```bash
 cd labs/m4
-kit pack . -t ghcr.io/acme/support-model:v1.0
-kit push  ghcr.io/acme/support-model:v1.0
+kit pack . -t ghcr.io/<your-github-user>/support-model:v1.0
+kit push  ghcr.io/<your-github-user>/support-model:v1.0
 ```
 
 The model weights, system prompt, and quantization config are sealed into a single OCI artifact — a ModelKit. Any CI job or serving node pulls exactly that version with one command. No shared drives, no Slack links, no "also grab the prompt file from the other folder." See the [M4 lab](../m4-packaging/lab).
 
 ### Step 6 — Secure the crew image (M8)
 
+Build the crew image locally first (or reuse the one from M7), then run the supply chain script against the **local** image tag. Syft, Trivy, and Grype scan the local image without pulling from a registry:
+
 ```bash
+# Ensure the crew image is built locally
+docker build -t acme-incident-crew:latest labs/m7/
+
 cd labs/m8
-./secure-image.sh ghcr.io/acme/incident-crew:v1.0
+./secure-image.sh acme-incident-crew:latest
 ```
 
-This runs Syft (SBOM generation), Trivy and Grype (vulnerability scanning), and Cosign (image signing). An image that fails the scan threshold is rejected before it reaches the registry. An image that passes is signed — any downstream consumer can verify the signature and the attestation. See the [M8 lab](../m8-security/lab).
+Expected output:
+
+```
+==> [1/4] SBOM with syft  (local image — no registry pull)
+    wrote sbom.spdx.json
+==> [2/4] Vulnerability scan with trivy  (CRITICAL/HIGH — local image)
+Total: ...
+==> [3/4] Second opinion with grype  (local image)
+Vulnerabilities by severity: Critical X, High X, ...
+==> [4/4] Sign with cosign (key-based, via local registry)
+The signatures were verified against the specified public key
+Done. SBOM + scanned + signed acme-incident-crew:latest (signed ref: localhost:5001/acme-incident-crew:latest).
+```
+
+To push to your own GHCR namespace and sign the remote ref (requires `docker login ghcr.io` and a classic PAT with `write:packages`):
+
+```bash
+docker tag acme-incident-crew:latest ghcr.io/<your-github-user>/incident-crew:v1.0
+docker push ghcr.io/<your-github-user>/incident-crew:v1.0
+COSIGN_PASSWORD="" cosign sign --yes --key labs/m8/cosign.key \
+  ghcr.io/<your-github-user>/incident-crew:v1.0
+```
+
+See the [M8 lab](../m8-security/lab) for the full supply-chain walkthrough.
 
 ### Step 7 — Ship via CI (M8)
 

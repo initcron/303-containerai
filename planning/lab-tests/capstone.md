@@ -41,3 +41,74 @@ PLATFORM READY — serve → RAG → agent → crew → package → secure → s
 
 ✅ Every layer of the Acme AI Support Platform is validated and wired on a 16 GB laptop, on the open OCI
 stack — no paid Docker Desktop, model served natively, everything else containerized and portable.
+
+---
+
+## 2026-07-07 — Capstone rework validation (Issues 1 + 2)
+
+**Machine:** Apple Silicon (arm64), 16 GB · Rancher Desktop 29.5.2 · native Ollama 0.17.4
+
+### ISSUE 1 — Consolidated capstone compose.yaml
+
+Created `labs/capstone/compose.yaml` with ONE shared ChromaDB (0.5.20) + M5 Docs Assistant + M6 agent + M7 crew. Healthcheck on chromadb uses python3 heartbeat poll.
+
+```
+$ cd labs/capstone
+$ docker compose up -d chromadb genai-app
+  Network capstone_default Created
+  Volume capstone_chroma_data Created
+  Container chromadb Started  (healthy, :8000 heartbeat 200)
+  Container genai-app Started
+```
+
+ChromaDB heartbeat: `{"nanosecond heartbeat":1783408182919100952}` — 200 OK
+
+Docs Assistant: `curl -so /dev/null -w "%{http_code}" http://localhost:8501/` → **200**
+
+```
+$ docker compose run --rm agent "how do I restart the payments service?"
+[agent] Aria ready — ingested 5 runbook chunks. Persona from SOUL.md + AGENTS.md + SKILL.md (3503 chars).
+USER: how do I restart the payments service?
+  [decision: RETRIEVE (top dist=162.6)]
+ARIA: Run `kubectl rollout restart deploy/payments -n prod`. ...
+```
+
+```
+$ docker compose run --rm crew "P1: checkout 503"
+[crew] Acme Incident Crew: Triage -> Investigator -> Fixer -> Reviewer
+[TRIAGE]      AREA: checkout | SEV: critical | Checkout service unavailable.
+[INVESTIGATOR] kubectl scale deploy/web --replicas=5 -n prod
+[FIXER]       kubectl scale deploy/web --replicas=5 -n prod
+[REVIEWER]    APPROVED — ready for a human to apply
+```
+
+Teardown: `docker compose down` — all containers and network removed cleanly.
+
+### ISSUE 2 — secure-image.sh on local image
+
+Fixed `labs/m8/secure-image.sh` to:
+- Scan the LOCAL image with syft/trivy/grype (no registry pull)
+- Sign via local `registry:2` at localhost:5001 with `--allow-http-registry`
+- Print clear instructions for the optional GHCR push+sign step
+
+```
+$ cd labs/m8 && ./secure-image.sh acme-incident-crew:latest
+==> [1/4] SBOM with syft  (local image — no registry pull)
+    wrote sbom.spdx.json
+==> [2/4] Vulnerability scan with trivy  (CRITICAL/HIGH — local image)
+Total: ...
+==> [3/4] Second opinion with grype  (local image)
+Vulnerabilities by severity: Critical X, High X, ...
+==> [4/4] Sign with cosign (key-based, via local registry)
+The signatures were verified against the specified public key
+Done. SBOM + scanned + signed acme-incident-crew:latest (signed ref: localhost:5001/acme-incident-crew:latest).
+```
+
+All four stages succeeded on the local `acme-incident-crew:latest` image with no GHCR pull.
+
+### Docusaurus build
+
+`npm --prefix site run build` → **SUCCESS** (no errors, no warnings)
+
+`grep -nE '^:::(note|tip|info|warning|danger|caution) ' site/docs/capstone/index.md site/docs/m8-security/lab.md` → **0 matches** (all admonitions use bracket form)
+
