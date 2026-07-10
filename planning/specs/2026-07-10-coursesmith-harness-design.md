@@ -1,9 +1,22 @@
-# Design: `coursesmith` — a Course-Generation Harness (Claude Code plugin)
+# Design: CourseSmith — a Course-Generation Harness (Claude Code plugin)
 
 **Date:** 2026-07-10
 **Author:** Gourav Shah (with Claude Code / Superpowers)
-**Status:** Approved (design) — pending spec review → writing-plans
-**Source of truth:** the process used to build `303-containerai` (this repo) — reverse-engineered.
+**Status:** Approved — ready for writing-plans (Slice 1)
+**Name:** **CourseSmith** (plugin id `coursesmith`)
+**Repo:** https://github.com/schoolofdevops/coursesmith.git (new, dedicated repo)
+**Source of truth:** the process used to build `303-containerai` (this repo) — reverse-engineered; this
+course repo is CourseSmith's first extraction source + reference implementation.
+
+## Resolved decisions (2026-07-10)
+
+1. **Repo:** build in the new `schoolofdevops/coursesmith` repo (not inside this course repo).
+2. **Name:** CourseSmith / `coursesmith`.
+3. **First plan = Slice 1** (skeleton + `course-design` + `docusaurus-scaffold` + packaged starter +
+   continuity → `/course-new` takes an outline to a scaffolded, deployable site + approved spec + roadmap).
+4. **Skill boundaries:** `course-roadmap` is **folded into `course-design`** (design produces the spec
+   *and* the roadmap + per-module plans). `lab-validation` is a **distinct sub-skill** that
+   `course-authoring` calls for the live run-and-fold-back loop.
 
 ---
 
@@ -60,11 +73,10 @@ Cross-cutting the whole run: continuity (STATE/resume/memory), the growing compo
 
 | Skill | Responsibility | Inputs → Outputs | Status |
 |---|---|---|---|
-| `course-design` | Phase 1 intake. Wraps brainstorming *for courses*: outline → questions → design spec. | outline text → `planning/specs/*-design.md` + `course.config` | new |
+| `course-design` | Phases 1 + 3 intake. Wraps brainstorming *for courses*: outline → questions → design spec **and** the roadmap + per-module plans + project spine. | outline text → `planning/specs/*-design.md` + `course.config` + `ROADMAP.md` + `planning/plans/*` | new |
 | `docusaurus-scaffold` | Phase 2. Stand up the site from the packaged starter; wire Quiz/Mermaid/decks/Pages/continuity. | design spec → working `site/` + `planning/` + CI | ✅ extend |
-| `course-roadmap` | Phase 3. Module ladder + per-module `plan` files + the project spine. (May fold into `course-design`.) | design spec → `ROADMAP.md` + `planning/plans/*` | new |
-| `course-authoring` | Phase 4–5. Build ONE module end-to-end: lesson→lab→validate→quiz→deck. The core loop. | a module plan + `course.config` → the 3 docs + `labs/mN/` + deck + lab-test evidence | ✅ extend |
-| `lab-validation` | The live-validation sub-loop: run the lab on the runtime, capture output, fold corrections into `lab.md`. | `labs/mN/` + `lab.md` → validated lab + `planning/lab-tests/mN.md` | new (partly in authoring) |
+| `course-authoring` | Phase 4–5. Build ONE module end-to-end: lesson→lab→(call `lab-validation`)→quiz→deck. The core loop. | a module plan + `course.config` → the 3 docs + `labs/mN/` + deck + lab-test evidence | ✅ extend |
+| `lab-validation` | **Distinct sub-skill** `course-authoring` calls: run the lab on the runtime, capture output, fold corrections into `lab.md`. | `labs/mN/` + `lab.md` → validated lab + `planning/lab-tests/mN.md` | new |
 | `learner-qa` | Phase 6. Dispatch learner-simulating subagents; produce findings; drive fixes. | a module (or all) → findings report + fixes | new |
 | `capstone-integration` | Phase 7. Consolidated compose + coherence pass. | all modules → `labs/capstone/compose.yaml` + capstone doc | new |
 | `whiteboard-deck-builder` | Generate + embed a slide deck for a lesson. | lesson → `static/decks/*.html` + `<Slides>` embed | ✅ (user's) |
