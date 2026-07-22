@@ -33,6 +33,7 @@ const sidebars: SidebarsConfig = {
         'm3-vllm/lesson',
         'm3-vllm/lab',
         'm3-vllm/quiz',
+        'm3-vllm/deep-dive',
       ],
     },
     {
@@ -42,6 +43,7 @@ const sidebars: SidebarsConfig = {
         'm3b-finetuning/lesson',
         'm3b-finetuning/lab',
         'm3b-finetuning/quiz',
+        'm3b-finetuning/deep-dive',
       ],
     },
     {

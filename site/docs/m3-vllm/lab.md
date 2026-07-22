@@ -393,8 +393,6 @@ docker compose down -v
 
 ---
 
----
-
 ## Go deeper
 
 The lab proved a production-grade server runs on your laptop — but *why* does

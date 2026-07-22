@@ -38,6 +38,10 @@ untouched) + lab "Go deeper" pointer. Gates green: `site` build, `run-checks.mjs
 `VLLM_PORT=8010 scripts/test-course.sh m3` PASS (default port 8009 is machine-local-occupied by macOS
 AirPlay Reflector). Learner-QA PASS — one real finding (F7) fixed, remainder adjudicated false or
 machine-local.
+**Process incident (2026-07-22, honest note):** a mid-task push put the M3 deep-dive content live
+on `origin` (23ddfc8) before QA had completed — QA finding F7 was still open at push time. F7 was
+fixed and fast-followed with a corrective commit; see `.superpowers/sdd/progress.md` for the
+process note on what triggered the early push and the guard added to prevent recurrence.
 **NEXT:** M5 (v1.4.0) then M7 (v1.5.0) deep-dive plans written and ready to execute, cloned from the
 M3B plan structure with content maps from `planning/specs/2026-07-22-depth-retrofit-design.md` §Phase 2:
 - `planning/plans/2026-07-22-m5-deep-dive.md` (RAG params — chunk size/overlap, top-k, embedding

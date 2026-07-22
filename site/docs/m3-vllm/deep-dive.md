@@ -30,9 +30,9 @@ bash up.sh
 ```
 
 **Machine budget:** native Ollama (`qwen2.5:1.5b`, ~1 GB resident) and the m3 vLLM container
-(SmolLM2-135M, capped at 4 CPU / 5 GB in `compose.yaml`) **coexist** on the same 4 CPU / 6 GB VM
-this course targets — you do not need to stop one to run the other. Confirm both are reachable
-before the experiment in §6:
+(SmolLM2-135M, capped at 4 CPU / 5 GB in `compose.yaml`) **coexist on this machine**: Ollama runs
+native on the host, vLLM runs inside the 4 CPU / 6 GB VM this course targets — you do not need to
+stop one to run the other. Confirm both are reachable before the experiment in §6:
 
 ```bash
 curl -sf http://localhost:11434/api/tags >/dev/null && echo "ollama: up"
@@ -178,13 +178,17 @@ all — verified against this image's own source, not inferred.** `vllm/worker/c
 `cpu_kvcache_space_bytes` alone, then explicitly zeroes the swap side:
 
 ```python
-# determine_num_available_blocks()
-num_cpu_blocks = int(self.cache_config.cpu_kvcache_space_bytes // cache_block_size)
-num_gpu_blocks = num_cpu_blocks   # reuse the GPU-cache code path
-num_cpu_blocks = 0                # CPU worker never gets a second, swappable pool
+def determine_num_available_blocks(self) -> Tuple[int, int]:
+    """... Note that since vLLM assumes a block resides on GPU if it can be
+    modified, we return num_gpu_blocks=num_cpu_blocks and num_cpu_blocks=0. ..."""
+    num_cpu_blocks = int(self.cache_config.cpu_kvcache_space_bytes // cache_block_size)
+    num_gpu_blocks = num_cpu_blocks
+    num_cpu_blocks = 0
+    return num_gpu_blocks, num_cpu_blocks
 
-# initialize_cache()
-assert num_cpu_blocks == 0, f"{type(self)} does not support swappable cache"
+def initialize_cache(self, num_gpu_blocks, num_cpu_blocks) -> None:
+    """Initialize the KV cache. Currently, swappable CPU memory is not supported."""
+    assert num_cpu_blocks == 0, f"{type(self)} does not support swappable cache"
 ```
 
 Confirmed live on this container's own `/metrics` (`vllm:cache_config_info`): with
@@ -573,7 +577,9 @@ mature, optimized single-stream runtime like Ollama doesn't pay at this tiny sca
 show up clearly, comparing the concurrent run against the matched-set sequential baseline you just
 ran: vLLM-CPU's concurrent wall time (3.965s) is **3.13x** faster than the same 3 prompts run
 sequentially (12.393s) — a strongly sub-linear scaling curve, direct evidence of continuous
-batching overlapping work instead of serializing it. Ollama's concurrent time (1.301s) is only
+batching overlapping work instead of serializing it (run-to-run generation-length variance means
+the exact ratio is approximate — it's the direction of the effect, not the digit, that's the
+finding). Ollama's concurrent time (1.301s) is only
 **1.10x** faster than its own matched-set sequential baseline for the same 3 prompts (1.427s) —
 essentially flat, consistent with requests still being handled one at a time under the hood. That
 directional shape — not the absolute tokens/sec — is the teaching point; the
