@@ -1,0 +1,22 @@
+{
+  "checks": [
+    { "id": "platform-check-ready", "describe": "platform-check.sh confirms every layer (runtime, model serving, host wiring, supply-chain tooling) is present",
+      "run": "PATH=\"$HOME/.rd/bin:$PATH\" DOCKER_HOST=\"unix://$HOME/.rd/docker.sock\" labs/capstone/platform-check.sh",
+      "assert": { "contains": "PLATFORM READY" } },
+    { "id": "chromadb-healthy", "describe": "shared ChromaDB answers the v2 heartbeat",
+      "run": "curl -s -o /dev/null -w '%{http_code}' http://localhost:${CAPSTONE_CHROMA_PORT:-8000}/api/v2/heartbeat",
+      "assert": { "matches": "^200$" } },
+    { "id": "genai-app-healthy", "describe": "Docs Assistant (Streamlit) exposed endpoint returns 200",
+      "run": "curl -s -o /dev/null -w '%{http_code}' http://localhost:${CAPSTONE_APP_PORT:-8501}/_stcore/health",
+      "assert": { "matches": "^200$" } },
+    { "id": "agent-grounded-answer", "describe": "the one-shot support agent grounds its answer in the exact runbook command",
+      "run": "PATH=\"$HOME/.rd/bin:$PATH\" docker compose -f labs/capstone/compose.yaml run --rm agent 'how do I restart the payments service?'",
+      "assert": { "contains": "kubectl rollout restart deploy/payments -n prod" } },
+    { "id": "crew-approves-incident", "describe": "the one-shot incident crew approves a runbook-backed incident end-to-end",
+      "run": "PATH=\"$HOME/.rd/bin:$PATH\" docker compose -f labs/capstone/compose.yaml run --rm crew 'P1: checkout 503'",
+      "assert": { "contains": "OUTCOME: APPROVED" } },
+    { "id": "compose-teardown-with-volumes", "describe": "compose down -v removes containers, network, and volumes cleanly",
+      "run": "PATH=\"$HOME/.rd/bin:$PATH\" docker compose -f labs/capstone/compose.yaml down -v",
+      "assert": { "exit": 0 } }
+  ]
+}

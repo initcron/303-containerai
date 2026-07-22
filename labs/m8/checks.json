@@ -1,0 +1,22 @@
+{
+  "checks": [
+    { "id": "syft-sbom-packages", "describe": "syft SBOM (spdx-json) of the local lab image lists packages",
+      "run": "DOCKER_HOST=\"unix://$HOME/.rd/docker.sock\" syft acme-support-agent:latest -o spdx-json",
+      "assert": { "contains": "\"packages\"" } },
+    { "id": "trivy-scan-gated-exit0", "describe": "trivy vuln scan of the local image runs with an explicit exit-code gate and exits 0",
+      "run": "DOCKER_HOST=\"unix://$HOME/.rd/docker.sock\" trivy image --scanners vuln --severity CRITICAL,HIGH,MEDIUM --exit-code 0 acme-support-agent:latest",
+      "assert": { "exit": 0 } },
+    { "id": "grype-second-opinion", "describe": "grype produces a second vulnerability-scan opinion on the local image",
+      "run": "DOCKER_HOST=\"unix://$HOME/.rd/docker.sock\" grype acme-support-agent:latest",
+      "assert": { "contains": "VULNERABILITY" } },
+    { "id": "cosign-present", "describe": "cosign CLI is installed and runs",
+      "run": "cosign version",
+      "assert": { "exit": 0 } },
+    { "id": "sandbox-network-isolated", "describe": "the sandbox proves egress is genuinely blocked for generated code (URLError: unreachable or DNS resolution fails under --network none)",
+      "run": "PATH=\"$HOME/.rd/bin:$PATH\" DOCKER_HOST=\"unix://$HOME/.rd/docker.sock\" labs/m8/sandbox.sh 'import urllib.request; urllib.request.urlopen(\"http://example.com\", timeout=3)'",
+      "assert": { "contains": "URLError" } },
+    { "id": "guardrail-eval-passes", "describe": "the M6 agent's guardrail mini-eval passes deterministically (no model, no ChromaDB)",
+      "run": "python3 labs/m8/guardrail-eval.py",
+      "assert": { "contains": "3/3 cases passed" } }
+  ]
+}

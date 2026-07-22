@@ -112,3 +112,54 @@ All four stages succeeded on the local `acme-incident-crew:latest` image with no
 
 `grep -nE '^:::(note|tip|info|warning|danger|caution) ' site/docs/capstone/index.md site/docs/m8-security/lab.md` → **0 matches** (all admonitions use bracket form)
 
+## checks.json validation 2026-07-22
+
+Authored `labs/capstone/checks.json` + `up.sh`/`down.sh` (m2/m3 pattern; teardown uses `down -v` since
+the capstone demo should leave no volumes behind). Checks combine `platform-check.sh`'s readiness gate
+with a live bring-up of every consolidated service and both one-shot runners.
+
+```
+$ ./labs/capstone/up.sh
+ ... Image capstone-genai-app Built
+ ... Container chromadb Healthy
+ ... Container genai-app Started
+ ... Image acme-support-agent:latest Built
+ ... Image acme-incident-crew:latest Built
+capstone ready: chromadb + genai-app healthy, agent + crew images built.
+
+$ node scripts/run-checks.mjs labs/capstone/checks.json
+✅ platform-check-ready — platform-check.sh confirms every layer (runtime, model serving, host wiring, supply-chain tooling) is present
+✅ chromadb-healthy — shared ChromaDB answers the v2 heartbeat
+✅ genai-app-healthy — Docs Assistant (Streamlit) exposed endpoint returns 200
+✅ agent-grounded-answer — the one-shot support agent grounds its answer in the exact runbook command
+✅ crew-approves-incident — the one-shot incident crew approves a runbook-backed incident end-to-end
+✅ compose-teardown-with-volumes — compose down -v removes containers, network, and volumes cleanly
+
+6/6 checks · score 6/6
+```
+
+Raw output backing the two application-level checks (fresh run on this validation pass):
+
+```
+$ docker compose run --rm agent 'how do I restart the payments service?'
+[agent] Aria ready — ingested 5 runbook chunks (collection 42d13825). Persona from SOUL.md + AGENTS.md + SKILL.md (3503 chars).
+USER: how do I restart the payments service?
+  [decision: RETRIEVE (top dist=216.8)]
+ARIA: Run `kubectl rollout restart deploy/payments -n prod`. ...
+
+$ docker compose run --rm crew 'P1: checkout 503'
+[TRIAGE]       AREA: checkout | SEV: critical | Checkout service unavailable.
+[INVESTIGATOR] ## Checkout 503 errors ...
+[FIXER]        kubectl scale deploy/web --replicas=5 -n prod
+[REVIEWER]     APPROVED: ...
+OUTCOME: APPROVED — ready for a human to apply
+```
+
+Post-teardown check: `docker ps -a` and `docker volume ls` confirmed no `chromadb`/`genai-app`/
+`agent`/`crew` containers or `capstone_chroma_data` volume remained.
+
+No lab drift found — `compose.yaml` and `platform-check.sh` matched the earlier consolidated-stack
+validation exactly.
+
+**Verdict:** ✅ capstone checks green (6/6).
+

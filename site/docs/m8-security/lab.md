@@ -293,8 +293,12 @@ Now prove the network isolation is real. Try to reach the internet from inside t
 ```
 Traceback (most recent call last):
   ...
-urllib.error.URLError: <urlopen error [Errno 101] Network is unreachable>
+urllib.error.URLError: <urlopen error [Errno -3] Temporary failure in name resolution>
 ```
+
+(The exact `URLError` reason varies by runtime — Rancher Desktop's `--network none` typically fails DNS
+resolution first; other runtimes may report `Network is unreachable`. Either way it is a `URLError`:
+the container never reaches the network.)
 
 The network egress is genuinely blocked — not firewalled, but unreachable at the container networking layer. Any model-generated code that attempts to exfiltrate data, call home, or access an external API fails immediately and loudly.
 

@@ -1,0 +1,19 @@
+{
+  "checks": [
+    { "id": "chromadb-heartbeat", "describe": "ChromaDB container answers the v2 heartbeat",
+      "run": "curl -s -o /dev/null -w '%{http_code}' http://localhost:${M7_CHROMA_PORT:-8000}/api/v2/heartbeat",
+      "assert": { "matches": "^200$" } },
+    { "id": "crew-approve-path", "describe": "runbook-backed incident (checkout 503) is APPROVED with the exact remediation command",
+      "run": "PATH=\"$HOME/.rd/bin:$PATH\" docker compose -f labs/m7/compose.yaml run --rm crew 'The checkout page is returning HTTP 503 errors for all users.'",
+      "assert": { "contains": "OUTCOME: APPROVED" } },
+    { "id": "crew-approve-command", "describe": "the Fixer quotes the exact runbook command for the approve path",
+      "run": "PATH=\"$HOME/.rd/bin:$PATH\" docker compose -f labs/m7/compose.yaml run --rm crew 'The checkout page is returning HTTP 503 errors for all users.'",
+      "assert": { "contains": "kubectl scale deploy/web --replicas=5 -n prod" } },
+    { "id": "crew-escalate-path", "describe": "the relevance gate REJECTS/escalates an incident with no matching runbook (Kafka)",
+      "run": "PATH=\"$HOME/.rd/bin:$PATH\" docker compose -f labs/m7/compose.yaml run --rm crew 'The Kafka event streaming cluster has stopped processing messages.'",
+      "assert": { "contains": "OUTCOME: REJECTED" } },
+    { "id": "compose-teardown", "describe": "compose down removes the m7 network cleanly (teardown-safe)",
+      "run": "PATH=\"$HOME/.rd/bin:$PATH\" docker compose -f labs/m7/compose.yaml down",
+      "assert": { "exit": 0 } }
+  ]
+}

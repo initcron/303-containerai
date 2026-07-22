@@ -112,8 +112,6 @@ Now append the application service below the chromadb block:
       - CHROMA_PORT=8000
       - LLM_MODEL=qwen2.5:1.5b
       - EMBEDDING_MODEL=nomic-embed-text
-    volumes:
-      - ./docs:/app/seed-docs:ro
     depends_on:
       - chromadb
     deploy:
@@ -128,7 +126,6 @@ Now append the application service below the chromadb block:
 - `OLLAMA_BASE_URL=http://host.docker.internal:11434` — this is the Apple-Silicon pattern. The container cannot reach `localhost:11434` (that is the container's own loopback); `host.docker.internal` resolves to the host machine, where Ollama is running natively with Metal acceleration.
 - `CHROMA_HOST=chromadb` — Docker's internal DNS resolves the service name. The app talks to ChromaDB over the Docker network, not via localhost.
 - `build: context: ./app` — the app is built from source rather than pulled from a registry. The `Dockerfile` in `./app/` produces a trimmed image: no `sentence-transformers`, no PyTorch, just the LangChain + ChromaDB + Streamlit stack.
-- `./docs:/app/seed-docs:ro` — mounts Acme's runbooks into the container read-only. You can ingest them directly from the UI.
 
 Finally, add the volumes stanza at the end of the file:
 

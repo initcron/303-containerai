@@ -1,0 +1,16 @@
+{
+  "checks": [
+    { "id": "chromadb-heartbeat", "describe": "ChromaDB container answers the v2 heartbeat",
+      "run": "curl -s -o /dev/null -w '%{http_code}' http://localhost:${M5_CHROMA_PORT:-8000}/api/v2/heartbeat",
+      "assert": { "matches": "^200$" } },
+    { "id": "streamlit-health", "describe": "genai-app Streamlit health endpoint returns 200",
+      "run": "curl -s -o /dev/null -w '%{http_code}' http://localhost:${M5_APP_PORT:-8501}/_stcore/health",
+      "assert": { "matches": "^200$" } },
+    { "id": "app-log-streamlit-started", "describe": "genai-app log shows Streamlit came up",
+      "run": "PATH=\"$HOME/.rd/bin:$PATH\" docker logs genai-app",
+      "assert": { "contains": "You can now view your Streamlit app" } },
+    { "id": "rag-roundtrip-grounded-answer", "describe": "scripted ingest->embed->retrieve->generate round-trip returns the exact runbook command",
+      "run": "python3 labs/m5/rag_roundtrip.py",
+      "assert": { "contains": "kubectl rollout restart deploy/payments -n prod" } }
+  ]
+}
