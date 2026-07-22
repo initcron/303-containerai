@@ -42,15 +42,14 @@ machine-local.
 on `origin` (23ddfc8) before QA had completed — QA finding F7 was still open at push time. F7 was
 fixed and fast-followed with a corrective commit; see `.superpowers/sdd/progress.md` for the
 process note on what triggered the early push and the guard added to prevent recurrence.
-M5 RAG-params deep dive: draft committed, pre-validation — page + `deep-dive.checks.json` written,
-review findings B-1..B-8 fixed (container-boundary `docker exec -i`, `docker cp` corpus staging,
-embedded-question script + `tee`'d host artifact, Mermaid overlap label, §1 sections-per-chunk
-framing, splitter separator phrasing, temperature=0-vs-0.7 note); smoke-tested (`up.sh` +
-one-variant §7 run + teardown + `down.sh`); T2 (full live validation + fold real output) not yet run.
-**NEXT:** M5 (v1.4.0) then M7 (v1.5.0) deep-dive plans written and ready to execute, cloned from the
-M3B plan structure with content maps from `planning/specs/2026-07-22-depth-retrofit-design.md` §Phase 2:
-- `planning/plans/2026-07-22-m5-deep-dive.md` (RAG params — chunk size/overlap, top-k, embedding
-  choice, context budget; re-ingest experiment; deck `05-deepdive.html`; ships as v1.4.0)
+M5 RAG-params deep dive (`planning/plans/2026-07-22-m5-deep-dive.md`) is **SHIPPED-pending as v1.4.0**
+(2026-07-22, release-prep commit only — no push/tag yet, controller ships after final review) — page +
+separate `deep-dive.checks.json` + new self-contained `05-deepdive.html` deck (21 slides, existing
+decks untouched) + state-tolerant collection re-seed guard + lab "Go deeper" pointer. Gates green:
+`site` build, `run-checks.mjs deep-dive.checks.json` (8/8), deck-diff-since-v1.3.0 (only
+`05-deepdive.html` touched), `scripts/test-course.sh m5` PASS. Learner-QA all-PASS, zero real findings.
+**NEXT:** M7 (v1.5.0) deep-dive plan written and ready to execute, cloned from the M3B plan structure
+with content map from `planning/specs/2026-07-22-depth-retrofit-design.md` §Phase 2:
 - `planning/plans/2026-07-22-m7-deep-dive.md` (agent knobs — temperature, max iterations, tool-loop
   control, delegation, guardrails; crew knob-variant experiment; deck `07-deepdive.html`; ships as
   v1.5.0)

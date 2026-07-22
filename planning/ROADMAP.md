@@ -53,5 +53,5 @@ Legend: ✅ done · 🔄 in progress · ⬜ pending
 | --- | --- |
 | M3B · Fine-Tuning Deep Dive — page + `deep-dive.checks.json` + `03b-deepdive.html` deck (19 slides) + lab pointer, learner-QA all-PASS | ✅ (v1.2.0) |
 | M3 · vLLM Internals Deep Dive — page + `deep-dive.checks.json` + `03-deepdive.html` deck (18 slides) + lab pointer, learner-QA PASS (F7 fixed) | ✅ (v1.3.0) |
-| M5 · RAG Parameters Deep Dive — plan written (`planning/plans/2026-07-22-m5-deep-dive.md`) | ⬜ |
+| M5 · RAG Parameters Deep Dive — page + `deep-dive.checks.json` + `05-deepdive.html` deck (21 slides) + state-tolerant re-seed guard + lab pointer, learner-QA all-PASS (zero findings) | ✅ (v1.4.0) |
 | M7 · Agent Knobs Deep Dive — plan written (`planning/plans/2026-07-22-m7-deep-dive.md`) | ⬜ |

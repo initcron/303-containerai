@@ -5,6 +5,17 @@ All notable changes to this course build are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] - 2026-07-22
+
+### Added
+
+- M5 Deep Dive (Part 2): RAG parameters under the hood (chunk size/overlap trade-offs, top-k vs
+  noise, L2-vs-cosine with measured norm evidence, context-budget arithmetic incl. proven
+  front-truncation mechanism, retrieval-miss vs generation-miss diagnosis, direct-ChromaDB
+  observation, live 3-variant chunking experiment), a state-tolerant collection re-seed guard,
+  new self-contained 21-slide deck — existing decks unchanged, `deep-dive.checks.json` stage,
+  lab "Go deeper" pointer.
+
 ## [1.3.0] - 2026-07-22
 
 ### Added
