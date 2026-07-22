@@ -4,6 +4,8 @@ title: 'Deep Dive: Fine-Tuning Parameters Under the Hood'
 sidebar_label: 'Deep Dive (Part 2)'
 ---
 
+import Slides from '@site/src/components/Slides';
+
 # Deep Dive: Fine-Tuning Parameters Under the Hood
 
 The lab ran `mlx_lm.lora --iters 50` and you watched loss drop from a training run whose flags
@@ -13,6 +15,8 @@ a loss curve instead of just watching it fall, and where a data-format mismatch 
 run before training even starts. Then you run the same lab's training loop three times with
 different knobs and put the results side by side — the comparison a platform engineer actually
 needs before recommending a rank/learning-rate pair for a real corporate-docs adapter.
+
+<Slides src="decks/03b-deepdive.html" title="Module 3B Deep Dive — Fine-Tuning Parameters" />
 
 :::info[Where this picks up]
 
