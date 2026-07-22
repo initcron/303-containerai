@@ -38,8 +38,24 @@ curl -sf http://localhost:${VLLM_PORT:-8009}/v1/models >/dev/null && echo "vllm:
 **Expected output**
 
 ```text
-<expected output — folded in during live lab validation>
+ollama: up
+vllm: up
 ```
+
+:::note[If port 8009 refuses connections on your machine]
+
+If `curl` on `:8009` resets the connection while the container itself shows healthy
+(`docker ps` / `docker compose ps` says `Up`), you likely have a stale local port forward left
+over from something else on that machine — not a lab defect. Point every command on this page
+at a different host port instead, by exporting `VLLM_PORT` before running anything:
+
+```bash
+export VLLM_PORT=8010
+```
+
+Every command on this page reads `${VLLM_PORT:-8009}`, so this one export retargets the whole
+lab in one shot. This is a machine-local workaround, not a course default — the lab's own
+`compose.yaml` still maps `8009` unless you override it.
 
 :::
 
@@ -83,7 +99,7 @@ graph TB
         RB["Request B\ngenerating tokens"]
     end
     subgraph TABLE["Block tables (per-sequence)"]
-        TA["A: block 2, block 5"]
+        TA["A: block 2"]
         TB["B: block 1, block 4"]
     end
     subgraph POOL["Physical KV cache blocks (fixed size)"]
@@ -91,17 +107,14 @@ graph TB
         P2["block 2 — A"]
         P3["block 3 — free"]
         P4["block 4 — B"]
-        P5["block 5 — A"]
-        P6["block 6 — free"]
     end
     RA --> TA --> P2
-    RA --> TA --> P5
     RB --> TB --> P1
     RB --> TB --> P4
 ```
 
 *Two requests' logical token sequences map through per-sequence block tables to scattered
-physical blocks — no request needs a contiguous span, and free blocks (3, 6) are immediately
+physical blocks — no request needs a contiguous span, and the free block (3) is immediately
 available to a third request or to A/B growing further.*
 
 ---
@@ -148,25 +161,50 @@ paging/batching story above.
 **`--dtype float32`** — bf16 has no CPU compute kernel on this arm64 path (that's the
 `rms_norm_impl not implemented for 'BFloat16'` crash from the lab's Troubleshooting). But there's
 a memory-side cost worth naming here: float32 KV cache entries are **twice the size** of bf16
-ones for the same token count. That means the same `VLLM_CPU_KVCACHE_SPACE` / `--swap-space`
-budget holds half as many blocks on this CPU path as it would on a GPU running bf16 — one reason
-the lab keeps `--max-model-len` and `--max-num-seqs` deliberately small.
+ones for the same token count. That means the same `VLLM_CPU_KVCACHE_SPACE` budget holds half as
+many blocks on this CPU path as it would on a GPU running bf16 — one reason the lab keeps
+`--max-model-len` and `--max-num-seqs` deliberately small. (Why not "`VLLM_CPU_KVCACHE_SPACE` +
+`--swap-space`" — see the next flag; on this backend swap-space isn't a second budget line.)
 
 **`--swap-space`** — on a GPU deployment, `swap-space` is CPU RAM used as an overflow tier when
 GPU VRAM's KV cache blocks run out (a sequence's blocks can be swapped to host RAM and back,
-rather than aborting the request). On this CPU-only path there's no GPU tier to overflow *from*
-— `swap-space` still reserves the same host RAM, but it's reserving from the same pool everything
-else draws from, not a separate overflow behind a faster tier. That's why the lab pins it to `1`
-(GiB): the default `4` GiB assumes a GPU box with RAM to spare as a swap tier, and on a
-4 CPU / 6 GB VM that default alone can exceed total container memory (the
-`Too large swap space` failure documented in the lab).
+rather than aborting the request). **On this CPU build, that overflow tier does not exist at
+all — verified against this image's own source, not inferred.** `vllm/worker/cpu_worker.py`
+(`0.9.1-oe2403lts`, the exact image this lab builds) computes block counts from
+`cpu_kvcache_space_bytes` alone, then explicitly zeroes the swap side:
+
+```python
+# determine_num_available_blocks()
+num_cpu_blocks = int(self.cache_config.cpu_kvcache_space_bytes // cache_block_size)
+num_gpu_blocks = num_cpu_blocks   # reuse the GPU-cache code path
+num_cpu_blocks = 0                # CPU worker never gets a second, swappable pool
+
+# initialize_cache()
+assert num_cpu_blocks == 0, f"{type(self)} does not support swappable cache"
+```
+
+Confirmed live on this container's own `/metrics` (`vllm:cache_config_info`): with
+`VLLM_CPU_KVCACHE_SPACE=1` (GiB) and `--swap-space 1` (GiB) both set, the running engine reports
+`num_gpu_blocks="1456"` and **`num_cpu_blocks="0"`** — every block came from
+`VLLM_CPU_KVCACHE_SPACE`; the swap-space GiB contributed zero blocks. `--swap-space` is still
+accepted and still shows up in the config (`swap_space="1.0"`), but on this CPU backend it's
+dead weight, not a second budget line — the flag exists because the CPU worker reuses the GPU
+worker's scheduler code path, and that path expects the argument even when it can't use it. The
+lab still pins it to `1` (down from the `4` GiB default) because vLLM validates and reserves it
+at startup regardless of whether it's ever used — the default `4` GiB is still enough to trip a
+`Too large swap space` failure against this 5 GB container cap, even though those 4 GiB never
+become cache blocks either way.
 
 **`MAX_MODEL_LEN`** — this is a direct KV-cache budget line, not just a context-window UX limit.
 Every block reserved by `--max-model-len` × `--max-num-seqs` (worst case, all sequences at max
-length) has to fit inside `VLLM_CPU_KVCACHE_SPACE` + `--swap-space`. The lab's default (`1024`)
-was chosen by working that arithmetic backward from the container's 5 GB cap, not picked for
-context-length UX — the lab-tests evidence recorded a 360M-model / longer-context combination
-crash-looping for exactly this reason before the defaults were tuned down.
+length) has to fit inside `VLLM_CPU_KVCACHE_SPACE` alone on this backend — confirmed above,
+`--swap-space` doesn't add capacity here. The lab's default (`1024`) was chosen by working that
+arithmetic backward from the container's 5 GB cap, not picked for context-length UX — the
+lab-tests evidence recorded a 360M-model / longer-context combination crash-looping for exactly
+this reason before the defaults were tuned down. (This run's own startup log confirms the
+arithmetic: `VLLM_CPU_KVCACHE_SPACE=1` GiB produced exactly 1456 blocks of 16 tokens each —
+`# cpu blocks: 1456` in the engine log — giving "Maximum concurrency for 1024 tokens per
+request: 22.75x", i.e. roughly 22 max-length sequences before the cache is full.)
 
 **`MAX_NUM_SEQS`** — this is the continuous-batching concurrency cap from §2, made concrete: it's
 the maximum number of sequences the scheduler will admit into the running batch at once,
@@ -177,15 +215,17 @@ admitted and then immediately queue on KV cache space instead of on batch-slot a
 
 ```mermaid
 graph LR
-    DT["--dtype float32"] -->|"2x KV bytes/token vs bf16"| BUDGET
-    SW["--swap-space"] -->|"overflow tier (GPU) / same pool (CPU)"| BUDGET["KV cache memory budget"]
+    DT["--dtype float32"] -->|"2x KV bytes/token vs bf16"| BUDGET["KV cache memory budget"]
     MML["--max-model-len"] -->|"max blocks per sequence"| BUDGET
     MNS["--max-num-seqs"] -->|"max concurrent sequences"| BUDGET
-    BUDGET -->|"must fit in"| CAP["VLLM_CPU_KVCACHE_SPACE + swap-space"]
+    BUDGET -->|"must fit in"| CAP["VLLM_CPU_KVCACHE_SPACE only"]
+    SW["--swap-space"] -.->|"accepted, but 0 blocks on CPU"| CAP
 ```
 
-*All four flags feed the same arithmetic: sequences × per-sequence blocks must fit the reserved
-KV cache budget. Every flag in the lab's `.env` is a lever on one side of that inequality.*
+*Three flags feed the real arithmetic: sequences × per-sequence blocks must fit inside
+`VLLM_CPU_KVCACHE_SPACE`. `--swap-space` is dashed here on purpose — verified against this
+image's own `cpu_worker.py` and its live `/metrics`, it's accepted and validated at startup but
+contributes zero blocks on this CPU backend, unlike its overflow-tier role on GPU.*
 
 ---
 
@@ -202,8 +242,26 @@ curl -s http://localhost:${VLLM_PORT:-8009}/metrics | grep -E 'vllm:num_requests
 **Expected output**
 
 ```text
-<expected output — folded in during live lab validation>
+# HELP vllm:num_requests_running Number of requests currently running on GPU.
+# TYPE vllm:num_requests_running gauge
+vllm:num_requests_running{model_name="HuggingFaceTB/SmolLM2-135M-Instruct"} 0.0
+# HELP vllm:num_requests_waiting Number of requests waiting to be processed.
+# TYPE vllm:num_requests_waiting gauge
+vllm:num_requests_waiting{model_name="HuggingFaceTB/SmolLM2-135M-Instruct"} 0.0
+# HELP vllm:gpu_cache_usage_perc GPU KV-cache usage. 1 means 100 percent usage.
+# TYPE vllm:gpu_cache_usage_perc gauge
+vllm:gpu_cache_usage_perc{model_name="HuggingFaceTB/SmolLM2-135M-Instruct"} 0.0
 ```
+
+**Names confirmed on the exact image this lab builds** (vLLM `0.9.1-oe2403lts`, CPU): all three
+gauges exist under exactly the names the lab-derived commands above expect — this version and
+build did not rename or drop any of them. The reading above is idle (0.0 across the board)
+because it was captured between requests; fire the §6 concurrent burst and re-curl mid-flight to
+see `num_requests_running` and `gpu_cache_usage_perc` move off zero — at this laptop's request
+volumes (2-3 concurrent, sub-second scheduling iterations) a single `/metrics` snapshot has a
+real chance of landing between bursts, which is itself informative: these gauges are instant
+snapshots of scheduler state, not counters, so "0 right now" only means "nothing in flight this
+instant," not "nothing happened."
 
 Three gauges matter most for the story above:
 
@@ -215,15 +273,18 @@ Three gauges matter most for the story above:
   sustained load is your signal to raise `MAX_NUM_SEQS` or the KV cache budget from §3 — not to
   add more replicas blindly.
 - **`vllm:gpu_cache_usage_perc`** (named for the GPU path historically; on this CPU build it
-  reflects the CPU KV cache pool) — how full the paged block pool is. Near 100% under load is
-  expected and healthy — that's PagedAttention doing its job of using nearly all reserved memory
-  instead of leaving slabs empty. Consistently near 0% under real traffic usually means your
-  budget is oversized for the load you're actually serving.
+  reflects the CPU KV cache pool — confirmed by `cache_config_info` on this same `/metrics`
+  endpoint, which reports `num_gpu_blocks="1456"` for what is, physically, host RAM) — how full
+  the paged block pool is. Near 100% under load is expected and healthy — that's PagedAttention
+  doing its job of using nearly all reserved memory instead of leaving slabs empty. Consistently
+  near 0% under real traffic usually means your budget is oversized for the load you're actually
+  serving.
 
 Reading these three together tells you *which* of §3's flags to move: waiting-queue pressure with
 low cache usage means raise `MAX_NUM_SEQS`; waiting-queue pressure with cache usage pinned at
-100% means raise the KV cache budget (`VLLM_CPU_KVCACHE_SPACE` / `--swap-space`) or lower
-`--max-model-len` per sequence — not the same fix for two different symptoms.
+100% means raise `VLLM_CPU_KVCACHE_SPACE` (not `--swap-space` — §3 confirmed that's a no-op on
+this backend) or lower `--max-model-len` per sequence — not the same fix for two different
+symptoms.
 
 ---
 
@@ -268,7 +329,8 @@ docker stats vllm-smollm2 --no-stream
 **Expected output**
 
 ```text
-<expected output — folded in during live lab validation>
+CONTAINER ID   NAME           CPU %     MEM USAGE / LIMIT   MEM %     NET I/O          BLOCK I/O       PIDS
+1424f1e596f1   vllm-smollm2   2.69%     2.361GiB / 5GiB     47.21%    274MB / 4.17MB   121MB / 547MB   63
 ```
 
 Set up a small fixed prompt set — mixed short/long — and a results file:
@@ -298,7 +360,14 @@ done < prompts.txt)
 **Expected output**
 
 ```text
-<expected output — folded in during live lab validation>
+200 8.462310s
+200 1.896633s
+200 5.088494s
+200 4.156934s
+
+real	0m19.673s
+user	0m0.017s
+sys	0m0.027s
 ```
 
 Now the same four prompts against native Ollama, same shape, same `max_tokens`:
@@ -315,14 +384,27 @@ done < prompts.txt)
 **Expected output**
 
 ```text
-<expected output — folded in during live lab validation>
+200 1.980044s
+200 0.381983s
+200 0.676789s
+200 0.670878s
+
+real	0m3.765s
+user	0m0.014s
+sys	0m0.018s
 ```
+
+Ollama's sequential run is already visibly faster in absolute wall time here — a mature,
+optimized single-stream runtime beating an eager-mode float32 CPU vLLM path on a toy model is a
+real and expected result at this scale, not a validation failure. Keep reading: §6's whole point
+is the *shape* of the concurrent run below, not this absolute number.
 
 **Concurrent requests, two or three fired back to back.** This is the case §2 and §5 are actually
 about — this course's CPU/RAM budget rules out real load testing, so fire just 2-3 requests
 without waiting for each to finish, against vLLM-CPU first:
 
 ```bash
+time (
 for p in "Say OK." "In one sentence, what is a container?" "Name two container runtimes."; do
   curl -s http://localhost:${VLLM_PORT:-8009}/v1/chat/completions \
     -H "Content-Type: application/json" \
@@ -330,17 +412,25 @@ for p in "Say OK." "In one sentence, what is a container?" "Name two container r
     -o /dev/null -w "%{http_code} %{time_total}s\n" &
 done
 wait
+)
 ```
 
 **Expected output**
 
 ```text
-<expected output — folded in during live lab validation>
+200 1.635600s
+200 3.647941s
+200 3.951341s
+
+real	0m3.965s
+user	0m0.009s
+sys	0m0.014s
 ```
 
 Then the same three fired concurrently at native Ollama:
 
 ```bash
+time (
 for p in "Say OK." "In one sentence, what is a container?" "Name two container runtimes."; do
   curl -s http://localhost:11434/v1/chat/completions \
     -H "Content-Type: application/json" \
@@ -348,40 +438,90 @@ for p in "Say OK." "In one sentence, what is a container?" "Name two container r
     -o /dev/null -w "%{http_code} %{time_total}s\n" &
 done
 wait
+)
 ```
 
 **Expected output**
 
 ```text
-<expected output — folded in during live lab validation>
+200 0.911742s
+200 1.116994s
+200 1.279921s
+
+real	0m1.301s
+user	0m0.011s
+sys	0m0.018s
 ```
 
-Fold the wall-clock numbers into a comparison table, and save it to the results file the checks
-verify:
+Fold the wall-clock numbers into a comparison table:
 
-```text
-| Engine | Mode | Wall time (4 seq. / 3 concurrent) | tokens/sec (approx) | Notes |
+| Engine | Mode | Wall time (4 seq. / 3 concurrent) | tokens/sec (approx, aggregate) | Notes |
 |---|---|---|---|---|
-| vLLM-CPU | Sequential | <folded in> | <folded in> | <folded in> |
-| vLLM-CPU | Concurrent (3) | <folded in> | <folded in> | <folded in> |
-| Ollama (native) | Sequential | <folded in> | <folded in> | <folded in> |
-| Ollama (native) | Concurrent (3) | <folded in> | <folded in> | <folded in> |
-```
+| vLLM-CPU | Sequential | 19.673s | ~8.4 tok/s | eager-mode float32 CPU path, real per-step overhead |
+| vLLM-CPU | Concurrent (3) | 3.965s | ~20.4 tok/s | same 3 prompts run sequentially took 12.393s — concurrent is **3.13x faster**, strongly sub-linear |
+| Ollama (native) | Sequential | 3.765s | ~33.2 tok/s | mature optimized single-stream runtime, wins on raw throughput here |
+| Ollama (native) | Concurrent (3) | 1.301s | ~32.3 tok/s | same 3 prompts sequentially took 1.427s — concurrent is only **1.10x faster**, close to linear |
+
+Save the same numbers to the results file the checks verify:
 
 ```bash
 cat > ~/vllm-deepdive-lab/comparison-results.txt << 'EOF'
-<expected output — folded in during live lab validation>
+vLLM-CPU vs native Ollama — same prompts, m3 deep-dive experiment
+Machine: arm64, Rancher Desktop VM 5 CPU / 8 GB, VLLM_PORT=8010 (machine-local — host 8009 had a stale forward)
+vLLM 0.9.1-oe2403lts (CPU build), model HuggingFaceTB/SmolLM2-135M-Instruct
+Ollama native, model qwen2.5:1.5b
+
+Sequential (4 prompts, one after another):
+  vLLM-CPU : 200 8.462310s / 200 1.896633s / 200 5.088494s / 200 4.156934s -> real 19.673s
+  Ollama   : 200 1.980044s / 200 0.381983s / 200 0.676789s / 200 0.670878s -> real 3.765s
+
+Concurrent (3 prompts, fired with & and waited):
+  vLLM-CPU : 200 1.635600s / 200 3.647941s / 200 3.951341s -> real 3.965s
+  Ollama   : 200 0.911742s / 200 1.116994s / 200 1.279921s -> real 1.301s
+
+Matched-set sequential (same 3 prompts as concurrent run, for fair scaling comparison):
+  vLLM-CPU : real 12.393s  (per-req 4.905935s / 1.896905s / 5.542839s)
+  Ollama   : real 1.427s   (per-req 0.287230s / 0.429941s / 0.670900s)
+
+Scaling factor (matched-set sequential -> concurrent, same 3 prompts):
+  vLLM-CPU : 12.393s / 3.965s = 3.13x   -- strongly sub-linear (batching overlap visible)
+  Ollama   : 1.427s / 1.301s  = 1.10x   -- near-linear (little/no overlap benefit at this scale)
+
+Approx tokens/sec (completion_tokens / wall time, aggregate):
+  vLLM-CPU sequential(4)  : 165 tok / 19.673s ~= 8.4 tok/s
+  vLLM-CPU concurrent(3)  : 81 tok / 3.965s   ~= 20.4 tok/s (aggregate)
+  Ollama sequential(4)    : 125 tok / 3.765s  ~= 33.2 tok/s
+  Ollama concurrent(3)    : 42 tok / 1.301s   ~= 32.3 tok/s
+
+Headline: Ollama is faster in absolute tokens/sec at this toy CPU scale (qwen2.5:1.5b via a mature
+optimized runtime vs SmolLM2-135M via vLLM eager-mode float32 CPU path with real per-step overhead).
+But the SHAPE differs exactly as PagedAttention/continuous-batching theory predicts: vLLM-CPUs
+concurrent wall time is ~3.1x better than linear scaling from its own sequential baseline, while
+Ollamas concurrent wall time is close to flat/linear versus its own sequential baseline. The
+mechanism is doing its job even though absolute throughput on a 135M toy model does not beat a
+mature single-stream runtime on this laptop.
 EOF
 ```
 
-At this N (≤ 8 requests, tiny models, one CPU) don't expect vLLM to visibly "win" on raw
-tokens/sec — a single-digit request count on a 135M-parameter model rarely saturates either
-engine's batching machinery enough to show the 3x GPU story from the lesson. What's worth reading
-in your own captured numbers instead: does vLLM-CPU's concurrent wall time grow **sub-linearly**
-relative to its sequential wall time (a hint of overlap/batching happening even at this scale),
-while Ollama's concurrent time grows closer to linear (each request effectively still waiting its
-turn)? That directional shape — not the absolute tokens/sec — is the teaching point; the 3x number
-from the lesson is real, but it needs GPU-scale concurrent load to show up, not this laptop.
+**Expected output**
+
+```text
+(no output — the heredoc writes the file silently)
+```
+
+At this N (≤ 8 requests, tiny models, one CPU), vLLM-CPU did **not** visibly "win" on raw
+tokens/sec against Ollama — and that's the honest result, not a validation failure: a
+135M-parameter model on an eager-mode float32 CPU path carries real per-step overhead that a
+mature, optimized single-stream runtime like Ollama doesn't pay at this tiny scale. What *did*
+show up clearly, in this run's own numbers: vLLM-CPU's concurrent wall time (3.965s) is **3.13x**
+faster than the same 3 prompts run sequentially (12.393s) — a strongly sub-linear scaling curve,
+direct evidence of continuous batching overlapping work instead of serializing it. Ollama's
+concurrent time (1.301s) is only **1.10x** faster than its own sequential baseline for the same 3
+prompts (1.427s) — essentially flat, consistent with requests still being handled one at a time
+under the hood. That directional shape — not the absolute tokens/sec — is the teaching point; the
+3x GPU story from the lesson is real, but it needs GPU-scale concurrent load and a production
+model to show up in the *absolute* numbers too. On this laptop, the shape is visible even though
+the scoreboard isn't reversed.
 
 ---
 
@@ -397,7 +537,14 @@ cd labs/m3 && bash down.sh
 **Expected output**
 
 ```text
-<expected output — folded in during live lab validation>
+ Container vllm-smollm2 Stopping
+ Container vllm-smollm2 Stopped
+ Container vllm-smollm2 Removing
+ Container vllm-smollm2 Removed
+ Network m3_default Removing
+ Volume m3_hf-cache Removing
+ Volume m3_hf-cache Removed
+ Network m3_default Removed
 ```
 
 The results file and prompt list in `~/vllm-deepdive-lab/` are cheap to keep or remove — they're
@@ -422,10 +569,11 @@ rm -rf ~/vllm-deepdive-lab
   **Use it when:** you're deciding whether to raise `MAX_NUM_SEQS` or raise the KV cache budget
   before scaling out replicas — read the gauges first; a growing waiting queue with cache usage
   already near 100% needs more memory, not a higher concurrency cap.
-- **`--dtype`, `--swap-space`, `--max-model-len`, and `--max-num-seqs` all feed one shared memory
-  inequality.** **Use it when:** a CPU or memory-constrained deployment crash-loops on startup —
-  work the arithmetic backward from the container's memory cap the way the lab's defaults were
-  tuned, instead of guessing at each flag independently.
+- **`--dtype`, `--max-model-len`, and `--max-num-seqs` all feed one shared memory inequality on
+  the CPU backend — `--swap-space` does not, verified against source and `/metrics` on this
+  image.** **Use it when:** a CPU or memory-constrained deployment crash-loops on startup — work
+  the arithmetic backward from `VLLM_CPU_KVCACHE_SPACE` and the container's memory cap, instead
+  of assuming `--swap-space` buys you extra headroom the way it would on a GPU deployment.
 - **PagedAttention/continuous-batching machinery only pays for itself under concurrent, competing
   requests.** **Use it when:** someone proposes vLLM for a single-user internal tool — ask
   whether requests actually overlap in time; if not, the simpler Ollama-class server is the right

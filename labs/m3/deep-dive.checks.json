@@ -17,6 +17,9 @@
       "assert": { "matches": "^[1-9]" } },
     { "id": "continuous-batching-section", "describe": "deep-dive page covers continuous batching mid-flight admission",
       "run": "grep -c 'continuous batching' site/docs/m3-vllm/deep-dive.md",
+      "assert": { "matches": "^[1-9]" } },
+    { "id": "swap-space-verdict-in-page", "describe": "deep-dive page states the verified swap-space-on-CPU verdict (num_cpu_blocks=0)",
+      "run": "grep -c 'num_cpu_blocks=\"0\"' site/docs/m3-vllm/deep-dive.md",
       "assert": { "matches": "^[1-9]" } }
   ]
 }
