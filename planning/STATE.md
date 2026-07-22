@@ -23,11 +23,11 @@ verified on the fork. Shipped as **v1.1.0** (see `CHANGELOG.md`).
 **SHIPPED:** v1.1.0 live on origin (2026-07-22), deploy green, fork staging in sync.
 
 **Phase 2 — deep dives (priority order M3B → M3 → M5 → M7).** M3B fine-tuning deep dive
-(`planning/plans/2026-07-22-m3b-deep-dive.md`) is **SHIPPED-pending as v1.2.0** — page + separate
+(`planning/plans/2026-07-22-m3b-deep-dive.md`) is **SHIPPED as v1.2.0** (2026-07-22, live deploy green) — page + separate
 `deep-dive.checks.json` + new self-contained `03b-deepdive.html` deck (19 slides, existing decks
 untouched) + lab "Go deeper" pointer, all four gates green (build, `test-course.sh m3b`,
 `run-checks.mjs deep-dive.checks.json`, deck-diff-since-v1.1.0), learner-QA all-PASS on staging.
-Pending only the controller's final review before tag/push (per this task's contract — no
+Final review done (one technical fix: mlx scale = alpha/r composite). Tagged + pushed; live pages 200. (No
 push/tag performed by the release-prep step itself).
 **NEXT:** M3 → M5 → M7 deep-dive plans written and ready to execute, cloned from the M3B plan
 structure with content maps from `planning/specs/2026-07-22-depth-retrofit-design.md` §Phase 2:
