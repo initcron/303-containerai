@@ -43,3 +43,25 @@ present and unchanged.
 ✅ M3B's checks correctly assert the module's optional/gated nature without requiring GPU hardware,
 an MLX-only Mac, or a pre-existing fine-tuning venv — they pass identically whether or not a learner
 has run Track A locally.
+
+## 2026-07-22 — post-review fix: check made honest; re-validated
+
+`lab-assets-exist`'s `describe` claimed "README + Track B config" and its `run` globbed
+`labs/m3b/*.yaml`, but no yaml file exists in `labs/m3b/` — the assertion (`contains: "README.md"`)
+actually only ever keyed off the `ls labs/m3b/README.md` half of the command, so the yaml glob and
+the "Track B config" claim in the describe text were dead/misleading. Fixed: `run` now asserts
+exactly what exists (`ls labs/m3b/README.md`), and `describe` now reads "labs/m3b/README.md
+reference asset exists" — no more claim about a Track B yaml config that isn't shipped.
+
+**Command:** `node scripts/run-checks.mjs labs/m3b/checks.json`
+
+**Real runner output:**
+```
+✅ lab-assets-exist — labs/m3b/README.md reference asset exists
+✅ version-variance-admonition — lab.md documents the mlx-lm flag-name version variance (machine-independent, GPU-agnostic)
+✅ mlx-lm-importable-if-venv-present — if ~/mlx-lora-env exists, mlx_lm imports inside it; else SKIP-OK (no GPU/venv assumed on this runner)
+
+3/3 checks · score 3/3
+```
+
+Stayed 3/3 green after the fix.

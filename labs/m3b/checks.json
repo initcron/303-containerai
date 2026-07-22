@@ -1,7 +1,7 @@
 {
   "checks": [
-    { "id": "lab-assets-exist", "describe": "labs/m3b/ reference assets exist (README + Track B config)",
-      "run": "ls labs/m3b/README.md labs/m3b/*.yaml 2>/dev/null; ls labs/m3b/",
+    { "id": "lab-assets-exist", "describe": "labs/m3b/README.md reference asset exists",
+      "run": "ls labs/m3b/README.md",
       "assert": { "contains": "README.md" } },
     { "id": "version-variance-admonition", "describe": "lab.md documents the mlx-lm flag-name version variance (machine-independent, GPU-agnostic)",
       "run": "grep -o 'Flag name varies by mlx-lm version' site/docs/m3b-finetuning/lab.md",

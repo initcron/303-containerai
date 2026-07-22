@@ -4,10 +4,10 @@
       "run": "kit version",
       "assert": { "exit": 0 } },
     { "id": "registry-up", "describe": "local registry:2 responds on the v2 API",
-      "run": "curl -s -o /dev/null -w '%{http_code}' http://localhost:5001/v2/",
+      "run": "curl -s -o /dev/null -w '%{http_code}' http://localhost:${M4_REGISTRY_PORT:-5001}/v2/",
       "assert": { "matches": "^200$" } },
     { "id": "pack-push-pull-roundtrip", "describe": "pack a synthetic modelkit, push to local registry, unpack on a clean dir — tag survives the round trip",
-      "run": "set -e; T=$(mktemp -d); trap 'rm -rf \"$T\"' EXIT; mkdir -p \"$T/src/model\"; echo 'dummy-weights' > \"$T/src/model/weights.bin\"; printf 'SYSTEM_PROMPT=test\\n' > \"$T/src/prompts.txt\"; cat > \"$T/src/Kitfile\" <<'EOF'\nmanifestVersion: \"1.0.0\"\npackage: {name: checks-smoke-model, version: \"1.0.0\", authors: [\"checks\"]}\nmodel: {name: checks-smoke-model, path: ./model/weights.bin}\ncode:  [{path: ./prompts.txt, description: \"config\"}]\nEOF\nkit pack \"$T/src\" -t localhost:5001/checks-smoke-model:1.0.0; kit push --plain-http localhost:5001/checks-smoke-model:1.0.0; kit remove localhost:5001/checks-smoke-model:1.0.0; kit unpack --plain-http localhost:5001/checks-smoke-model:1.0.0 -d \"$T/out\"; kit list --plain-http localhost:5001/checks-smoke-model",
+      "run": "set -e; RP=\"${M4_REGISTRY_PORT:-5001}\"; T=$(mktemp -d); trap 'rm -rf \"$T\"' EXIT; mkdir -p \"$T/src/model\"; echo 'dummy-weights' > \"$T/src/model/weights.bin\"; printf 'SYSTEM_PROMPT=test\\n' > \"$T/src/prompts.txt\"; cat > \"$T/src/Kitfile\" <<'EOF'\nmanifestVersion: \"1.0.0\"\npackage: {name: checks-smoke-model, version: \"1.0.0\", authors: [\"checks\"]}\nmodel: {name: checks-smoke-model, path: ./model/weights.bin}\ncode:  [{path: ./prompts.txt, description: \"config\"}]\nEOF\nkit pack \"$T/src\" -t localhost:${RP}/checks-smoke-model:1.0.0; kit push --plain-http localhost:${RP}/checks-smoke-model:1.0.0; kit remove localhost:${RP}/checks-smoke-model:1.0.0; kit unpack --plain-http localhost:${RP}/checks-smoke-model:1.0.0 -d \"$T/out\"; kit list --plain-http localhost:${RP}/checks-smoke-model",
       "assert": { "contains": "checks-smoke-model" } }
   ]
 }
