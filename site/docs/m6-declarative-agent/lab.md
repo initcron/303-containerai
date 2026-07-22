@@ -256,7 +256,7 @@ the release binary and put it on your PATH:
 curl -fsSL https://github.com/stacklok/toolhive/releases/download/v0.33.0/toolhive_0.33.0_darwin_arm64.tar.gz \
   | tar xz -C /tmp
 sudo mv /tmp/thv /usr/local/bin/thv    # or any dir already on your PATH
-thv version                            # -> ToolHive v0.33.0
+thv version                            # -> ToolHive v0.33.0 (plus an "update available" banner + build metadata — normal)
 ```
 
 For Linux or Intel macs, pick the matching asset (`_linux_amd64`, `_linux_arm64`, `_darwin_amd64`) from
@@ -278,15 +278,24 @@ thv run fetch
 
 ToolHive pulls `ghcr.io/stackloklabs/gofetch/server:1.0.5` and starts the server. On the first run it downloads the image; subsequent starts are fast.
 
+:::note[If you see a transport EOF error]
+
+The first `thv run` sometimes logs `ERROR failed to forward request: error="EOF"` followed by
+`WARN transport is no longer running, attempting automatic restart` — the proxy is restarting itself.
+This is normal; wait 15-20 seconds and re-check with `thv list` rather than the couple of seconds it
+usually takes.
+
+:::
+
 ### Inspect the isolation stack
 
 ```bash
 thv list
 ```
 
-**Expected output** (ToolHive may take a few seconds after `thv run` to show the server — if you see
-"No MCP servers found", wait ~5s and retry; the **PORT is random** on each run, and columns/image paths
-vary by ToolHive version):
+**Expected output** (ToolHive may take up to 15-20s after `thv run` to show the server while the proxy
+stabilizes — if you see "No MCP servers found", wait and retry rather than giving up after one check;
+the **PORT is random** on each run, and columns/image paths vary by ToolHive version):
 
 ```
 NAME   PACKAGE                                     STATUS   URL                          PORT    GROUP    CREATED
@@ -302,14 +311,19 @@ docker ps --format 'table {{.Names}}\t{{.Image}}\t{{.Status}}'
 You will see the server plus the isolation stack:
 
 ```
-NAMES           IMAGE                                   STATUS
-fetch           gofetch/server:1.0.5                    Up ...
-fetch-ingress   ghcr.io/stackloklabs/toolhive/...       Up ...
-fetch-egress    ghcr.io/stackloklabs/toolhive/...       Up ...
-fetch-dns       dnsmasq                                 Up ...
+NAMES           IMAGE                                       STATUS
+fetch           gofetch/server:1.0.5                        Up ...
+fetch-ingress   ghcr.io/stacklok/toolhive/egress-proxy:...  Up ...
+fetch-egress    ghcr.io/stacklok/toolhive/egress-proxy:...  Up ...
+fetch-dns       dnsmasq                                      Up ...
 ```
 
-The `ingress` and `egress` containers are network proxies; `dns` provides per-server DNS resolution. The `fetch` server can reach the public internet through the egress proxy but is isolated from every other container. No credentials are stored on your host — the agent's `AGENTS.md` points at `http://127.0.0.1:34267/mcp`.
+Note the org is `stacklok` (not `stackloklabs`), and `fetch-ingress`/`fetch-egress` run the **same**
+`egress-proxy` image — there is no separate ingress-proxy image; ToolHive reuses the one proxy image
+for both directions. The `ingress` and `egress` containers are network proxies; `dns` provides
+per-server DNS resolution. The `fetch` server can reach the public internet through the egress proxy
+but is isolated from every other container. No credentials are stored on your host — the agent's
+`AGENTS.md` points at `http://127.0.0.1:34267/mcp`.
 
 ### How the agent uses the ToolHive endpoint
 
@@ -422,7 +436,7 @@ Or set `OLLAMA_HOST=0.0.0.0` in your Ollama launchd/systemd configuration and re
 **Fix:** Set `DOCKER_HOST` to point at your runtime socket before running `thv`:
 
 ```bash
-export DOCKER_HOST=unix://$HOME/.rd/rancher-desktop/run/docker.sock   # Rancher Desktop
+export DOCKER_HOST=unix://$HOME/.rd/docker.sock   # Rancher Desktop
 thv run fetch
 ```
 

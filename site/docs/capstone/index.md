@@ -127,19 +127,34 @@ See the [M5 lab](../m5-naive-rag/lab) for the step-by-step compose walkthrough.
 With ChromaDB already running, run the M6 agent as a one-shot against the same shared vector store. Stay in `labs/capstone/`:
 
 ```bash
-docker compose run --rm agent "payments pod keeps restarting, what do I do?"
+docker compose run --rm agent "How do I restart the payments service?"
 ```
 
 Expected output (abbreviated):
 
 ```
 [agent] Aria ready — ingested 5 runbook chunks. Persona from SOUL.md + AGENTS.md + SKILL.md.
-USER: payments pod keeps restarting, what do I do?
-  [decision: RETRIEVE (top dist=162.x)]
-ARIA: Run `kubectl rollout restart deploy/payments -n prod`. ...
+USER: How do I restart the payments service?
+  [decision: RETRIEVE (top dist=216.8)]
+ARIA: Run `kubectl rollout restart deploy/payments -n prod`. The payments service depends on the
+      Postgres primary in the `prod` namespace.
 ```
 
-Aria — the declarative agent — reads the question, decides whether it needs to retrieve from ChromaDB at all, and returns a grounded, guardrailed answer. This is agentic RAG: the agent routes first, then acts. See the [M6 lab](../m6-declarative-agent/lab).
+Aria — the declarative agent — reads the question, decides whether it needs to retrieve from ChromaDB at all, and returns a grounded, guardrailed answer. This is agentic RAG: the agent routes first, then acts.
+
+:::note[Phrasing matters for a small model's routing]
+
+`qwen2.5:1.5b`'s routing step is a single yes/no judgment call, and vaguer phrasing (e.g. "payments pod
+keeps restarting, what do I do?") can miss and answer directly instead of retrieving — the model
+hallucinates a plausible-looking command instead of the real runbook answer. Ask the same way M6's own
+lab does — a direct "how do I restart X" question that mirrors the runbook's own language — and the
+routing decision is reliable. If you ever see `ANSWER DIRECTLY` where you expected `RETRIEVE`, check the
+`[decision: ...]` marker in the output before trusting the answer; that marker is exactly how you catch
+an ungrounded response.
+
+:::
+
+See the [M6 lab](../m6-declarative-agent/lab).
 
 ### Step 4 — Fire the Incident Crew (M7)
 
@@ -154,7 +169,7 @@ Expected output (abbreviated):
 ```
 [crew] Acme Incident Crew: Triage -> Investigator -> Fixer -> Reviewer
 
-[TRIAGE]      AREA: payments | SEV: critical | ...
+[TRIAGE]      AREA: payments | SEV: 3 | ...   # numeric severity; exact scale/wording varies by run
 [INVESTIGATOR] kubectl rollout restart deploy/payments -n prod ...
 [FIXER]       kubectl rollout restart deploy/payments -n prod
 [REVIEWER]    APPROVED — ready for a human to apply
@@ -177,9 +192,10 @@ docker compose down
 ### Step 5 — Package the model (M4)
 
 ```bash
+export GITHUB_USER=your-github-username
 cd labs/m4
-kit pack . -t ghcr.io/<your-github-user>/support-model:v1.0
-kit push  ghcr.io/<your-github-user>/support-model:v1.0
+kit pack . -t ghcr.io/${GITHUB_USER}/support-model:v1.0
+kit push  ghcr.io/${GITHUB_USER}/support-model:v1.0
 ```
 
 The model weights, system prompt, and quantization config are sealed into a single OCI artifact — a ModelKit. Any CI job or serving node pulls exactly that version with one command. No shared drives, no Slack links, no "also grab the prompt file from the other folder." See the [M4 lab](../m4-packaging/lab).
@@ -213,10 +229,10 @@ Done. SBOM + scanned + signed acme-incident-crew:latest (signed ref: localhost:5
 To push to your own GHCR namespace and sign the remote ref (requires `docker login ghcr.io` and a classic PAT with `write:packages`):
 
 ```bash
-docker tag acme-incident-crew:latest ghcr.io/<your-github-user>/incident-crew:v1.0
-docker push ghcr.io/<your-github-user>/incident-crew:v1.0
+docker tag acme-incident-crew:latest ghcr.io/${GITHUB_USER}/incident-crew:v1.0
+docker push ghcr.io/${GITHUB_USER}/incident-crew:v1.0
 COSIGN_PASSWORD="" cosign sign --yes --key labs/m8/cosign.key \
-  ghcr.io/<your-github-user>/incident-crew:v1.0
+  ghcr.io/${GITHUB_USER}/incident-crew:v1.0
 ```
 
 See the [M8 lab](../m8-security/lab) for the full supply-chain walkthrough.
@@ -224,6 +240,20 @@ See the [M8 lab](../m8-security/lab) for the full supply-chain walkthrough.
 ### Step 7 — Ship via CI (M8)
 
 Push to `main` and the GitHub Actions pipeline in `labs/m8/security-pipeline.yml` runs automatically: build → scan → sign → push to GHCR. A failed scan blocks the push. A passing build produces a signed, attested image that any production host can pull and verify without trusting the sender's word.
+
+:::tip[Full teardown]
+
+The mid-lab `docker compose down` (after Step 4) only stops the compose-managed services
+(`chromadb`, `genai-app`, plus any one-shot `agent`/`crew` runs). Step 6's `secure-image.sh` starts its
+own `local-registry` container as a side effect, and Step 2 created a persistent `capstone_chroma_data`
+volume. To leave a fully clean machine, also run:
+
+```bash
+docker stop local-registry && docker rm local-registry
+cd labs/capstone && docker compose down -v   # -v also removes capstone_chroma_data
+```
+
+:::
 
 ---
 

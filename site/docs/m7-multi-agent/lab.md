@@ -119,6 +119,14 @@ docker compose up -d chromadb
  ✔ Container chromadb  Started
 ```
 
+:::note[Re-running this lab reuses the old data]
+
+`docker compose up` silently attaches to an existing `m7_chroma_data` volume if one is already present
+from a previous run — you will not get a fresh ingest. For a clean slate, run `docker compose down -v`
+first, then bring it back up.
+
+:::
+
 ---
 
 ## Step 4 — Run the approve path (503 incident)
@@ -149,6 +157,10 @@ INCIDENT: The checkout page is returning HTTP 503 errors for all users.
 ======================================================================
 OUTCOME: APPROVED — ready for a human to apply
 ```
+
+On a small model like `qwen2.5:1.5b`, exact wording varies run to run — the `AREA:`/`SEV:` labels may
+drop or the retrieved runbook excerpt may run longer than shown above. Judge the run by the stage
+markers and the final `OUTCOME:` line, not the exact prose.
 
 Walk through what happened:
 
@@ -190,6 +202,9 @@ INCIDENT: The Kafka event streaming cluster has stopped processing messages.
 OUTCOME: REJECTED — escalate
 ```
 
+As with Step 4, the exact labels and wording (`AREA:`/`SEV:`, the summary sentence) can vary or drop
+on a small model — judge by the stage markers and final `OUTCOME:` line.
+
 The relevance gate is why this works correctly. ChromaDB's nearest-neighbour retrieval returned *some* chunk — it always does. The gate asked the model: *does this passage address a Kafka message-processing failure?* The answer was NO. The runbook variable was set to empty. The Fixer declined. The Reviewer rejected.
 
 Without the gate, the crew would have proposed the payments runbook for a Kafka outage — a real failure mode caught during validation. The Reviewer alone is not sufficient: it checks the Fixer's command against the runbook, but if the Fixer received a wrong runbook and quoted from it faithfully, the Reviewer would have seen a command that matched the (wrong) runbook and approved it. The gate catches the mismatch before the Fixer ever acts.
@@ -229,7 +244,7 @@ docker compose run --rm crew "The payments service is throwing connection errors
 
 The declarative crew above is the default: no dependencies, works on a 1.5B model, fits any laptop. When you need role-based orchestration, dynamic task delegation, or the structure that a framework provides, **CrewAI** is the go-to choice.
 
-The reference repository `compose-for-agents/crew-ai` (at `reference-repos/compose-for-agents/crew-ai/`) shows a CrewAI crew defined in `agents.yaml` and `tasks.yaml`. To run it anywhere — not just on Docker Desktop with Docker Model Runner — two ports are needed.
+The reference repository [`gouravshah/compose-for-agents`](https://github.com/gouravshah/compose-for-agents) — specifically its `crew-ai/` directory — shows a CrewAI crew defined in `agents.yaml` and `tasks.yaml`. This is optional external reading; nothing in this lab requires cloning it. To run it anywhere — not just on Docker Desktop with Docker Model Runner — two ports are needed.
 
 ### Port 1: Docker Model Runner → native Ollama
 

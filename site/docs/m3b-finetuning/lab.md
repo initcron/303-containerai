@@ -387,3 +387,21 @@ Reduce `micro_batch_size` to 1 and `sequence_len` to 256. If still failing, swit
 Both tracks download from Hugging Face on first run. On a slow connection, set `HF_HUB_OFFLINE=1` after the first download and point at your local cache. Models cache at `~/.cache/huggingface/hub/` on both macOS and Linux.
 
 :::
+
+:::warning[Step A-3 download stalls at "Fetching files 0%"]
+
+**Symptom:** `mlx_lm.lora`'s first-run model download hangs indefinitely at `Fetching N files: 0%` —
+the process stays alive but makes no progress. This is a stall in `huggingface_hub`'s default **xet**
+chunked-transfer backend on some networks, not a crash — there's no error or timeout to tell you
+something is wrong.
+
+**Fix:** interrupt (Ctrl-C) and pre-fetch the model with xet disabled, then re-run Step A-3 — it will
+use the cache:
+
+```bash
+HF_HUB_DISABLE_XET=1 hf download Qwen/Qwen2.5-0.5B-Instruct
+```
+
+Once cached, the page's Step A-3 command runs as written with no further changes.
+
+:::

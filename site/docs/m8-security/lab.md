@@ -37,11 +37,32 @@ syft 1.x.x
 
 Trivy version 0.72.x
 ...
-grype 0.x.x
+Application: grype
+Version:     0.x.x
 ...
+
 cosign: A tool for Container Signing, Verification and Storage in an OCI registry.
 Version: 3.x.x
 ```
+
+`grype version` prints the same multi-field block shape as `syft version` and `cosign version`
+(Application/Version/BuildDate/GitCommit/Platform), not a single condensed line.
+
+:::note[If scans can't find the daemon: set DOCKER_HOST]
+
+The `docker` CLI honors your active context (e.g. Rancher Desktop's `rancher` context) automatically,
+but Syft/Trivy/Grype's built-in Docker SDK clients only look at `$DOCKER_HOST` (or the default
+`/var/run/docker.sock`), which Rancher Desktop does not populate. If a scan fails with something like
+`could not determine source ... docker: docker not available: failed to connect to Docker daemon` even
+though plain `docker` commands work fine, export the real socket path before scanning:
+
+```bash
+export DOCKER_HOST="unix://$HOME/.rd/docker.sock"   # Rancher Desktop
+```
+
+This applies to any runtime whose socket isn't at the default path, not just Rancher Desktop.
+
+:::
 
 :::tip[Linux / CI install]
 
@@ -121,18 +142,23 @@ Scan for Critical and High vulnerabilities. This is the health inspection:
 trivy image --scanners vuln --severity CRITICAL,HIGH,MEDIUM $IMAGE
 ```
 
-**Expected output:**
+**Expected output** (columns and totals vary by Trivy version — recent Trivy prints a "Report Summary"
+table first, then one `Total:` line **per target** it scanned, e.g. one for the OS packages and one for
+Python packages, and a 7-column table with a `Status` column the block below abbreviates):
 
 ```
-Total: 64 (MEDIUM: 53, HIGH: 9, CRITICAL: 2)
+Total: 77 (MEDIUM: 54, HIGH: 19, CRITICAL: 4)     # debian (OS) target
 
-┌──────────────┬────────────────────┬──────────┬───────────────────┬───────────────────┬──────────────────────────────┐
-│   Library    │   Vulnerability    │ Severity │ Installed Version │    Fixed Version  │            Title             │
-├──────────────┼────────────────────┼──────────┼───────────────────┼───────────────────┼──────────────────────────────┤
-│ gzip         │ CVE-2026-41992     │ HIGH     │ 1.12-1            │ 1.12-2            │ gzip: ...                    │
-│ libacl1      │ CVE-2026-54369     │ HIGH     │ 2.3.1-3           │ 2.3.1-4           │ libacl1: ...                 │
-│ ...          │ ...                │          │ ...               │ ...               │ ...                          │
-└──────────────┴────────────────────┴──────────┴───────────────────┴───────────────────┴──────────────────────────────┘
+┌──────────────┬────────────────────┬──────────┬────────┬───────────────────┬───────────────────┬──────────────────────────────┐
+│   Library    │   Vulnerability    │ Severity │ Status │ Installed Version │    Fixed Version  │            Title             │
+├──────────────┼────────────────────┼──────────┼────────┼───────────────────┼───────────────────┼──────────────────────────────┤
+│ gzip         │ CVE-2026-41992     │ HIGH     │ fixed  │ 1.12-1            │ 1.12-2            │ gzip: ...                    │
+│ libacl1      │ CVE-2026-54369     │ HIGH     │ fixed  │ 2.3.1-3           │ 2.3.1-4           │ libacl1: ...                 │
+│ ...          │ ...                │          │        │ ...               │ ...               │ ...                          │
+└──────────────┴────────────────────┴──────────┴────────┴───────────────────┴───────────────────┴──────────────────────────────┘
+
+Total: 4 (MEDIUM: 4, HIGH: 0, CRITICAL: 0)        # python-pkg target
+...
 ```
 
 Now run a second opinion with Grype:
@@ -141,7 +167,9 @@ Now run a second opinion with Grype:
 grype $IMAGE
 ```
 
-**Expected output:**
+**Expected output** (columns vary by Grype version — recent Grype adds `EPSS`/`RISK` columns and no
+longer prints a "Vulnerabilities by severity" summary footer; judge by the table being populated, not
+an exact footer line):
 
 ```
  ✔ Vulnerability DB                [no update available]
@@ -150,12 +178,12 @@ grype $IMAGE
  ✔ Cataloged packages              [96 packages]
  ✔ Scanning for vulnerabilities    [151 vulnerability matches]
 
-NAME       INSTALLED  FIXED-IN  TYPE  VULNERABILITY        SEVERITY
+NAME       INSTALLED  FIXED IN  TYPE  VULNERABILITY        SEVERITY  EPSS  RISK
 ...
-Vulnerabilities by severity:  Critical 5, High 28, Medium 60, Low 7, Negligible 51
 ```
 
-The two scanners disagree. Trivy finds 2 Critical/9 High; Grype finds 5 Critical/28 High. Both are correct — they use different advisory feeds and matching heuristics. The rule: **run both and triage by fixable + severity**.
+The two scanners disagree. Trivy finds 4 Critical/19 High; Grype finds 7 Critical/30 High (exact counts
+vary by database freshness). Both are correct — they use different advisory feeds and matching heuristics. The rule: **run both and triage by fixable + severity**.
 
 **Triage heuristic:**
 - Look at the "Fixed Version" column in Trivy. If a fix exists, rebuild the image on a patched base (`FROM debian:bookworm` → wait for the daily rebuild, or pin the fixed package version).
@@ -256,6 +284,46 @@ echo $GITHUB_TOKEN | docker login ghcr.io -u USERNAME --password-stdin
 ```
 
 For a local `registry:2` (HTTP, not HTTPS), Cosign requires `--allow-http-registry`. Without it, Cosign will refuse the connection.
+
+:::
+
+:::warning[cosign sign fails behind a TLS-intercepting corporate proxy]
+
+**Symptom:** `cosign sign` fails even with key-based signing, with an error like:
+
+```
+Error: signing [...]: ... Post "https://rekor.sigstore.dev/api/v1/log/entries": tls: failed to verify
+certificate: x509: certificate is valid for *.yourcompany.com, not rekor.sigstore.dev
+```
+
+**Cause:** Even key-based `cosign sign` uploads a transparency-log entry to the public Sigstore Rekor
+instance by default — there is a real network dependency for "local/offline" signing. Some corporate
+networks run a TLS-intercepting proxy that MITMs `rekor.sigstore.dev` specifically (while allowing
+`docker.io`, GHCR, and `raw.githubusercontent.com`), so the TLS handshake to Rekor fails with a
+certificate-mismatch error. `--tlog-upload=false` looks like the fix but this cosign version (v3.1.x)
+rejects it outright: `--tlog-upload=false is not supported with --signing-config or --use-signing-config`.
+
+**Fix — sign with a tlog-free signing config, verify with `--insecure-ignore-tlog`.** Fetch the public
+signing config and strip the Rekor URL (this file only needs `raw.githubusercontent.com`, which typical
+proxies do not intercept):
+
+```bash
+curl -s https://raw.githubusercontent.com/sigstore/root-signing/refs/heads/main/targets/signing_config.v0.2.json \
+  | jq 'del(.rekorTlogUrls)' > signing_config_no_tlog.json
+
+COSIGN_PASSWORD="" cosign sign --yes --key cosign.key \
+  --allow-http-registry --signing-config signing_config_no_tlog.json \
+  localhost:5001/acme-support-agent:1.0.0
+
+cosign verify --key cosign.pub \
+  --allow-http-registry --insecure-ignore-tlog=true \
+  localhost:5001/acme-support-agent:1.0.0
+```
+
+Verified working on this network (which does intercept `rekor.sigstore.dev`): the sign step completes
+with no error, and verify prints `The signatures were verified against the specified public key` with a
+one-line warning that tlog verification was skipped. `--insecure-ignore-tlog` is appropriate for a local
+lab; do not carry it into a production verify policy — production should reach the real Rekor log.
 
 :::
 
@@ -414,21 +482,29 @@ The `exit-code: '1'` in the Trivy step means the step fails (and blocks the sign
 ./labs/m8/secure-image.sh acme-support-agent:latest
 ```
 
-**Expected output:**
+**Expected output** (exact totals/columns vary by scanner version and DB freshness — see Step 4's notes; if signing cannot reach the transparency log, stage `[4/4]` prints a "signing skipped" line instead and still ends in `Done.`):
 
 ```
 ==> [1/4] SBOM with syft  (local image — no registry pull)
     wrote sbom.spdx.json
 ==> [2/4] Vulnerability scan with trivy  (CRITICAL/HIGH — local image)
-Total: 64 (MEDIUM: 53, HIGH: 9, CRITICAL: 2)
+Total: 23 (HIGH: 19, CRITICAL: 4)
 ==> [3/4] Second opinion with grype  (local image)
-Vulnerabilities by severity:  Critical 5, High 28, Medium 60, Low 7, Negligible 51
+NAME       INSTALLED  FIXED IN  TYPE  VULNERABILITY        SEVERITY  EPSS  RISK
+...
 ==> [4/4] Sign with cosign (key-based, via local registry)
 The signatures were verified against the specified public key
 Done. SBOM + scanned + signed acme-support-agent:latest (signed ref: localhost:5001/acme-support-agent:latest).
 ```
 
 The script uses `|| true` on the scan steps so it does not stop on findings — that is appropriate for the local development version where you want to see all output. In CI (the GitHub Actions pipeline), `exit-code: '1'` gates the pipeline.
+
+The sign step (`[4/4]`) is also fail-soft: if it cannot reach Sigstore's transparency log (see the
+Cosign Troubleshooting entry above — common behind corporate proxies), it prints
+`signing skipped: cannot reach transparency log (common behind corporate proxies) — see Troubleshooting`
+and still finishes with `Done.` and exit code 0, rather than aborting silently. The SBOM and both scans
+already ran and are the important CI-blocking output; a missing signature on a local dev run is not
+fatal to the lab.
 
 :::warning[MANIFEST_UNKNOWN / DENIED when passing a GHCR ref]
 
@@ -465,6 +541,10 @@ Note: GHCR often rejects the plain `gh auth token` for `docker login`. Use a cla
 docker stop local-registry && docker rm local-registry
 rm -f cosign.key cosign.pub sbom.spdx.json
 ```
+
+This leaves three extra tags in your local image cache (`acme-support-agent:1.0.0`,
+`localhost:5001/acme-support-agent:1.0.0`, `localhost:5001/acme-support-agent:latest`) — all aliases of
+the same image ID, zero additional disk cost, and safe to ignore or remove with `docker rmi`.
 
 ---
 
