@@ -29,10 +29,17 @@ untouched) + lab "Go deeper" pointer, all four gates green (build, `test-course.
 `run-checks.mjs deep-dive.checks.json`, deck-diff-since-v1.1.0), learner-QA all-PASS on staging.
 Final review done (one technical fix: mlx scale = alpha/r composite). Tagged + pushed; live pages 200. (No
 push/tag performed by the release-prep step itself).
-**NEXT:** M3 → M5 → M7 deep-dive plans written and ready to execute, cloned from the M3B plan
-structure with content maps from `planning/specs/2026-07-22-depth-retrofit-design.md` §Phase 2:
-- `planning/plans/2026-07-22-m3-deep-dive.md` (vLLM internals — PagedAttention, continuous batching,
-  our lab flags, throughput vs Ollama; deck `03-deepdive.html`; ships as v1.3.0)
+
+M3 vLLM Deep Dive (`planning/plans/2026-07-22-m3-deep-dive.md`) is **SHIPPED-pending as v1.3.0**
+(2026-07-22, release-prep commit only — no push/tag yet, controller ships after final review) — page +
+separate `deep-dive.checks.json` + new self-contained `03-deepdive.html` deck (18 slides, existing decks
+untouched) + lab "Go deeper" pointer. Gates green: `site` build, `run-checks.mjs deep-dive.checks.json`
+(7/7, server-down states correctly SKIP-OK), deck-diff-since-v1.2.0 (only `03-deepdive.html` touched),
+`VLLM_PORT=8010 scripts/test-course.sh m3` PASS (default port 8009 is machine-local-occupied by macOS
+AirPlay Reflector). Learner-QA PASS — one real finding (F7) fixed, remainder adjudicated false or
+machine-local.
+**NEXT:** M5 (v1.4.0) then M7 (v1.5.0) deep-dive plans written and ready to execute, cloned from the
+M3B plan structure with content maps from `planning/specs/2026-07-22-depth-retrofit-design.md` §Phase 2:
 - `planning/plans/2026-07-22-m5-deep-dive.md` (RAG params — chunk size/overlap, top-k, embedding
   choice, context budget; re-ingest experiment; deck `05-deepdive.html`; ships as v1.4.0)
 - `planning/plans/2026-07-22-m7-deep-dive.md` (agent knobs — temperature, max iterations, tool-loop

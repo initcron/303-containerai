@@ -5,6 +5,19 @@ All notable changes to this course build are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-07-22
+
+### Added
+
+- M3 Deep Dive (Part 2): vLLM internals (PagedAttention block tables, continuous batching, lab flags
+  decoded incl. the source-verified swap-space-is-inert-on-CPU finding, `/metrics` reading, honest
+  vLLM-vs-Ollama throughput-shape experiment), new self-contained 18-slide deck — existing decks
+  unchanged, `deep-dive.checks.json` stage, lab "Go deeper" pointer.
+
+### Fixed
+
+- Matched-set baseline made runnable (QA).
+
 ## [1.2.0] - 2026-07-22
 
 ### Added
