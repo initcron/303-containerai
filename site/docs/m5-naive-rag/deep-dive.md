@@ -52,18 +52,20 @@ anything in particular. Overlap is photocopying the last couple of lines from ea
 front of the next one, so a fact that happens to fall right on a cut boundary is never orphaned
 on one card with no context.
 
-Concretely, `RecursiveCharacterTextSplitter` tries to cut on paragraph and sentence boundaries
-first, falling back to a hard character cut only when a paragraph is longer than `chunk_size`.
-At 500 characters, most of the four short Acme runbook sections fit inside one or two chunks
-each — which is exactly why the lab's ingest reported **2 chunks** for the whole 4-section
-document. That's small enough that overlap barely matters here; overlap earns its keep on longer
-documents where a procedure genuinely spans a chunk boundary.
+Concretely, `RecursiveCharacterTextSplitter` tries to cut on paragraph and line boundaries first
+(its separator list is `["\n\n", "\n", " ", ""]` — paragraphs, then lines, then words, then a
+hard character cut as the last resort), so it avoids slicing through a word or a mid-sentence
+run wherever a paragraph break gives it a cleaner place to cut. At 500 characters, the whole
+~1,000-character Acme corpus is small enough that the splitter packs roughly **two of the four
+runbook sections into each chunk** — which is exactly why the lab's ingest reported **2 chunks**
+for the whole document. That's small enough that overlap barely matters here; overlap earns its
+keep on longer documents where a procedure genuinely spans a chunk boundary.
 
 ```mermaid
 flowchart LR
     DOC["Runbook text\n(one long document)"]
     C1["Chunk 1\n(500 chars)"]
-    C2["Chunk 2\n(500 chars,\nstarts 50 chars\ninto chunk 1)"]
+    C2["Chunk 2\n(500 chars,\nstarts 50 chars\nbefore chunk 1 ends)"]
     E1["Embed → 768-dim vector"]
     E2["Embed → 768-dim vector"]
     STORE[("ChromaDB\ndocuments collection")]
@@ -282,26 +284,37 @@ Compare the lab's baseline chunking against two variants, without touching the r
 its `documents` collection — every variant gets its **own** ChromaDB collection name, so this
 runs against the same containers already up, no extra process or memory cost.
 
-Seed a working directory and the fixed question set (reused from `rag_roundtrip.py`'s question,
-extended to cover more of the corpus):
+This experiment runs *inside* the `genai-app` container (that's where `langchain-chroma` and the
+Ollama client are already installed), but the corpus file only exists on your **host**, at
+`labs/m5/docs/acme-runbooks.md` — the image was built from `app/` alone (see `compose.yaml`'s
+`build.context: ./app`), so the container never received the `docs/` folder that sits next to
+`app/` in the lab directory. Copy it in explicitly first:
 
 ```bash
+CORPUS="$(pwd)/docs/acme-runbooks.md"
 mkdir -p ~/rag-deepdive-lab && cd ~/rag-deepdive-lab
-cat > questions.txt << 'EOF'
-How do I restart the payments service?
-What happens if checkout is overloaded?
-How long are database backups retained?
-Who do I page for an unacknowledged incident?
-EOF
+docker exec genai-app mkdir -p /tmp/deepdive-docs
+docker cp "$CORPUS" genai-app:/tmp/deepdive-docs/acme-runbooks.md
+docker exec genai-app ls -la /tmp/deepdive-docs/
 ```
 
-Run the ingest-and-compare script against three chunking configurations — the lab's own baseline
-(`chunk_size=500, overlap=50`), a smaller-chunks/no-overlap variant, and a larger-chunks/generous-
-overlap variant, each into its own named collection:
+**Expected output**
+
+```text
+<expected output — folded in during live lab validation>
+```
+
+Write the ingest-and-compare script. The question set is embedded directly in the script (not a
+separate host file — the script only ever runs inside the container, so a file written next to it
+on the host would not be visible there). It re-ingests the corpus under three chunking
+configurations — the lab's own baseline (`chunk_size=500, overlap=50`), a smaller-chunks/no-overlap
+variant, and a larger-chunks/generous-overlap variant — each into its own named collection, and
+prints every result to stdout so the host can capture it without reaching back into the container's
+filesystem:
 
 ```bash
 cat > compare_chunking.py << 'PYEOF'
-import os, sys
+import os
 import chromadb
 from langchain_ollama import OllamaEmbeddings, OllamaLLM
 from langchain_chroma import Chroma
@@ -311,7 +324,14 @@ from langchain_community.document_loaders import UnstructuredMarkdownLoader
 OLLAMA = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
 CHROMA_HOST = os.getenv("CHROMA_HOST", "localhost")
 CHROMA_PORT = int(os.getenv("CHROMA_PORT", "8000"))
-DOCS = os.getenv("DOCS_PATH", "labs/m5/docs/acme-runbooks.md")
+DOCS = os.getenv("DOCS_PATH", "/tmp/deepdive-docs/acme-runbooks.md")
+
+QUESTIONS = [
+    "How do I restart the payments service?",
+    "What happens if checkout is overloaded?",
+    "How long are database backups retained?",
+    "Who do I page for an unacknowledged incident?",
+]
 
 VARIANTS = {
     "baseline":  {"chunk_size": 500,  "chunk_overlap": 50},   # the lab's own values
@@ -319,12 +339,14 @@ VARIANTS = {
     "variant-b": {"chunk_size": 1200, "chunk_overlap": 200},  # larger, generous overlap
 }
 
-questions = [l.strip() for l in open("questions.txt") if l.strip()]
+# temperature=0 here (vs. the app's temperature=0.7) is deliberate: this experiment compares
+# retrieval across chunking strategies, so we want the *generation* step as deterministic as
+# possible. The live Streamlit app keeps 0.7 for more natural answers — expect its UI answers to
+# vary more, run to run, than what this script prints.
 emb = OllamaEmbeddings(model="nomic-embed-text", base_url=OLLAMA)
 llm = OllamaLLM(model="qwen2.5:1.5b", base_url=OLLAMA, temperature=0, num_ctx=4096)
 client = chromadb.HttpClient(host=CHROMA_HOST, port=CHROMA_PORT)
 
-created = []
 for name, params in VARIANTS.items():
     collection = f"deepdive-{name}"
     docs = UnstructuredMarkdownLoader(DOCS).load()
@@ -332,10 +354,10 @@ for name, params in VARIANTS.items():
     chunks = splitter.split_documents(docs)
     vs = Chroma(client=client, collection_name=collection, embedding_function=emb)
     vs.add_documents(chunks)
-    created.append(collection)
-    print(f"\n=== {name} (chunk_size={params['chunk_size']}, overlap={params['chunk_overlap']}) -> {len(chunks)} chunks ===")
+    print(f"COLLECTION: {collection}")
+    print(f"=== {name} (chunk_size={params['chunk_size']}, overlap={params['chunk_overlap']}) -> {len(chunks)} chunks ===")
 
-    for q in questions:
+    for q in QUESTIONS:
         hits = vs.similarity_search_with_score(q, k=3)
         top_doc, top_score = hits[0]
         context = "\n\n".join(d.page_content for d, _ in hits)
@@ -344,12 +366,16 @@ for name, params in VARIANTS.items():
         print(f"  Q: {q}")
         print(f"    top distance: {top_score:.4f}  chunk: {top_doc.page_content[:70].strip()!r}")
         print(f"    answer: {answer.strip()[:120]}")
-
-with open(os.path.expanduser("~/rag-deepdive-lab/variant-collections.txt"), "w") as f:
-    f.write("\n".join(created) + "\n")
 PYEOF
-docker exec -e DOCS_PATH=/app/docs/acme-runbooks.md genai-app python3 - < compare_chunking.py
+docker exec -i genai-app python3 - < compare_chunking.py | tee ~/rag-deepdive-lab/variant-collections.txt
 ```
+
+The `-i` on `docker exec` is required — without it, `docker exec` never attaches its stdin to the
+container process, so piping the script in (`< compare_chunking.py`) silently sends nothing and
+the script exits immediately with no output. `tee` writes everything the container printed —
+collection names and per-question results — to both your terminal and the host file
+`~/rag-deepdive-lab/variant-collections.txt`, which is what turns the container's stdout into a
+real artifact you can grep, diff, or fold into the table below.
 
 **Expected output**
 
@@ -375,7 +401,7 @@ wording varies run to run even at `temperature=0` on a small local model.
 **not** touch the `documents` collection the running lab app depends on:
 
 ```bash
-docker exec genai-app python3 -c "
+docker exec -i genai-app python3 -c "
 import chromadb, os
 client = chromadb.HttpClient(host=os.environ['CHROMA_HOST'], port=int(os.environ['CHROMA_PORT']))
 for name in open('/dev/stdin').read().split():
@@ -386,6 +412,10 @@ for name in open('/dev/stdin').read().split():
         print('skip', name, e)
 " <<< "deepdive-baseline deepdive-variant-a deepdive-variant-b"
 ```
+
+The teardown heredoc needs `-i` for the same reason as the ingest step above: `<<<` feeds the
+container's `/dev/stdin` inside the `-c` script, and without `-i` that stdin is never attached, so
+`open('/dev/stdin').read()` blocks or returns empty and no collection actually gets dropped.
 
 **Expected output**
 
