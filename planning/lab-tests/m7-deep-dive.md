@@ -314,3 +314,144 @@ claims (baseline run, 3 Variant A repeats, Variant B gate-bypass with wrong-runb
 checks 7/7 pre and SKIP-OK post, knob ground-truth table, crew.py untouched) come directly
 from the task-1 report and were validated live on this machine (Rancher Desktop, arm64) during
 the authoring phase.
+
+---
+
+## 2026-07-23 — Learner-QA fixes (findings F1, F2 from `planning/learner-qa/m7-deep-dive-report.md`)
+
+Two fixes applied to `site/docs/m7-multi-agent/deep-dive.md` after a fresh-learner QA pass
+surfaced a blocker and a misleading reproducibility claim.
+
+### Fix 1 (BLOCKER, F1) — hardcoded author machine path
+
+The page had ~8 occurrences of the literal absolute path
+`/Users/gshah/work/apps/learning/303-containerai` baked into Variant A/B commands and the
+git-status confirmation step — copy-paste-broken for any learner whose clone isn't at that exact
+path.
+
+Rewrite: added a `REPO_ROOT="$(pwd)"` capture at the top of §6 Variant A (right after the
+"Where this picks up" admonition already anchors the learner at the repo root, matching
+`lab.md`'s own convention of always running commands from clone root), then replaced every
+absolute-path occurrence with `"$REPO_ROOT/labs/m7/..."` or `cd "$REPO_ROOT/labs/m7"`. The
+`git -C` confirmation step now reads `git -C "$REPO_ROOT" status --short labs/m7/crew/crew.py`.
+
+Re-validated live on this machine, from the actual repo root (not the author's original hardcoded
+path baked into the old command), using the real `/usr/bin/diff` and `/usr/bin/git` (not the
+`rtk`-hooked wrappers, which falsely report "identical" on the Variant A diff — see QA report
+F3):
+
+```
+$ cd /Users/gshah/work/apps/learning/303-containerai
+$ /usr/bin/diff labs/m7/crew/crew.py ~/crew-deepdive-lab-test/crew-hot-triage.py
+65c65
+<     triage = llm(f"Incident: {incident}", profile("triage"), temperature=0)
+---
+>     triage = llm(f"Incident: {incident}", profile("triage"), temperature=0.9)
+(exit 1 — matches the page's Expected output exactly)
+
+$ git status --short labs/m7/crew/crew.py
+(no output — matches the page's Expected output exactly)
+
+$ /usr/bin/diff labs/m7/crew/crew.py ~/crew-deepdive-lab-test/crew-no-gate.py
+73c73
+<                    profile("investigator"), temperature=0).upper().startswith("YES")
+---
+>                    profile("investigator"), temperature=0).upper().startswith("YES") or True  # DEEP-DIVE: gate bypassed on purpose
+(exit 1 — matches the page's Expected output exactly)
+```
+
+No fold was needed for these Expected-output blocks — the captured output never showed the path
+itself (only relative diff line numbers / empty git output), so removing the absolute path from
+the *command* text didn't change what the *output* block should show. Added
+`labs/m7/deep-dive.checks.json` check `no-hardcoded-author-path` (asserts
+`grep -c '/Users/gshah' site/docs/m7-multi-agent/deep-dive.md` == 0) and fixed the pre-existing
+`crew-source-untouched` check, which itself had `cd /Users/gshah/work/apps/learning/303-containerai &&`
+hardcoded — now runs as a plain `git status --short labs/m7/crew/crew.py` (checks runner already
+executes from repo root).
+
+### Fix 2 (CONFUSING, F2) — Variant B "exact, reproducible OUTCOME" claim was false
+
+The page's §6 admonition and comparison table asserted the `OUTCOME:` marker is an "exact,
+reproducible fact" for every variant. QA got `REJECTED` then `APPROVED` on two consecutive,
+otherwise-identical Variant B (gate-bypassed) runs — contradicting that claim specifically for
+Variant B.
+
+Root-caused and reproduced live on this machine before rewriting: rebuilt `acme-incident-crew:no-gate`
+fresh and ran it 3× sequentially against the same Kafka incident.
+
+```
+$ for i in 1 2 3; do
+    docker run --rm --network m7_default \
+      -e OLLAMA_BASE_URL=http://host.docker.internal:11434 \
+      -e CHROMA_HOST=chromadb -e CHROMA_PORT=8000 \
+      -e LLM_MODEL=qwen2.5:1.5b -e EMBEDDING_MODEL=nomic-embed-text \
+      acme-incident-crew:no-gate \
+      "The Kafka event streaming cluster has stopped processing messages."
+  done
+```
+
+All 3 runs on this machine, this session, landed on `OUTCOME: APPROVED` (the Fixer's fabricated
+command, `kubectl rollout restart deployment/payments -n prod`, was worded consistently across
+all 3 — but the QA report's own two runs got `REJECTED` once and `APPROVED` once on a
+differently-worded fabricated command). Combined with the QA evidence, this confirms: with the
+relevance gate bypassed, the Investigator always retrieves the wrong (payments) runbook — that
+part is structural and repeatable — but nothing downstream is pinned anymore. The Fixer
+(`temperature=0.2`, not `0`) phrases its fabricated command differently run to run, and the
+Reviewer's APPROVED/REJECTED verdict tracks whatever the Fixer handed it, rather than a fixed
+fact. **The gate — not the agents' temperatures — was what made Baseline and Variant A's outcome
+markers reproducible.** Remove it, and the final verdict becomes exactly as unpredictable as
+the Fixer/Reviewer's prose, because the code no longer short-circuits before they get a say.
+
+Rewrite, honest version:
+- The small-model-variance admonition (top of §6) now scopes the "exact, reproducible" claim to
+  runs where the gate is intact (Baseline, Variant A) and explicitly flags that Variant B removes
+  that gate and demonstrates the marker itself becoming unpinned.
+- The Variant B captured transcript is now labeled **"Captured output — one real run"** (not
+  presented as *the* expected/reproducible result), and the narrative paragraph after it states
+  plainly that re-running the same command several times should be expected to flip the
+  `OUTCOME:` marker between APPROVED and REJECTED, and that this unpredictability **is** the
+  finding.
+- The comparison-table row for Variant B's "OUTCOME marker" column now reads "Not stable" instead
+  of a single fixed value, and its "Consistency vs. baseline" cell explains the mechanism (gate
+  removed → nothing left pins the verdict) instead of calling it "a clean, reproducible failure."
+  The paragraph below the table was reworded to match — determinism is now stated as conditional
+  on the gate being present, not a blanket property of the pipeline.
+- The closing "Where you will use this" tip's temperature-determinism bullet was rewritten from
+  "low temperature stabilizes the outcome marker" (misleading — Variant A already showed
+  temperature alone doesn't touch the marker either way) to "a code-level gate, not low
+  temperature by itself, is what pins the outcome marker" — matching what Variant A (gate present,
+  temperature changed, marker stable) and Variant B (gate removed, temperature untouched, marker
+  unstable) actually demonstrate side by side.
+
+Added `labs/m7/deep-dive.checks.json` check `gate-determinism-claim-honest` (asserts the page
+contains the "is the finding" framing introduced by this rewrite) to guard against the claim
+regressing to the old "always reproducible" wording.
+
+### Gates run after both fixes
+
+```
+$ node scripts/run-checks.mjs labs/m7/deep-dive.checks.json
+✅ chromadb-up-if-running
+✅ crew-source-untouched
+✅ no-deepdive-images-left
+✅ variant-transcripts
+✅ comparison-table
+✅ outcome-markers-present
+✅ temperature-values-documented
+✅ no-hardcoded-author-path
+✅ gate-determinism-claim-honest
+9/9 checks · score 9/9
+
+$ cd site && npm run build
+[SUCCESS] Generated static files in "build".
+```
+
+Render check on `site/build/docs/m7-multi-agent/deep-dive/index.html`: 2 `<table>` elements
+present, 7 `<h2>`/`<h3>`... headings intact (11 total heading tags), `grep -c '/Users/gshah'` on
+the built HTML → 0, `REPO_ROOT` present (7 occurrences, split across Prism syntax-highlighting
+spans), "Comparison table" / "Variant B: guardrail-off" / "is the finding" all present in the
+rendered output — no section swallowed into a code block.
+
+Test images (`acme-incident-crew:no-gate` rebuilt for this re-validation) and the scratch
+directory `~/crew-deepdive-lab-test` were removed after use. The tracked `labs/m7/crew/crew.py`
+was never touched — confirmed via `git status --short labs/m7/crew/crew.py` (empty) before commit.

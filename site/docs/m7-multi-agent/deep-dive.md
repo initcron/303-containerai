@@ -26,6 +26,10 @@ You need the m7 stack up — ChromaDB and the built `crew` image. This works whe
 currently running or was torn down after the lab; `up.sh` is idempotent, so re-running it is
 safe.
 
+**Every command on this page is run from the root of your course-repo clone** (the directory
+containing `labs/`, `site/`, `planning/` — wherever you ran `git clone` for this course). Paths
+below are always relative to that root, exactly like the lab page.
+
 ```bash
 cd labs/m7
 bash up.sh
@@ -328,10 +332,15 @@ whether a difference in output came from the knob you changed or from ordinary s
 `qwen2.5:1.5b`-class models respond to temperature and prompt changes less predictably than
 larger models. The comparisons below are illustrative of the **mechanism** — what changing a
 knob does to a pipeline's stability — not a universal recipe for what temperature to pick.
-Judge the deterministic side of every result strictly: the `OUTCOME:` marker and which stages
-ran or short-circuited are exact, reproducible facts about this run. Judge the prose — the
-Triage summary sentence, the Reviewer's stated reason — by shape only: whether it stayed on
-topic and matched the expected disposition, not its exact wording. If you swap in a larger model
+Judge the deterministic side of every result strictly, but note that "deterministic" here is
+conditional on the gates being intact: with the relevance gate in place (Baseline, Variant A),
+the `OUTCOME:` marker and which stages ran or short-circuited are exact, reproducible facts about
+this run — Investigator and Reviewer both stay pinned at `temperature=0`, so the gate's YES/NO
+and the final APPROVED/REJECTED don't move even when Triage's temperature does. **Variant B
+removes that gate**, and §6's Variant B section shows directly what happens to the `OUTCOME:`
+marker once it's gone: it stops being pinned. Judge the prose — the Triage summary sentence, the
+Reviewer's stated reason — by shape only in every variant: whether it stayed on topic and matched
+the expected disposition, not its exact wording. If you swap in a larger model
 (`qwen2.5:3b` or bigger) later, expect the *outcome markers* to stay just as stable at low
 temperature, but expect the *prose* to vary less at a given temperature than it does here — a
 bigger model needs less determinism-by-temperature to stay on-message.
@@ -384,11 +393,15 @@ patched file. This keeps the original file in the repo untouched and gives you a
 (delete the copy, rebuild from the unmodified source).
 
 ```bash
+REPO_ROOT="$(pwd)"
 mkdir -p ~/crew-deepdive-lab && cd ~/crew-deepdive-lab
-cp /Users/gshah/work/apps/learning/303-containerai/labs/m7/crew/crew.py ./crew-hot-triage.py
+cp "$REPO_ROOT/labs/m7/crew/crew.py" ./crew-hot-triage.py
 sed -i.bak 's/llm(f"Incident: {incident}", profile("triage"), temperature=0)/llm(f"Incident: {incident}", profile("triage"), temperature=0.9)/' ./crew-hot-triage.py
-diff /Users/gshah/work/apps/learning/303-containerai/labs/m7/crew/crew.py ./crew-hot-triage.py
+diff "$REPO_ROOT/labs/m7/crew/crew.py" ./crew-hot-triage.py
 ```
+
+(Run this from your repo root — `REPO_ROOT="$(pwd)"` captures it before the `cd` below, so every
+later command in this section can find the tracked source again without you retyping the path.)
 
 **Expected output**
 
@@ -406,7 +419,7 @@ Build a one-off image from this patched copy, reusing the lab's own build contex
 and Dockerfile don't have to be duplicated:
 
 ```bash
-cd /Users/gshah/work/apps/learning/303-containerai/labs/m7
+cd "$REPO_ROOT/labs/m7"
 cp ~/crew-deepdive-lab/crew-hot-triage.py crew/crew.py.deepdive-hot-triage
 docker build -t acme-incident-crew:hot-triage \
   --build-arg CREW_FILE=crew.py.deepdive-hot-triage \
@@ -433,7 +446,7 @@ rm crew/crew.py.deepdive-hot-triage
 Run it 3 times against the same incident, sequentially, logging each transcript:
 
 ```bash
-cd /Users/gshah/work/apps/learning/303-containerai/labs/m7
+cd "$REPO_ROOT/labs/m7"
 for i in 1 2 3; do
   docker run --rm --network m7_default \
     -e OLLAMA_BASE_URL=http://host.docker.internal:11434 \
@@ -553,7 +566,7 @@ multi-line f-string above it:
 
 ```bash
 cd ~/crew-deepdive-lab
-cp /Users/gshah/work/apps/learning/303-containerai/labs/m7/crew/crew.py ./crew-no-gate.py
+cp "$REPO_ROOT/labs/m7/crew/crew.py" ./crew-no-gate.py
 python3 -c "
 import pathlib
 p = pathlib.Path('crew-no-gate.py')
@@ -562,7 +575,7 @@ needle = '.upper().startswith(\"YES\")'
 assert src.count(needle) == 1, f'expected exactly 1 match, found {src.count(needle)}'
 p.write_text(src.replace(needle, '.upper().startswith(\"YES\") or True  # DEEP-DIVE: gate bypassed on purpose'))
 "
-diff /Users/gshah/work/apps/learning/303-containerai/labs/m7/crew/crew.py ./crew-no-gate.py
+diff "$REPO_ROOT/labs/m7/crew/crew.py" ./crew-no-gate.py
 ```
 
 **Expected output**
@@ -578,7 +591,7 @@ Build and run it against the Kafka incident — the one the baseline crew correc
 because no runbook covers it:
 
 ```bash
-cd /Users/gshah/work/apps/learning/303-containerai/labs/m7
+cd "$REPO_ROOT/labs/m7"
 cp ~/crew-deepdive-lab/crew-no-gate.py crew/crew.py.deepdive-no-gate
 docker build -t acme-incident-crew:no-gate \
   --build-arg CREW_FILE=crew.py.deepdive-no-gate \
@@ -601,7 +614,7 @@ docker run --rm --network m7_default \
   | tee ~/crew-deepdive-lab/variant-b-kafka-no-gate.log
 ```
 
-**Expected output**
+**Captured output — one real run**
 
 `````text
 [crew] Acme Incident Crew: Triage -> Investigator -> Fixer -> Reviewer (4 profiles, one shared model: qwen2.5:1.5b)
@@ -637,14 +650,26 @@ with total confidence and no hint that it's the wrong section. The baseline crew
 above, and the lab's own Step 5) correctly says `NO RUNBOOK FOUND` for this exact incident,
 because the relevance gate answers NO when asked whether the payments passage addresses a Kafka
 failure. With the gate always returning `True`, the Fixer treats the mismatched passage as
-confirmed-relevant — and this run shows the compounding failure the gate exists to prevent: the
-Fixer didn't even quote the payments runbook's real command faithfully, it invented a *plausible-sounding*
-command (`kubectl rollout restart deployment kafka-event-streaming -n prod`) that appears nowhere
-in `acme-runbooks.md`. The Reviewer then approved it, describing it as "backed by a runbook" —
-false, but the Reviewer has no way to check that claim; it only checks whether the *proposed
-command text* looks non-destructive, not whether the referenced runbook passage actually
-supports it. This is the unsafe/unclassified output the gate exists to stop: not a destructive
-command, but a **fabricated one, laundered through two agents and rubber-stamped APPROVED.**
+confirmed-relevant, and starts from a wrong runbook every time — that part is structural and does
+not change run to run. What the Fixer *does* with that wrong runbook does change: at
+`temperature=0.2`, it sometimes quotes the payments command reasonably faithfully and sometimes,
+as in the run captured above, invents a *plausible-sounding* command
+(`kubectl rollout restart deployment kafka-event-streaming -n prod`) that appears nowhere in
+`acme-runbooks.md`. The Reviewer then judges whatever the Fixer handed it — and because the
+Reviewer only checks whether the *proposed command text* looks non-destructive, not whether the
+referenced runbook passage actually supports it, its APPROVED/REJECTED verdict now tracks the
+Fixer's un-pinned phrasing instead of a fixed fact. Run this exact command four or five times in a
+row and expect the `OUTCOME:` marker itself to flip between APPROVED and REJECTED across those
+runs, on the same incident, same image, same bypassed gate — sometimes the Reviewer calls a
+fabricated command "backed by a runbook" and approves it (the run above), sometimes it correctly
+distrusts an unfamiliar command and rejects it. **Neither answer is the "right" one to expect —
+that unpredictability is the finding.** With the gate in place, the Investigator's NO pins the
+outcome before the Fixer or Reviewer ever get a say. Remove the gate, and the last word belongs to
+two non-zero-certainty steps (a `temperature=0.2` Fixer and a Reviewer judging that Fixer's
+possibly-fabricated text) — so the crew stops being wrong in one consistent, obviously-buggy way
+and starts being wrong (or right) unpredictably, run to run. That's a worse failure mode than a
+clean, repeatable bug: a flaky APPROVED/REJECTED is harder to catch in testing than a
+*consistently* wrong one, because some fraction of runs look fine.
 
 The tracked `crew.py` itself was never touched — only the temporary `crew.py.deepdive-*` copies
 inside the build contexts (removed by the `rm crew/crew.py.deepdive-*` line right after each
@@ -652,7 +677,7 @@ build) and the two extra local images (removed together in the section teardown 
 the source tree is clean:
 
 ```bash
-git -C /Users/gshah/work/apps/learning/303-containerai status --short labs/m7/crew/crew.py
+git -C "$REPO_ROOT" status --short labs/m7/crew/crew.py
 ```
 
 **Expected output**
@@ -667,13 +692,18 @@ git -C /Users/gshah/work/apps/learning/303-containerai status --short labs/m7/cr
 |---|---|---|---|---|---|
 | Baseline | none (Triage=0, gate=0, Fixer=0.2, Reviewer=0) | ~4.2s | 5 (fixed, per §2) | APPROVED | — |
 | A (×3 repeats) | Triage temperature 0 → 0.9 | ~3.5s per run | 5 per run | APPROVED, all 3 runs | Structural outcome stable; Triage prose drifted from terse (run 1) to a run-on sentence (run 2) to an unrequested multi-section troubleshooting writeup (run 3) — the profile's "Be terse" instruction eroded as temperature-driven variance compounded |
-| B | Relevance gate bypassed (`relevant = True`, always) | ~3.4s | 5 (same count — gate bypass changes the *decision*, not the call count) | APPROVED — on the Kafka incident the baseline correctly REJECTED | Not "instability" — a clean, reproducible failure: the crew retrieved the wrong runbook, the Fixer fabricated a command absent from any runbook, and the Reviewer approved it anyway |
+| B | Relevance gate bypassed (`relevant = True`, always) | ~3.4s | 5 (same count — gate bypass changes the *decision*, not the call count) | **Not stable** — retrieves the wrong (payments) runbook every time, but the final APPROVED/REJECTED marker has been observed to flip between runs on this exact incident, this exact image, gate bypassed both times | This *is* instability, and it's the finding: with Investigator/Reviewer still at `temperature=0` but the gate removed, nothing left in the pipeline pins the final verdict — it now depends on what the `temperature=0.2` Fixer does with a wrong runbook, and on the Reviewer's read of that. The gate, not the agents' temperatures, was what made Baseline and Variant A's outcomes reproducible |
 
-Judge the deterministic side of this table strictly: the `OUTCOME:` line and which stages ran are
-exact, reproducible facts about each run (per the small-model-variance note above). Judge the
-Triage/Fixer/Reviewer prose by shape — did it stay on-topic, did it reach the same disposition —
-not by exact wording, which will vary between the three Variant A repeats even though nothing
-else changed between them. Wall times above are single-machine, single-run measurements on this
+Judge the deterministic side of this table strictly, and note what "deterministic" is
+conditional on. In Baseline and Variant A, the relevance gate is intact, so the `OUTCOME:` line
+and which stages ran are exact, reproducible facts about each run (per the small-model-variance
+note above) — the gate pins the verdict regardless of what Triage's temperature does upstream. In
+Variant B, the gate itself is the thing removed, and the table row above documents what breaks:
+the `OUTCOME:` marker is no longer pinned. Judge the Triage/Fixer/Reviewer prose in every variant
+by shape — did it stay on-topic, did it reach a defensible disposition — not by exact wording,
+which will vary between the three Variant A repeats even though nothing else changed between
+them, and which drives the Variant B outcome itself once the gate is gone. Wall times above are
+single-machine, single-run measurements on this
 laptop, included to show the same order of magnitude across variants (temperature and a gate
 bypass do not change the crew's call count, so wall time stays roughly flat) — not a timing
 benchmark to reproduce exactly.
@@ -745,10 +775,13 @@ cd labs/m7 && bash down.sh
   safety check in a new pipeline — put it after the tool call that produced risky input, and
   again at final-answer time before a human sees the result; a follow-up prompt asking the model
   to double-check itself is not a substitute for either.
-- **On a small model, low temperature stabilizes the outcome marker faster than it stabilizes the
-  prose.** **Use it when:** you're evaluating whether a crew's output is reliable enough to trust
-  — check the structural decision (approved/rejected, which branch ran) across repeated runs
-  before worrying about exact wording drift; the marker is the thing downstream code and humans
-  actually act on.
+- **A code-level gate, not low temperature by itself, is what pins the outcome marker run to
+  run.** Variant A raised Triage's temperature and the `OUTCOME:` marker held steady — because
+  the gate was still there to pin it. Variant B left every temperature untouched and removed only
+  the gate, and the marker itself started flipping between runs. **Use it when:** you're
+  evaluating whether a crew's output is reliable enough to trust — don't credit "low temperature"
+  for a stable outcome marker until you've confirmed there's still a code-level gate between the
+  model's opinion and the marker; a stable-looking pipeline with no gate is one bad retrieval away
+  from a coin flip.
 
 :::
