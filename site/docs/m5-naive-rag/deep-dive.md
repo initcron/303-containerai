@@ -4,6 +4,8 @@ title: 'Deep Dive: RAG Parameters Under the Hood'
 sidebar_label: 'Deep Dive (Part 2)'
 ---
 
+import Slides from '@site/src/components/Slides';
+
 # Deep Dive: RAG Parameters Under the Hood
 
 The lab wired ChromaDB and a Streamlit app together, ingested Acme's runbooks, and watched
@@ -14,6 +16,8 @@ does to retrieval quality, what distance metric ChromaDB is silently using under
 how to size a context-window budget instead of guessing at `top-k`, and how to tell a retrieval
 miss from a generation miss when the app answers wrong. It closes by re-ingesting the same corpus
 under two different chunking strategies and comparing what each one actually retrieves.
+
+<Slides src="decks/05-deepdive.html" title="Module 5 Deep Dive — RAG Parameters" />
 
 :::info[Where this picks up]
 
