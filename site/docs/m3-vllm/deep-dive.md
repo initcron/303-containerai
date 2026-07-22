@@ -457,14 +457,67 @@ user	0m0.011s
 sys	0m0.018s
 ```
 
+**Matched-set sequential baseline.** The scaling ratio below compares the concurrent run above
+against a *sequential* run of the exact same 3 prompts — not the 4-prompt sequential run earlier
+on this page, which uses a different prompt set and would make the ratio arithmetic meaningless.
+Run the same 3 prompts one after another (no `&`, no `wait`) against vLLM-CPU:
+
+```bash
+time (
+for p in "Say OK." "In one sentence, what is a container?" "Name two container runtimes."; do
+  curl -s http://localhost:${VLLM_PORT:-8009}/v1/chat/completions \
+    -H "Content-Type: application/json" \
+    -d "{\"model\":\"HuggingFaceTB/SmolLM2-135M-Instruct\",\"messages\":[{\"role\":\"user\",\"content\":\"$p\"}],\"max_tokens\":48}" \
+    -o /dev/null -w "%{http_code} %{time_total}s\n"
+done
+)
+```
+
+**Expected output**
+
+```text
+200 4.905935s
+200 1.896905s
+200 5.542839s
+
+real	0m12.393s
+```
+
+Then the same 3 prompts sequentially against native Ollama:
+
+```bash
+time (
+for p in "Say OK." "In one sentence, what is a container?" "Name two container runtimes."; do
+  curl -s http://localhost:11434/v1/chat/completions \
+    -H "Content-Type: application/json" \
+    -d "{\"model\":\"qwen2.5:1.5b\",\"messages\":[{\"role\":\"user\",\"content\":\"$p\"}],\"max_tokens\":48}" \
+    -o /dev/null -w "%{http_code} %{time_total}s\n"
+done
+)
+```
+
+**Expected output**
+
+```text
+200 0.287230s
+200 0.429941s
+200 0.670900s
+
+real	0m1.427s
+```
+
+These two matched-set sequential runs — same 3 prompts, same shape as the concurrent run above,
+just without the `&`/`wait` overlap — are the baseline the scaling-factor row in the table below
+divides into: vLLM-CPU 12.393s → 3.965s and Ollama 1.427s → 1.301s.
+
 Fold the wall-clock numbers into a comparison table:
 
 | Engine | Mode | Wall time (4 seq. / 3 concurrent) | tokens/sec (approx, aggregate) | Notes |
 |---|---|---|---|---|
 | vLLM-CPU | Sequential | 19.673s | ~8.4 tok/s | eager-mode float32 CPU path, real per-step overhead |
-| vLLM-CPU | Concurrent (3) | 3.965s | ~20.4 tok/s | same 3 prompts run sequentially took 12.393s — concurrent is **3.13x faster**, strongly sub-linear |
+| vLLM-CPU | Concurrent (3) | 3.965s | ~20.4 tok/s | matched-set sequential baseline above took 12.393s — concurrent is **3.13x faster**, strongly sub-linear |
 | Ollama (native) | Sequential | 3.765s | ~33.2 tok/s | mature optimized single-stream runtime, wins on raw throughput here |
-| Ollama (native) | Concurrent (3) | 1.301s | ~32.3 tok/s | same 3 prompts sequentially took 1.427s — concurrent is only **1.10x faster**, close to linear |
+| Ollama (native) | Concurrent (3) | 1.301s | ~32.3 tok/s | matched-set sequential baseline above took 1.427s — concurrent is only **1.10x faster**, close to linear |
 
 Save the same numbers to the results file the checks verify:
 
@@ -517,12 +570,13 @@ At this N (≤ 8 requests, tiny models, one CPU), vLLM-CPU did **not** visibly "
 tokens/sec against Ollama — and that's the honest result, not a validation failure: a
 135M-parameter model on an eager-mode float32 CPU path carries real per-step overhead that a
 mature, optimized single-stream runtime like Ollama doesn't pay at this tiny scale. What *did*
-show up clearly, in this run's own numbers: vLLM-CPU's concurrent wall time (3.965s) is **3.13x**
-faster than the same 3 prompts run sequentially (12.393s) — a strongly sub-linear scaling curve,
-direct evidence of continuous batching overlapping work instead of serializing it. Ollama's
-concurrent time (1.301s) is only **1.10x** faster than its own sequential baseline for the same 3
-prompts (1.427s) — essentially flat, consistent with requests still being handled one at a time
-under the hood. That directional shape — not the absolute tokens/sec — is the teaching point; the
+show up clearly, comparing the concurrent run against the matched-set sequential baseline you just
+ran: vLLM-CPU's concurrent wall time (3.965s) is **3.13x** faster than the same 3 prompts run
+sequentially (12.393s) — a strongly sub-linear scaling curve, direct evidence of continuous
+batching overlapping work instead of serializing it. Ollama's concurrent time (1.301s) is only
+**1.10x** faster than its own matched-set sequential baseline for the same 3 prompts (1.427s) —
+essentially flat, consistent with requests still being handled one at a time under the hood. That
+directional shape — not the absolute tokens/sec — is the teaching point; the
 3x GPU story from the lesson is real, but it needs GPU-scale concurrent load and a production
 model to show up in the *absolute* numbers too. On this laptop, the shape is visible even though
 the scoreboard isn't reversed.

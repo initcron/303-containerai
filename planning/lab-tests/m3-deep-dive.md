@@ -297,3 +297,36 @@ Experiment ran end-to-end with real timings; honest headline is Ollama wins abso
 this toy scale while vLLM-CPU shows a dramatically better (3.13x vs 1.10x) concurrent-scaling
 shape, which the page states plainly rather than forcing a different narrative. Checks 6/6 →
 7/7 (post fix) pre-teardown, 7/7 post-teardown via SKIP-OK guards. Build green.
+
+## Addendum — 2026-07-22, QA F7 fix (matched-set sequential baseline made runnable)
+
+**Finding (learner-QA F7, CONFUSING):** §6's scaling-ratio prose (vLLM 3.13x concurrent-vs-sequential
+vs Ollama 1.10x) cited a "matched-set sequential" baseline (same 3 prompts as the concurrent step,
+run sequentially: 12.393s vLLM / 1.427s Ollama) that existed only in the results table, the saved
+`comparison-results.txt` heredoc, and this evidence file — never as an executable command block on
+the page itself. A learner reading §6 top to bottom could not reproduce the ratio arithmetic; the
+12.393s / 1.427s numbers appeared to come from nowhere.
+
+**Fix applied:** inserted two new numbered command blocks in §6, directly between the existing
+"Concurrent requests" step and the "Fold the wall-clock numbers into a comparison table" step —
+running the same 3-prompt set (`Say OK.` / `In one sentence, what is a container?` / `Name two
+container runtimes.`) sequentially (no `&`, no `wait`) against vLLM-CPU, then against Ollama, each
+with its own **Expected output** block. Command style matches the page's existing pattern (same
+`for p in "..." "..." "..."; do curl ... done` loop used by the concurrent step, minus the
+backgrounding). Adjusted the comparison-table row notes and the closing ratio paragraph to say
+"matched-set sequential baseline above" instead of an unexplained bare number, so the arithmetic
+now points at a step the learner just ran.
+
+**No live re-run performed** — the exact matched-set sequential numbers (vLLM-CPU real 12.393s,
+per-req 4.905935s / 1.896905s / 5.542839s; Ollama real 1.427s, per-req 0.287230s / 0.429941s /
+0.670900s) were already captured verbatim during the original Step 6 validation above (see
+"Matched-set sequential" block) but had not yet been surfaced as a page-level runnable step. Folded
+those real, already-live-validated numbers into the new Expected-output blocks rather than
+re-running, since the underlying data was already primary evidence from this machine, not inferred.
+
+**Verification:**
+- `cd site && npm run build` — green (see below).
+- `node scripts/run-checks.mjs labs/m3/deep-dive.checks.json` — all-pass, state-tolerant, run with
+  the vLLM lab down (no `VLLM_PORT` server up) — see below.
+- No `<...>`-style or "folded in during live validation" placeholder markers left unfolded on the
+  page (grepped after edit).
