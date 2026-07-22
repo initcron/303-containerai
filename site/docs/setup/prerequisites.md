@@ -47,7 +47,20 @@ If you have a Windows machine with an NVIDIA GPU, the NVIDIA Container Toolkit l
 
 ## Quickstart: Install Rancher Desktop + Ollama
 
-If you're starting from scratch on macOS, these three commands get you to a working environment.
+If you're starting from scratch on macOS, these steps get you to a working environment.
+
+### 0. Get the course code
+
+```bash
+git clone https://github.com/schoolofdevops/303-containerai.git && cd 303-containerai
+```
+
+:::note[labs/ ships finished files too]
+
+The labs hand-author almost every file service by service — type them yourself as you go, that's
+how the material sticks. The `labs/` directory in this clone already contains finished versions of
+those same files; treat them as your reference or fallback, not a shortcut to skip typing.
+:::
 
 ### 1. Install Rancher Desktop (the container runtime)
 
@@ -72,6 +85,13 @@ Server: Docker Engine - Community
   Version:          29.x.x
 ```
 
+:::note[Runtime output varies]
+
+On Rancher Desktop the `Server:` section has no `Docker Engine - Community` heading — you'll just
+see `Server:` followed by the `Engine:` block. What matters is that both a `Client:` and a `Server:`
+section appear; the exact heading text depends on the runtime.
+:::
+
 ### 2. Install Ollama (the model server — natively on the host)
 
 ```bash
@@ -83,6 +103,13 @@ Start the Ollama service:
 ```bash
 ollama serve &
 ```
+
+:::note[Already running?]
+
+If the Ollama app or a background service auto-started it for you, this prints `Error: listen tcp
+127.0.0.1:11434: bind: address already in use`. That's harmless — it just means Ollama is already
+serving. Move on to the next command.
+:::
 
 Verify it's running:
 
@@ -102,15 +129,21 @@ Ollama is running
 ollama pull qwen2.5:1.5b
 ```
 
-Expected output (model is ~986 MB):
+Expected output (model is ~986 MB; digest varies per release):
 
 ```
 pulling manifest
-pulling azc9e5e2e492... 100% ▕████████████████████▏ 986 MB
+pulling 183715c43589: 100% ▕██████████████████▏ 986 MB
+pulling 66b9ea09bd5b: 100% ▕██████████████████▏   68 B
+pulling eb4402837c78: 100% ▕██████████████████▏ 1.5 KB
+pulling 832dd9e00a68: 100% ▕██████████████████▏  11 KB
+pulling 377ac4d7aeef: 100% ▕██████████████████▏  487 B
 verifying sha256 digest
 writing manifest
 success
 ```
+
+If the model is already pulled, you'll just see `success` — no download progress.
 
 ### 4. Verify the end-to-end wiring
 

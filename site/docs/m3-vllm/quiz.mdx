@@ -65,9 +65,9 @@ Test your understanding of vLLM, PagedAttention, continuous batching, the CPU tr
     prompt: 'You built a client against Ollama in M2. Now you want it to talk to the vLLM server from this lab instead. What has to change?',
     options: [
       {
-        text: 'Only OPENAI_BASE_URL — point it from the Ollama address to http://host.docker.internal:8009/v1. No code, SDK, or image change.',
+        text: 'Just the environment — OPENAI_BASE_URL (to http://host.docker.internal:8009/v1) and MODEL (to the vLLM model id). No code, SDK, or image change.',
         correct: true,
-        explanation: 'Correct. vLLM exposes the identical OpenAI-compatible /v1 contract as Ollama. This is the wall-socket principle: the client speaks to the contract, and swapping the engine behind it is a one-variable deployment change.',
+        explanation: 'Correct. vLLM exposes the identical OpenAI-compatible /v1 contract as Ollama. This is the wall-socket principle: the client speaks to the contract, and swapping the engine behind it is a config-only deployment change — the client code never changes.',
       },
       {
         text: 'Rewrite client.py to use a vLLM-specific SDK and response parser.',

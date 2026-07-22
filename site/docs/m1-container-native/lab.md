@@ -116,7 +116,7 @@ You should see a `"response"` field with a short reply. The exact wording varies
 ## Step 4 — Wrap it in a script
 
 The `labs/m1/` directory of this repo already includes a convenience script, `call-ollama.sh`, that runs
-the exact command from Step 3. From the **root of the course repo** (where you cloned it), make it
+the exact command from Step 3. (You cloned the repo in Setup — run this from its root.) Make it
 executable:
 
 ```bash
@@ -195,7 +195,7 @@ ollama pull qwen2.5:1.5b
 :::
 
 :::warning[Container pull is slow (first run)]
-`curlimages/curl:latest` is ~3 MB — it downloads once and is cached. Subsequent runs start in under a second.
+`curlimages/curl:latest` is ~20 MB compressed (~37 MB on disk) — it downloads once and is cached. Subsequent runs start in under a second.
 :::
 
 ---

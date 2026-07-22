@@ -102,6 +102,11 @@ Mac learners and Windows learners without NVIDIA still hit the same `http://host
 
 Module 3 uses vLLM to teach production serving: batching, quantization, and the OpenAI server interface. To make this accessible on any machine, we use vLLM's **prebuilt CPU images**:
 
+:::warning[First run pulls ~3.6 GB]
+
+The image below is large. If you're on a metered or slow connection, skip running this here — Module 3's lab pulls the same image and walks you through it with proper expectations set.
+:::
+
 ```bash
 docker run --rm vllm/vllm-openai-cpu:latest-arm64 --help
 ```

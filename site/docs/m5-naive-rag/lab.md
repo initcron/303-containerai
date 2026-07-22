@@ -197,13 +197,15 @@ curl -s -o /dev/null -w '%{http_code}' localhost:8501/_stcore/health
 ### App log confirmation
 
 ```bash
-docker logs genai-app | grep Streamlit
+docker logs genai-app | grep -A2 Streamlit
 ```
 
-**Expected output:**
+**Expected output** (Streamlit prints the message and the URL on separate lines — `-A2` grabs both):
 
 ```
-You can now view your Streamlit app in your browser.  URL: http://0.0.0.0:8501
+  You can now view your Streamlit app in your browser.
+
+  URL: http://0.0.0.0:8501
 ```
 
 ---

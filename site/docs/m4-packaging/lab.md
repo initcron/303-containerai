@@ -76,9 +76,9 @@ Confirm the download:
 ls -lh model/
 ```
 
-**Expected output:**
+**Expected output** (macOS `ls -lh` rounds to `101M`; exact size may vary slightly by mirror):
 ```
--rw-r--r-- 1 user staff 100.6M SmolLM2-135M-Instruct-Q4_K_M.gguf
+-rw-r--r-- 1 user staff 101M SmolLM2-135M-Instruct-Q4_K_M.gguf
 ```
 
 ---
@@ -124,11 +124,13 @@ Pack the current directory (`.`) using the Kitfile. Replace `<you>` with your Gi
 kit pack . -t ghcr.io/<you>/acme-docs-model:1.0.0
 ```
 
-**Expected output:**
+**Expected output** (real `kit` 1.15.0 output — five lines, not condensed):
 ```
-Saved model layer: sha256:c0f4f53...
-Saved code layer:  sha256:be409de...
-Saved configuration + manifest: sha256:a72965fa...
+Saved model layer: sha256:c0f4f53235c650e36fe5897432b8ffd227be40a100619fbe92709c548740aa29
+Saved code layer: sha256:fc86b3d925423a6ce261521da71793a297f45f1968ddce837b489d15eaa12578
+Saved configuration: sha256:5591f216...
+Saved manifest to storage: sha256:1861c1e5...
+Model saved: sha256:1861c1e5...
 ```
 
 List the local kit store to confirm:
@@ -137,10 +139,10 @@ List the local kit store to confirm:
 kit list
 ```
 
-**Expected output:**
+**Expected output** (kit 1.15.0 also prints a `MAINTAINER` column):
 ```
-REPOSITORY                         TAG    NAME             SIZE        DIGEST
-ghcr.io/<you>/acme-docs-model      1.0.0  acme-docs-model  100.5 MiB   sha256:a72965fa...
+REPOSITORY                     TAG    NAME             MAINTAINER               SIZE        DIGEST
+ghcr.io/<you>/acme-docs-model  1.0.0  acme-docs-model  School of DevOps & AI    100.5 MiB   sha256:1861c1e5...
 ```
 
 Three things just happened: the GGUF became a `model` layer, `prompts.txt` became a `code` layer, and the Kitfile became the OCI manifest — all signed with their SHA-256 digests.
@@ -192,7 +194,7 @@ kit push ghcr.io/<you>/acme-docs-model:1.0.0
 
 **Expected output:**
 ```
-Pushed sha256:a72965fa...
+Pushed sha256:1861c1e5...
 ```
 
 ### Step 5b — Local registry alternative (validated offline path)
@@ -212,7 +214,7 @@ kit push --plain-http localhost:5001/acme-docs-model:1.0.0
 
 **Expected output:**
 ```
-Pushed sha256:a72965fa...
+Pushed sha256:1861c1e5...
 ```
 
 The mechanics are identical — `kit` speaks the same OCI distribution API. The `--plain-http` flag is the only difference for a non-TLS registry.
@@ -235,9 +237,12 @@ Now unpack from the registry into a fresh directory:
 kit unpack --plain-http localhost:5001/acme-docs-model:1.0.0 -d /tmp/m4-clean
 ```
 
-**Expected output:**
+**Expected output** (real `kit` 1.15.0 output — one line per restored layer):
 ```
-Unpacking config to Kitfile / model to ./model/...gguf / code to ./prompts.txt
+Unpacked config to Kitfile
+Unpacked model to model/SmolLM2-135M-Instruct-Q4_K_M.gguf
+Unpacked code to prompts.txt
+Unpacked to /tmp/m4-clean
 ```
 
 Verify the contents arrived byte-identical:
@@ -246,9 +251,9 @@ Verify the contents arrived byte-identical:
 ls -lh /tmp/m4-clean/model/*.gguf
 ```
 
-**Expected output:**
+**Expected output** (macOS `ls -lh` rounds to `101M`):
 ```
--rw-r--r-- 1 user staff 100.6M  SmolLM2-135M-Instruct-Q4_K_M.gguf
+-rw-r--r-- 1 user staff 101M  SmolLM2-135M-Instruct-Q4_K_M.gguf
 ```
 
 The Kitfile and `prompts.txt` are also restored:
@@ -257,9 +262,9 @@ The Kitfile and `prompts.txt` are also restored:
 ls /tmp/m4-clean/
 ```
 
-**Expected output:**
+**Expected output** (plain `ls` — no trailing slash on directory names):
 ```
-Kitfile  model/  prompts.txt
+Kitfile  model  prompts.txt
 ```
 
 That's portability: the sender packs once, any receiver unpacks the byte-identical bundle from the registry — no manual file assembly.
@@ -289,7 +294,7 @@ ls ./weights-only/
 
 **Expected output:**
 ```
-model/
+model
 ```
 
 Valid `--filter` values: `model`, `code`, `docs`, `datasets`, `prompts`. Use this to route different layers to different pipeline stages: serving nodes grab `model`; eval pipelines grab `datasets`; CI linting grabs `code`.
@@ -314,17 +319,19 @@ Valid `--filter` values: `model`, `code`, `docs`, `datasets`, `prompts`. Use thi
 ## Clean up
 
 Remove the local registry container, the ModelKits from `kit`'s local storage, and the artifacts this
-lab created (the ~100 MB model, the signing keys, and the unpack test directories):
+lab created (the ~100 MB model and the unpack test directories):
 
 ```bash
 # 1. stop + remove the local registry
 docker rm -f m4-registry
 
 # 2. remove the ModelKits from kit's local cache
+# (localhost:5001/... errors with "not found" if you already removed it in Step 6 — safe to ignore)
 kit remove localhost:5001/acme-docs-model:1.0.0
 kit remove ghcr.io/<your-user>/acme-docs-model:1.0.0   # if you tagged for GHCR
 
-# 3. remove the downloaded model + unpack test dirs (from labs/m4/)
+# 3. remove the downloaded model + unpack test dirs — run from the repo root
+cd ~/303-containerai   # adjust if you cloned elsewhere
 rm -rf labs/m4/model /tmp/m4-clean labs/m4/weights-only
 ```
 

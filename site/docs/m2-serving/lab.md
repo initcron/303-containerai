@@ -42,7 +42,7 @@ curl -s http://localhost:11434/v1/models | python3 -m json.tool
 }
 ```
 
-> The `created` value is an epoch timestamp set when Ollama loaded the model; it will differ on your machine.
+> The `created` value is an epoch timestamp set when Ollama loaded the model; it will differ on your machine. If you've pulled other models on this machine (from other courses or projects), `data` will list every one of them — only the `qwen2.5:1.5b` entry matters here.
 
 This is the standard OpenAI `GET /v1/models` response shape. Any tool, SDK, or framework that
 expects OpenAI will accept this.
@@ -132,12 +132,17 @@ Create `labs/m2/client.py` with the following content:
 
 ```python title="labs/m2/client.py"
 import os
+import sys
 from openai import OpenAI
+
 client = OpenAI(base_url=os.environ.get("OPENAI_BASE_URL", "http://host.docker.internal:11434/v1"),
                 api_key=os.environ.get("OPENAI_API_KEY", "ollama"))
+
+prompt = sys.argv[1] if len(sys.argv) > 1 else "Explain containers in one sentence."
+
 resp = client.chat.completions.create(
     model=os.environ.get("MODEL", "qwen2.5:1.5b"),
-    messages=[{"role": "user", "content": "Explain containers in one sentence."}])
+    messages=[{"role": "user", "content": prompt}])
 print(resp.choices[0].message.content)
 ```
 
@@ -147,8 +152,10 @@ A few things worth noting:
   `host.docker.internal:11434` — the address Ollama is reachable at from inside a container.
 - `api_key="ollama"` is a dummy value. The `openai` SDK requires the field to be non-empty; Ollama
   ignores whatever you pass. When you later swap to a real OpenAI endpoint, set the actual key.
-- Everything — `base_url`, `api_key`, and `model` — is configurable via environment variables.
-  The script itself never changes.
+- `prompt` reads from the first command-line argument, falling back to a default sentence — so you
+  can override what you ask without editing the file.
+- Everything — `base_url`, `api_key`, `model`, and now the prompt — is configurable without
+  touching the script itself.
 
 ---
 
@@ -203,8 +210,8 @@ docker build -t m2-client labs/m2/
 
 > Docker uses BuildKit's `#N` step notation. The build has **4 steps** (FROM, RUN, WORKDIR, COPY).
 > The first build pulls `python:3.12-slim` (~50 MB compressed) and installs `openai` (~2 MB) plus
-> its dependencies. Expect ~10–30 seconds on a typical connection. Subsequent builds use the layer
-> cache and finish in under a second.
+> its dependencies. Expect ~10–30 seconds on a typical connection (cached layers make reruns
+> near-instant). Subsequent builds use the layer cache and finish in under a second.
 
 Run it directly to verify the wiring before we add Compose:
 

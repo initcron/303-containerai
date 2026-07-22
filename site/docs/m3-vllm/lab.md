@@ -89,17 +89,25 @@ Look at `compose.yaml`. The `vllm-cpu` service runs the patched image, passes th
 cat compose.yaml
 ```
 
-**Expected output (excerpt):**
+**Expected output (excerpt — the real file, trimmed to the load-bearing lines):**
 ```yaml
 services:
   vllm-cpu:
-    build: {context: ., dockerfile: Dockerfile}
+    build:
+      context: .
+      dockerfile: Dockerfile
     image: vllm-cpu-optimized:latest
     container_name: vllm-smollm2
-    # (2) SYS_NICE + unconfined seccomp let vLLM migrate NUMA pages; without them
-    #     startup dies with "numa_migrate_pages failed. errno: 1".
-    cap_add: [SYS_NICE]
-    security_opt: ["seccomp:unconfined"]
+
+    # vLLM's CPU backend migrates memory pages across NUMA nodes at startup.
+    # That needs the SYS_NICE capability AND the migrate_pages syscall, which
+    # the default seccomp profile blocks — without both you get
+    # "numa_migrate_pages failed. errno: 1" (EPERM).
+    cap_add:
+      - SYS_NICE
+    security_opt:
+      - seccomp:unconfined
+
     command:
       - --model
       - ${MODEL_NAME:-HuggingFaceTB/SmolLM2-135M-Instruct}
@@ -108,19 +116,30 @@ services:
       - --port
       - "8000"
       - --dtype
-      - ${DTYPE:-float32}      # (3) CPU has no bf16 kernel — float32 or inference 500s
-      - --swap-space
-      - "${SWAP_SPACE:-1}"     # (4) default 4 GiB > container RAM; keep it small
+      - ${DTYPE:-float32}
       - --max-model-len
-      - "${MAX_MODEL_LEN:-1024}"  # smaller context => smaller KV cache => fits RAM
+      - "${MAX_MODEL_LEN:-1024}"
+      - --max-num-seqs
+      - "${MAX_NUM_SEQS:-4}"
+      - --swap-space
+      - "${SWAP_SPACE:-1}"
+
     ports:
-      - "8009:8000"
+      - "${VLLM_PORT:-8009}:8000"
+
     deploy:
       resources:
-        limits: {cpus: "4.0", memory: 5G}   # (1) must be <= your runtime VM's allocation
+        limits:
+          cpus: "${CPU_LIMIT:-4.0}"
+          memory: ${MEMORY_LIMIT:-5G}
 ```
 
-Those four numbered settings are the difference between "vLLM CPU works" and a wall of tracebacks. They're covered in Troubleshooting below and in the lesson's CPU-track section.
+Four things in that file are the difference between "vLLM CPU works" and a wall of tracebacks:
+`cap_add`/`security_opt` (NUMA migration needs both), `--dtype float32` (CPU has no bf16 kernel),
+`--swap-space` kept small (the 4 GiB default is bigger than this container's RAM), and the
+`deploy.resources.limits` cap (must be ≤ your runtime VM's allocation). They're covered in
+Troubleshooting below and in the lesson's CPU-track section. The full file also carries comments
+explaining each — `cat compose.yaml` yourself to read them in place.
 
 Start it:
 
@@ -157,6 +176,7 @@ curl http://localhost:8009/health
 
 **Expected output:**
 ```
+(no output — HTTP 200 with an empty body)
 ```
 
 `/health` returns **HTTP 200 with an empty body** once the model is loaded and the server is ready. If you get a connection refused, the model is still loading — give it a minute and retry.
@@ -265,6 +285,7 @@ cp .env.example .env
 
 **Expected output:**
 ```
+(no output on success)
 ```
 
 Try the **lightest model** (135M) for faster startup on constrained machines, and adjust threading and concurrency. Edit `.env`:
@@ -273,7 +294,7 @@ Try the **lightest model** (135M) for faster startup on constrained machines, an
 # in .env
 MODEL_NAME=HuggingFaceTB/SmolLM2-135M-Instruct
 OMP_THREADS=4        # more OpenMP threads (try up to ~75% of your cores)
-MAX_NUM_SEQS=4       # fewer concurrent sequences = less memory
+MAX_NUM_SEQS=4       # already the default — lower it further to trade concurrency for memory
 ```
 
 Recreate the service to apply:
@@ -297,8 +318,10 @@ docker stats vllm-smollm2 --no-stream
 **Expected output:**
 ```
 CONTAINER      CPU %     MEM USAGE / LIMIT     MEM %
-vllm-smollm2   180.4%    2.1GiB / 8GiB         26.3%
+vllm-smollm2   180.4%    2.1GiB / 5GiB         42.0%
 ```
+
+The `5GiB` LIMIT matches the compose cap (`memory: 5G`) quoted at the top of this lab.
 
 `OMP_THREADS` is the main dial: raising it uses more cores (higher CPU %) and can lower latency up to a point, then thermal throttling and cache thrashing take over. Find the value with the best latency, not the highest CPU.
 
