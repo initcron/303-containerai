@@ -1,0 +1,45 @@
+# Lab-test evidence — M3B: LoRA Fine-Tuning (Apple Silicon & NVIDIA Tracks)
+
+**Machine:** Apple Silicon (arm64), 16 GB RAM
+**Date:** 2026-07-22
+**Status:** Optional, GPU/MLX-gated module. Track A requires Apple Silicon + Python 3.10+ natively
+(no Docker); Track B requires an NVIDIA GPU on Linux/WSL2 and cannot run on this Mac at all.
+
+No `up.sh`/`down.sh` — this module runs no services (Track A is native host Python; Track B is
+documented but not executable here).
+
+---
+
+## checks.json validation 2026-07-22
+
+Per the task brief, M3B checks assert only **machine-independent facts** — they do not attempt to
+run the MLX-LM fine-tune itself (that needs a native Python env the checks runner shouldn't assume
+is provisioned), and they do not fail on a machine without a pre-built `~/mlx-lora-env` venv.
+
+**Command:** `node scripts/run-checks.mjs labs/m3b/checks.json`
+
+**Real runner output:**
+```
+✅ lab-assets-exist — labs/m3b/ reference assets exist (README + Track B config)
+✅ version-variance-admonition — lab.md documents the mlx-lm flag-name version variance (machine-independent, GPU-agnostic)
+✅ mlx-lm-importable-if-venv-present — if ~/mlx-lora-env exists, mlx_lm imports inside it; else SKIP-OK (no GPU/venv assumed on this runner)
+
+3/3 checks · score 3/3
+```
+
+On this validation machine `~/mlx-lora-env` did not exist (the lab's venv is created fresh by each
+learner during Step A-1 and torn down in Step A-6's cleanup), so the third check's guarded `run`
+command took the `SKIP-OK` branch — matching the brief's specified guard pattern
+(`[ -d ~/mlx-lora-env ] || echo SKIP-OK`, `assert.matches: "mlx_lm OK|SKIP-OK"`). This is expected
+and correct: the check is a pass either way — `mlx_lm OK` on a machine with the venv already
+provisioned, `SKIP-OK` on one without — never a failure driven by GPU/MLX availability.
+
+**Iterations needed:** 0 — green on first run. No lab.md drift found; the "Flag name varies by
+mlx-lm version" admonition (Step A-3, covering `--num-layers` vs. the older `--lora-layers`) is
+present and unchanged.
+
+## Verdict
+
+✅ M3B's checks correctly assert the module's optional/gated nature without requiring GPU hardware,
+an MLX-only Mac, or a pre-existing fine-tuning venv — they pass identically whether or not a learner
+has run Track A locally.

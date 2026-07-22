@@ -1,0 +1,16 @@
+{
+  "checks": [
+    { "id": "container-running", "describe": "vllm-smollm2 container is up",
+      "run": "PATH=\"$HOME/.rd/bin:$PATH\" docker ps --filter name=vllm-smollm2 --format '{{.Names}} {{.Status}}'",
+      "assert": { "contains": "vllm-smollm2" } },
+    { "id": "v1-models-smollm2", "describe": "/v1/models lists SmolLM2",
+      "run": "curl -s http://localhost:8009/v1/models",
+      "assert": { "contains": "SmolLM2" } },
+    { "id": "chat-completion-choices", "describe": "chat completion returns a choices array",
+      "run": "curl -s http://localhost:8009/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\":\"HuggingFaceTB/SmolLM2-135M-Instruct\",\"messages\":[{\"role\":\"user\",\"content\":\"Say OK\"}],\"max_tokens\":16}'",
+      "assert": { "contains": "\"choices\"" } },
+    { "id": "health-endpoint", "describe": "/health returns HTTP 200",
+      "run": "curl -s -o /dev/null -w '%{http_code}' http://localhost:8009/health",
+      "assert": { "matches": "^200$" } }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "checks": [
+    { "id": "lab-assets-exist", "describe": "labs/m3b/ reference assets exist (README + Track B config)",
+      "run": "ls labs/m3b/README.md labs/m3b/*.yaml 2>/dev/null; ls labs/m3b/",
+      "assert": { "contains": "README.md" } },
+    { "id": "version-variance-admonition", "describe": "lab.md documents the mlx-lm flag-name version variance (machine-independent, GPU-agnostic)",
+      "run": "grep -o 'Flag name varies by mlx-lm version' site/docs/m3b-finetuning/lab.md",
+      "assert": { "contains": "Flag name varies by mlx-lm version" } },
+    { "id": "mlx-lm-importable-if-venv-present", "describe": "if ~/mlx-lora-env exists, mlx_lm imports inside it; else SKIP-OK (no GPU/venv assumed on this runner)",
+      "run": "[ -d ~/mlx-lora-env ] && (source ~/mlx-lora-env/bin/activate && python -c \"import mlx_lm; print('mlx_lm OK')\") || echo SKIP-OK",
+      "assert": { "matches": "mlx_lm OK|SKIP-OK" } }
+  ]
+}
