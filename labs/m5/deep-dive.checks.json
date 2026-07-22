@@ -1,0 +1,28 @@
+{
+  "checks": [
+    { "id": "chromadb-up-if-running", "describe": "ChromaDB heartbeat responds if the m5 lab is currently up (else SKIP-OK)",
+      "run": "curl -sf http://localhost:${M5_CHROMA_PORT:-8000}/api/v2/heartbeat >/dev/null 2>&1 && echo UP || echo SKIP-OK",
+      "assert": { "matches": "^UP$|^SKIP-OK$" } },
+    { "id": "variant-collections-if-run", "describe": "the experiment's tracked variant collections file exists and lists 3 collections if the experiment has been run (else SKIP-OK)",
+      "run": "[ -f ~/rag-deepdive-lab/variant-collections.txt ] && wc -l < ~/rag-deepdive-lab/variant-collections.txt | tr -d ' ' || echo SKIP-OK",
+      "assert": { "matches": "^3$|^SKIP-OK$" } },
+    { "id": "comparison-table-in-page", "describe": "deep-dive page carries the live retrieval comparison table",
+      "run": "grep -c 'Variant' site/docs/m5-naive-rag/deep-dive.md",
+      "assert": { "matches": "^[1-9]" } },
+    { "id": "chunk-size-values-in-page", "describe": "deep-dive page cites the lab's actual chunk_size/overlap values (500/50)",
+      "run": "grep -c 'chunk_size=500' site/docs/m5-naive-rag/deep-dive.md",
+      "assert": { "matches": "^[1-9]" } },
+    { "id": "topk-value-in-page", "describe": "deep-dive page cites the lab's actual top-k value (k=3)",
+      "run": "grep -c 'k=3' site/docs/m5-naive-rag/deep-dive.md",
+      "assert": { "matches": "^[1-9]" } },
+    { "id": "l2-metric-verdict-in-page", "describe": "deep-dive page states the verified ChromaDB default distance metric (L2, not cosine)",
+      "run": "grep -c 'L2' site/docs/m5-naive-rag/deep-dive.md",
+      "assert": { "matches": "^[1-9]" } },
+    { "id": "context-budget-arithmetic-in-page", "describe": "deep-dive page carries the num_ctx=4096 context-budget arithmetic",
+      "run": "grep -c 'num_ctx=4096' site/docs/m5-naive-rag/deep-dive.md",
+      "assert": { "matches": "^[1-9]" } },
+    { "id": "retrieval-vs-generation-miss-in-page", "describe": "deep-dive page distinguishes retrieval miss from generation miss",
+      "run": "grep -c 'Retrieval miss' site/docs/m5-naive-rag/deep-dive.md",
+      "assert": { "matches": "^[1-9]" } }
+  ]
+}

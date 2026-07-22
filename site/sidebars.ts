@@ -62,6 +62,7 @@ const sidebars: SidebarsConfig = {
         'm5-naive-rag/lesson',
         'm5-naive-rag/lab',
         'm5-naive-rag/quiz',
+        'm5-naive-rag/deep-dive',
       ],
     },
     {

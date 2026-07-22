@@ -1,0 +1,436 @@
+---
+sidebar_position: 4
+title: 'Deep Dive: RAG Parameters Under the Hood'
+sidebar_label: 'Deep Dive (Part 2)'
+---
+
+# Deep Dive: RAG Parameters Under the Hood
+
+The lab wired ChromaDB and a Streamlit app together, ingested Acme's runbooks, and watched
+Learning Mode show a question retrieve the right chunk and generate a grounded answer. It never
+asked why `chunk_size=500`, `k=3`, or `nomic-embed-text` were the right choices — they were just
+the values already in `app/main.py`. This page opens those knobs: what moving each one actually
+does to retrieval quality, what distance metric ChromaDB is silently using under `add_documents`,
+how to size a context-window budget instead of guessing at `top-k`, and how to tell a retrieval
+miss from a generation miss when the app answers wrong. It closes by re-ingesting the same corpus
+under two different chunking strategies and comparing what each one actually retrieves.
+
+:::info[Where this picks up]
+
+You need the m5 stack up — ChromaDB and `genai-app` from the lab. This works whether the stack
+is currently running or was torn down after the lab; `up.sh` is idempotent, so re-running it is
+safe.
+
+```bash
+cd labs/m5
+bash up.sh
+```
+
+**Expected output**
+
+```text
+m5 ready: chromadb + genai-app healthy.
+```
+
+:::
+
+---
+
+## 1 — Chunk size and overlap: cutting the document without losing the sentence
+
+The lab's splitter runs with `chunk_size=500, chunk_overlap=50` — 500 characters per chunk, the
+last 50 characters of each chunk repeated at the start of the next. Nobody explained why those
+two numbers, or what changing them buys or costs you.
+
+**Analogy:** think of chunking as cutting a long runbook into index cards for a study deck. Cut
+the cards too small and a card can end mid-sentence — the fact "restart the payments service"
+lands on one card and the actual command lands on the next, so anyone reading a single card gets
+half an idea. Cut the cards too large and each card tries to hold four unrelated procedures at
+once; when you ask the librarian for "the payments card," she hands you a card whose *average*
+meaning is a blur of four topics, and the embedding for that card is a mediocre match for
+anything in particular. Overlap is photocopying the last couple of lines from each card onto the
+front of the next one, so a fact that happens to fall right on a cut boundary is never orphaned
+on one card with no context.
+
+Concretely, `RecursiveCharacterTextSplitter` tries to cut on paragraph and sentence boundaries
+first, falling back to a hard character cut only when a paragraph is longer than `chunk_size`.
+At 500 characters, most of the four short Acme runbook sections fit inside one or two chunks
+each — which is exactly why the lab's ingest reported **2 chunks** for the whole 4-section
+document. That's small enough that overlap barely matters here; overlap earns its keep on longer
+documents where a procedure genuinely spans a chunk boundary.
+
+```mermaid
+flowchart LR
+    DOC["Runbook text\n(one long document)"]
+    C1["Chunk 1\n(500 chars)"]
+    C2["Chunk 2\n(500 chars,\nstarts 50 chars\ninto chunk 1)"]
+    E1["Embed → 768-dim vector"]
+    E2["Embed → 768-dim vector"]
+    STORE[("ChromaDB\ndocuments collection")]
+
+    DOC --> C1
+    DOC -->|"overlap band\n(last 50 chars of C1)"| C2
+    C1 --> E1 --> STORE
+    C2 --> E2 --> STORE
+```
+
+*Overlap means the tail of chunk 1 and the head of chunk 2 share text — a fact sitting on that
+boundary appears whole in at least one chunk instead of being split with no context on either
+side.*
+
+**Too small** (say `chunk_size=100`): chunks approach single-sentence granularity. Embeddings get
+*more* precise about what each chunk means, but each retrieved chunk carries less surrounding
+context — the model gets the command but not the caveat two sentences later ("the payments
+service depends on the Postgres primary"). You also multiply the chunk count, which raises
+storage and search cost for no retrieval-quality gain once chunks are smaller than a single
+coherent idea.
+
+**Too large** (say `chunk_size=2000` on this corpus): a chunk this big would swallow two or three
+of Acme's runbook sections into one embedding. The embedding model has to compress "payments
+restart," "database backup," and "checkout 503" into a single 768-number average — noise
+dilution. A query about payments now has to compete with unrelated content baked into the same
+vector, and worse, retrieving that chunk burns your context-window budget (§4) on paragraphs the
+question never asked about.
+
+There is no universal right answer — it depends on how self-contained a "fact" is in your
+corpus. A FAQ where every Q&A pair is already a natural unit wants small chunks close to that
+unit's size. A long runbook where a single procedure spans several paragraphs wants larger
+chunks or overlap generous enough to keep a straddling step intact.
+
+---
+
+## 2 — top-k: how many cards you hand the model
+
+The lab retrieves with `search_kwargs={"k": 3}` — the three most similar chunks, every query,
+regardless of how many chunks actually exist or how relevant the third-nearest one is.
+
+More is not automatically better. Every chunk you retrieve is text the model has to read before
+it can answer, and it competes for two scarce things: your context-window budget (§4) and the
+model's attention. A `k` too small can miss the answer entirely if the right chunk lands 4th on
+the similarity ranking and never gets retrieved. A `k` too large hands the model near-duplicate
+or off-topic chunks alongside the real answer — on a small corpus like Acme's four runbook
+sections, `k=3` out of only 2 total chunks (the lab's ingest count) means you're already
+retrieving *everything indexed*, so `k` isn't filtering at all here. On a larger corpus, a `k`
+that's too generous makes the model do the filtering work retrieval was supposed to do for it,
+and a plausible-sounding but wrong nearby chunk sitting in the context is exactly what produces
+a confidently wrong answer (§5).
+
+The right `k` is corpus-shaped: a narrow FAQ where one chunk fully answers most questions wants
+`k=1`–`2`. A runbook where the answer commonly spans two related sections (the command *and* the
+prerequisite two sentences later) wants `k=3`–`5`. Above that, you're usually diluting more than
+you're helping — this is the point at which naive top-k retrieval gives way to re-ranking (§5),
+which this module's naive RAG doesn't have.
+
+---
+
+## 3 — Similarity metric and embedding model: what "similar" even means
+
+The lab's `Chroma(...)` constructor in `init_vectorstore()` passes no `collection_metadata`
+argument — no `hnsw:space` override anywhere in `app/main.py`, `rag_roundtrip.py`, or the
+`checks.json` collection-creation call. That means the `documents` collection runs on ChromaDB's
+default index space: **squared L2 (Euclidean) distance**, not cosine similarity. Every "Found N
+relevant chunks" line Learning Mode prints in the lab is ChromaDB returning the N chunks with the
+*smallest* L2 distance to the query vector — a distance, not a similarity score, which is why
+smaller numbers mean "more relevant" if you ever query the metric directly (§6).
+
+This matters in one specific way: for `nomic-embed-text`, whose embeddings are close to unit-norm
+by construction, L2 distance and cosine similarity produce **the same nearest-neighbour ranking**
+— L2² between two unit vectors is a monotonic function of their cosine similarity
+(`‖a-b‖² = 2 - 2·cos(a,b)` when `‖a‖=‖b‖=1`). So the metric choice is largely academic for this
+specific embedding model. It stops being academic the moment you swap in an embedding model that
+does *not* normalize its output vectors — L2 distance then starts rewarding vector *magnitude*
+alongside direction, which cosine similarity ignores entirely. If you ever change embedding
+models, check whether the new model's vectors are normalized before assuming the ranking behaves
+the same way.
+
+**Why the embedder — not the LLM — defines retrieval quality.** The LLM (`qwen2.5:1.5b`) never
+sees your documents until after retrieval hands it a slice of text. Every retrieval decision —
+which chunk counts as "similar" — is made entirely by `nomic-embed-text`'s 768-dimensional
+representation of meaning. If the embedding model doesn't distinguish "restart" from "backup" in
+its vector space, no amount of LLM quality downstream fixes a bad retrieval. This is also why you
+cannot swap embedding models without re-embedding the whole corpus: two different models place
+the same sentence at different, incomparable coordinates — `nomic-embed-text`'s vector for
+"restart the payments service" and a hypothetical second model's vector for the same sentence are
+not points in the same space, so comparing across them (or storing embeddings from one and
+querying with the other) produces nonsense distances. `nomic-embed-text` was chosen for this
+course because it is small enough to run natively on Ollama alongside `qwen2.5:1.5b` within the
+6 GB budget and produces reasonable general-purpose retrieval quality without a GPU. A larger
+domain-tuned embedder (e.g. a code- or legal-specific embedding model) would out-retrieve it on
+that domain — at a proportionally larger memory and latency cost.
+
+---
+
+## 4 — Context-window budget: what actually has to fit
+
+`init_llm()` sets `num_ctx=4096` on the Ollama LLM — that is the real ceiling every prompt this
+app builds has to fit inside, independent of `qwen2.5:1.5b`'s much larger native training context.
+The augmented prompt the app sends to the model (`main.py`, the `augmented_prompt` f-string) has
+four parts, and every one of them eats into that 4096-token budget:
+
+```text
+Based on the following context, answer the question.
+
+Context:
+{context}                    <- retrieved chunks, joined with "\n\n"
+
+Question: {prompt}           <- the user's question
+
+Answer:
+```
+
+Work the arithmetic for this lab's actual numbers. As a rough rule of thumb, 500 characters of
+English prose is roughly 100–130 tokens (about 4 characters per token). With `chunk_size=500` and
+`k=3`:
+
+| Budget line | Rough size |
+|---|---|
+| Template scaffolding ("Based on the following context...", "Question:", "Answer:") | ~20 tokens |
+| Retrieved context: 3 chunks × ~500 chars | ~300–390 tokens |
+| User question | ~15–30 tokens |
+| **Prompt total** | **~350–450 tokens** |
+| Headroom for the answer inside `num_ctx=4096` | **~3,650–3,700 tokens** |
+
+At this lab's scale the prompt uses under 15% of the 4096-token ceiling — there's no pressure on
+this corpus. The arithmetic starts to matter the moment you scale either axis: raise `k` to 10 on
+a corpus with `chunk_size=1500`, and 10 × 1500 chars ≈ 3,750 tokens of context alone — that
+crowds out the answer entirely inside a 4096 window, and Ollama silently truncates from the front
+of the context (the oldest tokens) once the window fills, which on this prompt shape means your
+*earliest retrieved chunks* are what gets cut, not the question. Sizing `top-k × chunk_size`
+against your actual `num_ctx` before scaling either knob up is the check that catches this before
+it becomes a silent, hard-to-diagnose "the model ignored my context" bug.
+
+---
+
+## 5 — Failure modes: retrieval miss vs. generation miss
+
+When a naive-RAG app answers wrong, there are two structurally different causes, and confusing
+them wastes debugging time:
+
+- **Retrieval miss** — the wrong chunk (or no useful chunk) was retrieved. The model then
+  answered correctly *given what it was handed* — it just wasn't handed the right thing. This is
+  an embedding/chunking/top-k problem (§1–§3), not a model problem.
+- **Generation miss** — the right chunk was retrieved (you can confirm this by reading "View
+  Source Chunks" in the lab's UI or querying ChromaDB directly, §6), but the model still answered
+  incorrectly, ignored part of the context, or hallucinated something the context didn't say.
+  This is a prompting or model-capability problem.
+
+Naive RAG makes retrieval misses more likely than they need to be because there is **no
+re-ranking step**. The pipeline retrieves once by raw vector distance and hands whatever comes
+back straight to the LLM — it never asks "is chunk #2, which scored slightly worse on embedding
+distance but is obviously more topically relevant, actually the better answer?" A production RAG
+system commonly adds a re-ranker (a smaller, more precise model that re-scores the top-N
+candidates from the vector search before choosing what to hand the LLM) specifically to catch
+cases where embedding similarity and true relevance diverge — two runbook sections can be
+semantically adjacent in embedding space (both are "ops procedures") while only one actually
+answers the question. This module's naive RAG has no such step; that gap is exactly what M6's
+agentic approach adds back.
+
+---
+
+## 6 — Querying ChromaDB directly: seeing what Learning Mode summarizes
+
+The Streamlit UI's Learning Mode panel already shows retrieved chunks, but it summarizes them —
+truncated previews, no raw distances. ChromaDB's own HTTP API gives you the unfiltered picture:
+the exact stored chunk text and the exact distance score behind every "Found N relevant chunks"
+line.
+
+List what's actually in the collection the lab's app writes to:
+
+```bash
+curl -s http://localhost:${M5_CHROMA_PORT:-8000}/api/v1/collections | python3 -m json.tool
+```
+
+**Expected output**
+
+```text
+<expected output — folded in during live lab validation>
+```
+
+Query it directly for a question, using the same embedding model the app uses, and see the raw
+distances behind the ranking (this one-liner runs inside the `genai-app` container, where
+`langchain-chroma` and the Ollama client are already installed):
+
+```bash
+docker exec genai-app python3 -c "
+import chromadb, os
+from langchain_ollama import OllamaEmbeddings
+from langchain_chroma import Chroma
+emb = OllamaEmbeddings(model='nomic-embed-text', base_url=os.environ['OLLAMA_BASE_URL'])
+client = chromadb.HttpClient(host=os.environ['CHROMA_HOST'], port=int(os.environ['CHROMA_PORT']))
+vs = Chroma(client=client, collection_name='documents', embedding_function=emb)
+for doc, score in vs.similarity_search_with_score('How do I restart the payments service?', k=3):
+    print(f'{score:.4f}', doc.page_content[:80].replace(chr(10), ' '))
+"
+```
+
+**Expected output**
+
+```text
+<expected output — folded in during live lab validation>
+```
+
+`similarity_search_with_score` returns raw L2 distance (§3) — **lower is better**, the opposite
+of a similarity percentage. This is the exact number ChromaDB's index is ranking on when the
+Streamlit app decides which 3 chunks to hand the LLM; the UI never shows you this figure, only
+the resulting text.
+
+---
+
+## 7 — Experiment: re-ingesting the corpus under different chunking strategies
+
+Compare the lab's baseline chunking against two variants, without touching the running app or
+its `documents` collection — every variant gets its **own** ChromaDB collection name, so this
+runs against the same containers already up, no extra process or memory cost.
+
+Seed a working directory and the fixed question set (reused from `rag_roundtrip.py`'s question,
+extended to cover more of the corpus):
+
+```bash
+mkdir -p ~/rag-deepdive-lab && cd ~/rag-deepdive-lab
+cat > questions.txt << 'EOF'
+How do I restart the payments service?
+What happens if checkout is overloaded?
+How long are database backups retained?
+Who do I page for an unacknowledged incident?
+EOF
+```
+
+Run the ingest-and-compare script against three chunking configurations — the lab's own baseline
+(`chunk_size=500, overlap=50`), a smaller-chunks/no-overlap variant, and a larger-chunks/generous-
+overlap variant, each into its own named collection:
+
+```bash
+cat > compare_chunking.py << 'PYEOF'
+import os, sys
+import chromadb
+from langchain_ollama import OllamaEmbeddings, OllamaLLM
+from langchain_chroma import Chroma
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_community.document_loaders import UnstructuredMarkdownLoader
+
+OLLAMA = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+CHROMA_HOST = os.getenv("CHROMA_HOST", "localhost")
+CHROMA_PORT = int(os.getenv("CHROMA_PORT", "8000"))
+DOCS = os.getenv("DOCS_PATH", "labs/m5/docs/acme-runbooks.md")
+
+VARIANTS = {
+    "baseline":  {"chunk_size": 500,  "chunk_overlap": 50},   # the lab's own values
+    "variant-a": {"chunk_size": 150,  "chunk_overlap": 0},    # smaller, no overlap
+    "variant-b": {"chunk_size": 1200, "chunk_overlap": 200},  # larger, generous overlap
+}
+
+questions = [l.strip() for l in open("questions.txt") if l.strip()]
+emb = OllamaEmbeddings(model="nomic-embed-text", base_url=OLLAMA)
+llm = OllamaLLM(model="qwen2.5:1.5b", base_url=OLLAMA, temperature=0, num_ctx=4096)
+client = chromadb.HttpClient(host=CHROMA_HOST, port=CHROMA_PORT)
+
+created = []
+for name, params in VARIANTS.items():
+    collection = f"deepdive-{name}"
+    docs = UnstructuredMarkdownLoader(DOCS).load()
+    splitter = RecursiveCharacterTextSplitter(length_function=len, **params)
+    chunks = splitter.split_documents(docs)
+    vs = Chroma(client=client, collection_name=collection, embedding_function=emb)
+    vs.add_documents(chunks)
+    created.append(collection)
+    print(f"\n=== {name} (chunk_size={params['chunk_size']}, overlap={params['chunk_overlap']}) -> {len(chunks)} chunks ===")
+
+    for q in questions:
+        hits = vs.similarity_search_with_score(q, k=3)
+        top_doc, top_score = hits[0]
+        context = "\n\n".join(d.page_content for d, _ in hits)
+        prompt = f"Based on the following context, answer the question.\n\nContext:\n{context}\n\nQuestion: {q}\n\nAnswer:"
+        answer = llm.invoke(prompt)
+        print(f"  Q: {q}")
+        print(f"    top distance: {top_score:.4f}  chunk: {top_doc.page_content[:70].strip()!r}")
+        print(f"    answer: {answer.strip()[:120]}")
+
+with open(os.path.expanduser("~/rag-deepdive-lab/variant-collections.txt"), "w") as f:
+    f.write("\n".join(created) + "\n")
+PYEOF
+docker exec -e DOCS_PATH=/app/docs/acme-runbooks.md genai-app python3 - < compare_chunking.py
+```
+
+**Expected output**
+
+```text
+<expected output — folded in during live lab validation>
+```
+
+Fold the three variants' results into a comparison table (variant, chunk count, retrieved-chunk
+snippet, whether the retrieved context actually contained the answer, model's answer):
+
+| Variant | Chunk size / overlap | Chunk count | Retrieved top chunk (payments Q) | Contains the answer? | Model's answer |
+|---|---|---|---|---|---|
+| baseline | 500 / 50 | <!-- folded in --> | <!-- folded in --> | <!-- folded in --> | <!-- folded in --> |
+| variant-a | 150 / 0 | <!-- folded in --> | <!-- folded in --> | <!-- folded in --> | <!-- folded in --> |
+| variant-b | 1200 / 200 | <!-- folded in --> | <!-- folded in --> | <!-- folded in --> | <!-- folded in --> |
+
+Judge the deterministic side of this table strictly — chunk counts and distance scores are exact,
+reproducible facts about this corpus and these parameters. Judge the model's prose answers by
+shape only (did it contain the right command, did it stay grounded in the retrieved text) — exact
+wording varies run to run even at `temperature=0` on a small local model.
+
+**Teardown for this section only** — drop the three variant collections created above; this does
+**not** touch the `documents` collection the running lab app depends on:
+
+```bash
+docker exec genai-app python3 -c "
+import chromadb, os
+client = chromadb.HttpClient(host=os.environ['CHROMA_HOST'], port=int(os.environ['CHROMA_PORT']))
+for name in open('/dev/stdin').read().split():
+    try:
+        client.delete_collection(name)
+        print('deleted', name)
+    except Exception as e:
+        print('skip', name, e)
+" <<< "deepdive-baseline deepdive-variant-a deepdive-variant-b"
+```
+
+**Expected output**
+
+```text
+<expected output — folded in during live lab validation>
+```
+
+---
+
+## Teardown
+
+Page-scoped only. The three `deepdive-*` collections were already dropped in §7. Remove the local
+working directory this page created:
+
+```bash
+rm -rf ~/rag-deepdive-lab
+```
+
+Leave the m5 stack and the `documents` collection exactly as the lab left them — this page never
+touched `docker compose down`, and the lab's own teardown is unaffected by anything run here.
+
+:::tip[Where you will use this]
+
+- **Chunk size and overlap trade context completeness against embedding precision.** **Use it
+  when:** you're tuning a real corpus — a short FAQ wants small, near-atomic chunks; a runbook
+  where procedures span paragraphs wants larger chunks or overlap generous enough that a fact
+  never lands split with no context on either side.
+- **top-k is a context-budget decision, not a "more retrieval is safer" dial.** **Use it when:**
+  you're deciding how many chunks to retrieve for a new corpus — size it to how often the answer
+  genuinely spans multiple chunks, not to a default that happens to work on someone else's docs.
+- **ChromaDB's default index metric is L2 distance, not cosine similarity — verify, don't
+  assume.** **Use it when:** you swap embedding models and retrieval quality drops; check whether
+  the new model's vectors are normalized before blaming the model, since unnormalized vectors
+  behave differently under L2 than under cosine.
+- **The embedding model — not the LLM — determines what gets retrieved, and embeddings from
+  different models are not comparable.** **Use it when:** you're planning an embedding-model
+  upgrade — budget for a full re-ingest of the corpus, not a drop-in swap; old and new vectors in
+  the same collection produce meaningless distances against each other.
+- **"RAG answered wrong" splits into retrieval miss vs. generation miss, and they need different
+  fixes.** **Use it when:** diagnosing a bad answer in production — check the actually-retrieved
+  chunks (via the raw API, not the UI summary) before touching the prompt or the model; a
+  retrieval miss needs a chunking/top-k/embedding fix, a generation miss needs a prompting fix.
+- **Naive RAG has no re-ranking step, so a semantically-adjacent-but-wrong chunk can outrank the
+  actually relevant one.** **Use it when:** you're deciding whether a corpus has outgrown naive
+  RAG — if wrong-topic retrievals are common despite good chunking, that's the signal to add a
+  re-ranking stage or move to an agentic retrieval loop (M6), not to keep tuning `top-k`.
+
+:::
