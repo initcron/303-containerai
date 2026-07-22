@@ -4,6 +4,8 @@ title: 'Deep Dive: Agent Knobs Under the Hood'
 sidebar_label: 'Deep Dive (Part 2)'
 ---
 
+import Slides from '@site/src/components/Slides';
+
 # Deep Dive: Agent Knobs Under the Hood
 
 The lab ran the Incident Crew end to end and watched it produce two outcomes: APPROVED for a
@@ -15,6 +17,8 @@ okay?" This page opens `crew.py` itself: the exact temperature each agent gets a
 crew has no iteration cap because it was never built to loop, how a finding moves from one agent
 to the next as a plain string, where the code-level gates actually sit, and what happens when you
 turn one off. It closes with a same-prompt, sequential comparison across three knob variants.
+
+<Slides src="decks/07-deepdive.html" title="Module 7 Deep Dive — Agent Knobs" />
 
 :::info[Where this picks up]
 
