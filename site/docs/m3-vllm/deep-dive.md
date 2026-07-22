@@ -4,6 +4,8 @@ title: 'Deep Dive: vLLM Internals Under the Hood'
 sidebar_label: 'Deep Dive (Part 2)'
 ---
 
+import Slides from '@site/src/components/Slides';
+
 # Deep Dive: vLLM Internals Under the Hood
 
 The lab built a patched CPU vLLM image, served SmolLM2 behind `/v1`, and pointed your M2 client
@@ -14,6 +16,8 @@ continuous batching changes throughput instead of just latency, and what your `.
 that machinery. It closes with a small, honest experiment — vLLM-CPU against native Ollama on
 the same prompts — that shows the *shape* of the difference PagedAttention and continuous
 batching make, even at CPU/toy scale.
+
+<Slides src="decks/03-deepdive.html" title="Module 3 Deep Dive — vLLM Internals" />
 
 :::info[Where this picks up]
 
