@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RAG Retrieval Playground — chunk size, overlap, top-k and the retrieval trade-off</title>
+<style>
+  :root{
+    --bg:#0d1220; --panel:#151c2e; --panel2:#111827; --line:#26324e; --line2:#1c2740;
+    --txt:#dbe4f5; --dim:#8494b3; --faint:#5a6a8c;
+    --accent:#4cc9f0; --accent2:#7b6cf6;
+    --ok:#3ddc97; --warn:#f5b942; --bad:#ff6b6b;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{font-size:clamp(10.5px,0.4vw + 9.1px,16px)}
+  html,body{height:100%}
+  body{
+    background:var(--bg); color:var(--txt);
+    font:1rem/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    overflow:hidden;
+  }
+  #app{display:flex;flex-direction:column;height:100%;padding:8px 10px;gap:6px}
+
+  /* ---------- header ---------- */
+  header{display:flex;align-items:center;gap:12px;flex:0 0 auto;flex-wrap:wrap}
+  header h1{font-size:1.05rem;font-weight:650;letter-spacing:.2px;white-space:nowrap}
+  header h1 .llm{color:var(--accent2)}
+  #hsub{margin-left:auto;font-family:var(--mono);font-size:.8rem;color:var(--faint);white-space:nowrap;
+    overflow:hidden;text-overflow:ellipsis}
+  #reset{background:none;border:1px solid var(--line);color:var(--dim);border-radius:6px;
+    padding:3px 9px;font-size:.88rem;cursor:pointer;min-height:24px;flex:0 0 auto}
+  #reset:hover{color:var(--txt);border-color:var(--faint)}
+
+  /* ---------- challenge banner ---------- */
+  #challenge{flex:0 0 auto;display:flex;align-items:center;gap:10px;
+    background:linear-gradient(90deg,rgba(123,108,246,.14),rgba(76,201,240,.07));
+    border:1px solid #3a3f6e;border-radius:8px;padding:4px 11px;min-height:30px}
+  #challenge .tag{font-size:.8rem;font-weight:700;letter-spacing:.8px;color:var(--accent2);
+    text-transform:uppercase;white-space:nowrap}
+  #challenge .steps{display:flex;gap:5px}
+  #challenge .dot{width:1.3rem;height:1.3rem;border-radius:50%;border:1.5px solid var(--faint);
+    font-size:.76rem;display:flex;align-items:center;justify-content:center;color:var(--faint);font-weight:700}
+  #challenge .dot.cur{border-color:var(--accent);color:var(--accent)}
+  #challenge .dot.done{border-color:var(--ok);background:rgba(61,220,151,.15);color:var(--ok)}
+  #challenge .txt{flex:1;color:var(--txt);font-size:.94rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+  #challenge .txt code{font-family:var(--mono);font-size:.86rem;color:var(--accent);background:rgba(76,201,240,.08);
+    padding:0 4px;border-radius:4px}
+  #challenge.success{background:linear-gradient(90deg,rgba(61,220,151,.16),rgba(61,220,151,.05));border-color:#2c7a5b}
+  #challenge.success .tag{color:var(--ok)}
+  #challenge.success .txt{white-space:normal;line-height:1.3}
+
+  /* ---------- main grid ---------- */
+  #main{flex:1 1 auto;display:grid;grid-template-columns:clamp(238px,20.5rem,340px) 1fr;gap:6px;min-height:0}
+  #main>.panel{min-width:0}
+  .panel{background:var(--panel);border:1px solid var(--line2);border-radius:10px;padding:7px 10px;min-height:0}
+  .panel h2{font-size:.76rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--faint);margin-bottom:5px}
+  .panel h2 span{text-transform:none;letter-spacing:0;color:var(--faint);font-weight:400}
+
+  /* ---------- controls (left) ---------- */
+  #controls{display:flex;flex-direction:column;gap:9px;overflow-y:auto;scrollbar-width:thin}
+
+  .ctl .cl{font-family:var(--mono);font-size:.76rem;color:var(--dim);display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px}
+  .ctl .cl b{color:var(--txt);font-weight:700}
+  .ctl .cl .hint{color:var(--faint);font-size:.68rem;font-weight:400}
+
+  /* pill groups */
+  .pillhead{font-family:var(--mono);font-size:.76rem;color:var(--dim);margin-bottom:3px}
+  #sizePills,#ovPills,#kPills{display:flex;flex-wrap:wrap;gap:4px}
+  .pill{font-family:var(--mono);font-size:.8rem;line-height:1.2;border:1px solid var(--line);
+    border-radius:999px;background:var(--panel2);color:var(--dim);padding:4px 12px;cursor:pointer;
+    transition:border-color .12s,color .12s,background .12s;user-select:none}
+  .pill:hover{border-color:var(--accent2);color:var(--txt)}
+  .pill.on{border-color:var(--accent2);color:var(--accent);
+    background:color-mix(in srgb,var(--accent2) 16%,var(--panel2))}
+
+  /* question picker */
+  #qList{display:flex;flex-direction:column;gap:4px}
+  .qopt{font-family:var(--mono);font-size:.78rem;line-height:1.3;border:1px solid var(--line);
+    border-radius:7px;background:var(--panel2);color:var(--dim);padding:5px 8px;cursor:pointer;
+    text-align:left;transition:border-color .12s,color .12s,background .12s}
+  .qopt:hover{border-color:var(--accent2);color:var(--txt)}
+  .qopt.on{border-color:var(--accent2);color:var(--accent);
+    background:color-mix(in srgb,var(--accent2) 14%,var(--panel2))}
+
+  /* readouts */
+  .readout{display:flex;flex-direction:column;gap:3px;border:1px solid var(--line2);border-radius:8px;
+    background:var(--panel2);padding:7px 10px}
+  .readout,.readout *{cursor:default}
+  .rrow{display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding:1px 0}
+  .rrow .rl{font-family:var(--mono);font-size:.78rem;color:var(--dim)}
+  .rrow .rv{font-family:var(--mono);font-size:.86rem;font-weight:700;color:var(--txt)}
+  .rrow .rv.good{color:var(--ok)} .rrow .rv.warn{color:var(--warn)} .rrow .rv.bad{color:var(--bad)}
+  .rsep{height:1px;background:var(--line2);margin:3px 0}
+
+  /* context-budget gauge */
+  .meterWrap{border:1px solid var(--line2);border-radius:8px;background:var(--panel2);padding:7px 10px}
+  .meterWrap,.meterWrap *{cursor:default}
+  .meterWrap .ml{font-family:var(--mono);font-size:.74rem;color:var(--dim);display:flex;justify-content:space-between;margin-bottom:4px}
+  .meterWrap .ml b{color:var(--txt)}
+  #meterBar{height:.7rem;border-radius:5px;background:#0a0f1c;border:1px solid var(--line2);overflow:hidden;position:relative}
+  #meterFill{position:absolute;inset:0 auto 0 0;width:0%;border-radius:5px;
+    background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s ease}
+  #meterFill.over{background:linear-gradient(90deg,var(--warn),var(--bad))}
+  .meterWrap .mnote{font-family:var(--mono);font-size:.68rem;color:var(--faint);margin-top:4px;line-height:1.35}
+
+  /* answer-quality indicator */
+  .qualBox{border:1px solid var(--line2);border-radius:8px;background:var(--panel2);padding:7px 10px}
+  .qualBox,.qualBox *{cursor:default}
+  .qualBox .ol{font-family:var(--mono);font-size:.74rem;color:var(--dim);display:flex;justify-content:space-between;margin-bottom:3px}
+  #qualBadge{font-family:var(--mono);font-size:.76rem;font-weight:700;padding:2px 9px;border-radius:999px;
+    border:1px solid var(--line);display:inline-block}
+  #qualBadge.grounded{color:var(--ok);border-color:color-mix(in srgb,var(--ok) 50%,var(--line));background:rgba(61,220,151,.08)}
+  #qualBadge.orphan{color:var(--warn);border-color:color-mix(in srgb,var(--warn) 50%,var(--line));background:rgba(245,185,66,.08)}
+  #qualBadge.starved{color:var(--bad);border-color:color-mix(in srgb,var(--bad) 50%,var(--line));background:rgba(255,107,107,.1)}
+  #qualBadge.diluted{color:var(--warn);border-color:color-mix(in srgb,var(--warn) 50%,var(--line));background:rgba(245,185,66,.08)}
+  .qualBox .onote{font-family:var(--mono);font-size:.68rem;color:var(--faint);margin-top:4px;line-height:1.35}
+
+  /* ---------- right view: corpus strip + retrieved chunks ---------- */
+  #view{display:flex;flex-direction:column;min-height:0;gap:6px}
+  #stage{flex:1 1 auto;position:relative;min-height:0;border:1px solid var(--line2);border-radius:8px;
+    background:radial-gradient(circle at 50% 20%,#0f1626 0%,#0a0f1c 100%);overflow:hidden;
+    display:flex;flex-direction:column;padding:8px;gap:6px}
+  #stageHead{display:flex;align-items:center;gap:14px;flex:0 0 auto;font-family:var(--mono);font-size:.74rem;color:var(--dim)}
+  #chunkCountLive{margin-left:auto;color:var(--txt);font-weight:700}
+
+  #corpusStrip{flex:0 0 auto;display:flex;flex-wrap:wrap;gap:2px;padding:6px;border:1px solid var(--line2);
+    border-radius:7px;background:var(--panel2);max-height:38%;overflow-y:auto;scrollbar-width:thin}
+  .chip{font-family:var(--mono);font-size:.68rem;line-height:1.3;padding:3px 6px;border-radius:4px;
+    border:1px solid var(--line);background:var(--panel);color:var(--dim);cursor:default;max-width:16rem;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .chip.hit{border-color:var(--accent);color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,var(--panel))}
+  .chip.hit1{border-color:var(--ok);color:var(--ok);background:color-mix(in srgb,var(--ok) 14%,var(--panel))}
+  .chip.orphan{border-style:dashed;border-color:var(--warn)}
+
+  #resultsWrap{flex:1 1 auto;min-height:0;overflow-y:auto;scrollbar-width:thin;display:flex;flex-direction:column;gap:5px}
+  .hitcard{border:1px solid var(--line2);border-radius:7px;background:var(--panel2);padding:6px 9px;cursor:default}
+  .hitcard .hh{display:flex;justify-content:space-between;align-items:baseline;font-family:var(--mono);font-size:.74rem;margin-bottom:3px}
+  .hitcard .hh .rank{color:var(--accent2);font-weight:700}
+  .hitcard .hh .dist{font-weight:700}
+  .hitcard .hh .dist.best{color:var(--ok)}
+  .hitcard .hh .dist.mid{color:var(--warn)}
+  .hitcard .hh .dist.worst{color:var(--bad)}
+  .hitcard .body{font-size:.82rem;line-height:1.35;color:var(--txt);opacity:.92}
+  .hitcard.orphanFlag{border-color:var(--warn);border-style:dashed}
+  .hitcard .flag{font-family:var(--mono);font-size:.68rem;color:var(--warn);margin-top:3px}
+
+  /* ---------- event log ---------- */
+  #events{flex:0 0 clamp(84px,7.5rem,132px);display:flex;flex-direction:column;min-height:0}
+  #events,#events *{cursor:default}
+  #evList{flex:1;overflow-y:auto;font-family:var(--mono);font-size:.78rem;line-height:1.6;scrollbar-width:thin}
+  .ev{display:flex;gap:8px;white-space:nowrap;overflow:hidden}
+  .ev .et{color:var(--faint);flex:0 0 4.2rem}
+  .ev .er{flex:0 0 7.4rem;color:var(--accent2);font-weight:700;overflow:hidden;text-overflow:ellipsis}
+  .ev.warn .er{color:var(--warn)} .ev.try .er{color:var(--accent)} .ev.ok .er{color:var(--ok)} .ev.bad .er{color:var(--bad)}
+  .ev .em{flex:1;color:var(--txt);opacity:.9;overflow:hidden;text-overflow:ellipsis}
+  .ev.new{animation:evin .4s ease-out}
+  @keyframes evin{0%{background:rgba(123,108,246,.12)}100%{background:transparent}}
+  #note{margin-left:auto;font-size:1rem;color:var(--faint);cursor:help;position:relative;padding:0 4px}
+  #note:hover{color:var(--dim)}
+  #note:hover::after,#note:active::after{content:attr(data-tip);position:absolute;right:0;bottom:calc(100% + 7px);
+    z-index:40;width:52ch;max-width:80vw;background:#0a0f1c;border:1px solid var(--line);border-radius:7px;padding:7px 10px;
+    color:var(--txt);text-align:left;white-space:normal;pointer-events:none;
+    font:.82rem/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    box-shadow:0 4px 16px rgba(0,0,0,.55)}
+
+  /* narrow fallback */
+  @media (max-width:620px){
+    body{overflow:auto}
+    #main{grid-template-columns:1fr}
+    #app{height:auto;min-height:100%}
+    #stage{min-height:70vw}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none !important;transition:none !important}
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <header>
+    <h1><span class="llm">◆</span> RAG Retrieval Playground</h1>
+    <span id="hsub">chunk size × overlap × top-k — feel where retrieval breaks</span>
+    <button id="reset" title="Reset the simulator to its starting state (chunk 500, overlap 50, k=3, payments question)">↺ Reset</button>
+  </header>
+
+  <div id="challenge">
+    <span class="tag">Try this</span>
+    <span class="steps">
+      <span class="dot" id="d1">1</span><span class="dot" id="d2">2</span><span class="dot" id="d3">3</span>
+    </span>
+    <span class="txt" id="chTxt"></span>
+  </div>
+
+  <div id="main">
+    <!-- LEFT: controls + readouts -->
+    <div class="panel" id="controls">
+
+      <div class="ctl" title="Chunk size in characters — how big each slice of the corpus is before embedding. RecursiveCharacterTextSplitter tries paragraph, then line, then word boundaries before a hard cut.">
+        <div class="pillhead">chunk size</div>
+        <div id="sizePills"></div>
+      </div>
+
+      <div class="ctl" title="Chunk overlap — characters repeated from the end of one chunk at the start of the next, so a fact on a boundary isn't orphaned.">
+        <div class="pillhead">overlap</div>
+        <div id="ovPills"></div>
+      </div>
+
+      <div class="ctl" title="top-k — how many chunks the retriever hands the LLM, ranked by ChromaDB's L2 distance (lower = closer).">
+        <div class="pillhead">top-k</div>
+        <div id="kPills"></div>
+      </div>
+
+      <div class="ctl" title="Pick one of the four real questions asked against this corpus in the course's lab experiment.">
+        <div class="pillhead">question</div>
+        <div id="qList"></div>
+      </div>
+
+      <div class="readout" id="readout">
+        <div class="rrow"><span class="rl">chunks</span><span class="rv" id="ovChunks">—</span></div>
+        <div class="rrow"><span class="rl">top-1 distance</span><span class="rv" id="ovDist">—</span></div>
+      </div>
+
+      <div class="meterWrap" title="Context budget = retrieved chunk chars + prompt template + question, converted to tokens at ~4 chars/token, against num_ctx=4096 (this course's real Ollama setting).">
+        <div class="ml">context budget <b><span id="budgetVal">—</span></b></div>
+        <div id="meterBar"><div id="meterFill"></div></div>
+        <div class="mnote" id="budgetNote"></div>
+      </div>
+
+      <div class="qualBox" title="Answer-quality signal derived from retrieval distance, orphan-chunk risk, and context-budget pressure — not a live model call.">
+        <div class="ol">answer quality <span id="qualBadge" class="grounded">grounded</span></div>
+        <div class="onote" id="qualNote"></div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT: corpus strip + retrieved chunks -->
+    <div class="panel" id="view">
+      <div id="stage">
+        <div id="stageHead">
+          <span>re-chunked corpus</span>
+          <span id="chunkCountLive">— chunks</span>
+        </div>
+        <div id="corpusStrip"></div>
+        <div id="resultsWrap"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" id="events">
+    <h2>Retrieval trace <span>— what Chroma + the app would log</span>
+      <span id="note" data-tip="Teaching model, not a live embedder. Distances are interpolated between THREE real captured runs on this course's lab machine (nomic-embed-text, ChromaDB squared-L2, containerized genai-app), all 4 real lab questions: 500/50 -> 2 chunks (payments 0.6956, checkout 0.7755, backups 0.7746, oncall 0.9238); 150/0 -> 11 chunks (payments 0.5146, checkout 0.7244, backups 0.3700 but that top chunk is a heading-only orphan, oncall 0.7124); 1200/200 -> 1 chunk, every question 0.75-1.08. Untested chunk-size/overlap/question combos are monotonically interpolated between these anchors, not measured. Chunking itself is real — the same RecursiveCharacterTextSplitter separator order (paragraph, line, word, hard cut) runs on the actual 823-char acme-runbooks.md corpus text in your browser, reproducing all 3 real chunk counts exactly. The context-budget bar is the sim's one deliberate extrapolation: this real corpus is only 823 chars, so it can never actually fill a 4096-token window — the bar instead projects k x chunk_size chars, the same back-of-envelope arithmetic the deep-dive's own §4 table uses for a larger corpus, so you can still feel a budget blow out. No live embedder, no live LLM call.">ⓘ</span></h2>
+    <div id="evList"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+  var $=function(id){return document.getElementById(id)};
+
+  /* ============================================================= REAL CORPUS
+     Ground truth: labs/m5/docs/acme-runbooks.md, 823 chars, 4 runbook sections.
+     Reproduced verbatim below (exact text, exact whitespace). */
+  var CORPUS_TEXT =
+"# Acme Platform Runbooks\n\n"+
+"## Payments service\n"+
+"To restart the Acme payments service, run:\n"+
+"`kubectl rollout restart deploy/payments -n prod`.\n"+
+"The payments service depends on the Postgres primary in the `prod` namespace.\n\n"+
+"## Database backups\n"+
+"The Acme database backup runs nightly at 02:00 UTC and is stored in the\n"+
+"`s3://acme-backups` bucket. Backups are retained for 30 days. To restore, use\n"+
+"`acmectl db restore --from s3://acme-backups/<date>`.\n\n"+
+"## Checkout 503 errors\n"+
+"If the checkout page returns HTTP 503, the web tier is saturated. Scale it up:\n"+
+"`kubectl scale deploy/web --replicas=5 -n prod`. Then check the load balancer\n"+
+"health in the Acme dashboard.\n\n"+
+"## On-call escalation\n"+
+"Page the on-call engineer via the #acme-oncall Slack channel. If unacknowledged\n"+
+"for 15 minutes, the incident auto-escalates to the platform lead.\n";
+
+  /* ---------------------------------------------------------- REAL splitter
+     RecursiveCharacterTextSplitter port: separator order ["\n\n","\n"," ",""],
+     paragraph -> line -> word -> hard-char-cut — the exact rule order
+     labs/m5/app/main.py's process_uploaded_file (and the deep-dive's
+     compare_chunking.py) run. The real ingest path is UnstructuredMarkdownLoader
+     (which partitions markdown into elements — title, each "## heading", each
+     paragraph body — as separate units) piped into this same splitter, so the
+     top merge tier operates on those elements (equivalent to a "\n\n" join)
+     before any element gets recursively re-split by line/word/char. This
+     reproduces the real chunk counts EXACTLY at all 3 captured anchors
+     (500/50 -> 2, 150/0 -> 11, 1200/200 -> 1) and reproduces the real
+     orphan-heading trap: at small chunk sizes a "## heading" element can land
+     alone in its own chunk with no body text — exactly what the deep-dive's
+     §7 documents for the 150/0 variant ("Database backups" heading-only,
+     dist 0.3700). */
+  function partitionElements(text){
+    var lines=text.split('\n'), elems=[], buf=[];
+    function flush(){ if (buf.length){ elems.push(buf.join('\n').trim()); buf=[]; } }
+    for (var i=0;i<lines.length;i++){
+      var line=lines[i];
+      if (/^#{1,6}\s/.test(line)){ flush(); elems.push(line.trim()); }
+      else if (line.trim()===''){ flush(); }
+      else { buf.push(line); }
+    }
+    flush();
+    return elems.filter(function(e){ return e!==''; });
+  }
+  function splitOne(text, sep){ return sep===''? text.split('') : text.split(sep); }
+  function joinDocs(docs, sep){ var t=docs.join(sep).trim(); return t===''?null:t; }
+  function mergeSplits(splits, sep, size, overlap){
+    var sepLen=sep.length, docs=[], cur=[], total=0;
+    for (var i=0;i<splits.length;i++){
+      var d=splits[i], len=d.length;
+      if (total + len + (cur.length>0?sepLen:0) > size){
+        if (cur.length>0){
+          var doc=joinDocs(cur, sep); if (doc!==null) docs.push(doc);
+          while (total>overlap || (total+len+(cur.length>0?sepLen:0) > size && total>0)){
+            total -= cur[0].length + (cur.length>1?sepLen:0);
+            cur.shift();
+          }
+        }
+      }
+      cur.push(d);
+      total += len + (cur.length>1?sepLen:0);
+    }
+    var last=joinDocs(cur, sep); if (last!==null) docs.push(last);
+    return docs;
+  }
+  function recursiveSplit(text, seps, size, overlap){
+    var final=[], sep=seps[seps.length-1], rest=[];
+    for (var i=0;i<seps.length;i++){
+      var s=seps[i];
+      if (s===''){ sep=s; rest=[]; break; }
+      if (text.indexOf(s)!==-1){ sep=s; rest=seps.slice(i+1); break; }
+    }
+    var splits=splitOne(text, sep).filter(function(s){return s!=='';});
+    var good=[];
+    for (var j=0;j<splits.length;j++){
+      var s2=splits[j];
+      if (s2.length < size){ good.push(s2); }
+      else{
+        if (good.length){ final=final.concat(mergeSplits(good, sep, size, overlap)); good=[]; }
+        if (!rest.length){ final.push(s2); }
+        else{ final=final.concat(recursiveSplit(s2, rest, size, overlap)); }
+      }
+    }
+    if (good.length){ final=final.concat(mergeSplits(good, sep, size, overlap)); }
+    return final;
+  }
+  function chunkCorpus(size, overlap){
+    var elems=partitionElements(CORPUS_TEXT);
+    var topSep='\n\n', rest=['\n',' ',''];
+    var good=[], final=[];
+    for (var i=0;i<elems.length;i++){
+      var e=elems[i];
+      if (e.length < size){ good.push(e); }
+      else{
+        if (good.length){ final=final.concat(mergeSplits(good, topSep, size, overlap)); good=[]; }
+        final=final.concat(recursiveSplit(e, rest, size, overlap));
+      }
+    }
+    if (good.length){ final=final.concat(mergeSplits(good, topSep, size, overlap)); }
+    return final;
+  }
+
+  /* ---------------------------------------------------------- REAL anchors
+     Ground truth: planning/lab-tests/m5-deep-dive.md §7 full experiment,
+     all 4 real questions x 3 real chunking configs (12 real captured distances). */
+  var QUESTIONS=[
+    {id:'payments', text:'How do I restart the payments service?'},
+    {id:'checkout',  text:'What happens if checkout is overloaded?'},
+    {id:'backups',   text:'How long are database backups retained?'},
+    {id:'oncall',    text:'Who do I page for an unacknowledged incident?'}
+  ];
+  // key: 'size|overlap' -> {chunks, dist:{qid:distance}}
+  var ANCHORS={
+    '500|50':  {chunks:2,  dist:{payments:0.6956, checkout:0.7755, backups:0.7746, oncall:0.9238}},
+    '150|0':   {chunks:11, dist:{payments:0.5146, checkout:0.7244, backups:0.3700, oncall:0.7124}},
+    '1200|200':{chunks:1,  dist:{payments:0.7515, checkout:0.9773, backups:0.8759, oncall:1.0830}}
+  };
+  var ANCHOR_SIZES=[500,150,1200]; // sorted by size for interpolation: 150 < 500 < 1200
+  var SIZE_ORDER=[150,500,1200];
+
+  /* Monotone interpolation of distance across the 3 real anchor points, by chunk size,
+     on a log scale (chunk-size effects are naturally multiplicative). Overlap and top-k
+     are secondary effects modeled on top (see below) — the 3 measured anchors themselves
+     are reproduced EXACTLY when the dial matches size=150/500/1200 with overlap=0/50/200
+     respectively (see anchorKeyFor). */
+  function lerp(a,b,t){ return a+(b-a)*t; }
+  function logInterpDistance(qid, size){
+    var s150=ANCHORS['150|0'].dist[qid], s500=ANCHORS['500|50'].dist[qid], s1200=ANCHORS['1200|200'].dist[qid];
+    var xs=[150,500,1200], ys=[s150,s500,s1200];
+    var ls=Math.max(1,Math.min(1200,size));
+    var lx=Math.log(ls);
+    if (lx<=Math.log(xs[0])) return ys[0];
+    if (lx>=Math.log(xs[2])) return ys[2];
+    var i = lx<Math.log(xs[1]) ? 0 : 1;
+    var x0=Math.log(xs[i]), x1=Math.log(xs[i+1]);
+    var t=(lx-x0)/(x1-x0);
+    return lerp(ys[i], ys[i+1], t);
+  }
+
+  /* chunk count: real at the 3 anchors, otherwise from the LIVE splitter (real, not modeled) */
+  function chunkCountFor(size, overlap){
+    return chunkCorpus(size, overlap).length;
+  }
+
+  function anchorKeyFor(size, overlap){
+    if (size===500 && overlap===50) return '500|50';
+    if (size===150 && overlap===0) return '150|0';
+    if (size===1200 && overlap===200) return '1200|200';
+    return null;
+  }
+
+  /* overlap secondary effect: more overlap softens distance slightly (duplicated context
+     helps a borderline match) — a small, bounded, monotone nudge, disclosed as modeled. */
+  function overlapAdj(overlap, size){
+    var maxOv = Math.min(overlap, Math.floor(size*0.4));
+    return -0.00025*maxOv; // tiny, bounded nudge, never flips a ranking
+  }
+
+  function distanceFor(qid, size, overlap){
+    var key=anchorKeyFor(size, overlap);
+    if (key) return ANCHORS[key].dist[qid];
+    var base=logInterpDistance(qid, size);
+    var adj=overlapAdj(overlap, size);
+    return Math.max(0.05, base+adj);
+  }
+
+  /* top-k secondary distances: rank 2..5 fan out above the top-1 distance using a
+     bounded, monotone growth curve (each next rank is farther) — real ranks beyond
+     top-1 were never captured for every question, so this is disclosed extrapolation. */
+  function distanceForRank(qid, size, overlap, rank){
+    var d1=distanceFor(qid, size, overlap);
+    if (rank<=1) return d1;
+    var spread=0.09+0.02*rank; // grows each rank, bounded
+    return d1 + spread*(rank-1);
+  }
+
+  /* ---------------------------------------------------------- token/budget math
+     Real arithmetic from the deep-dive's §4: ~4 chars/token, template ~20 tokens,
+     num_ctx=4096 (this course's real Ollama setting). */
+  var CHARS_PER_TOKEN=4, TEMPLATE_TOKENS=20, NUM_CTX=4096;
+  function tokensFor(chars){ return Math.round(chars/CHARS_PER_TOKEN); }
+  function projectedPct(size, k, qTextLen){
+    var ctxTokens=tokensFor(size*k), qTokens=tokensFor(qTextLen);
+    return 100*(TEMPLATE_TOKENS+ctxTokens+qTokens)/NUM_CTX;
+  }
+
+  /* ------------------------------------------------------------ state */
+  var SIZES=[150,300,500,800,1200], OVERLAPS=[0,50,200], KS=[1,3,5];
+  var DEFAULTS={size:500, overlap:50, k:3, q:'payments'};
+  var S={size:DEFAULTS.size, overlap:DEFAULTS.overlap, k:DEFAULTS.k, q:DEFAULTS.q, t0:Date.now()};
+
+  var CH={step:1, done:[false,false,false]};
+
+  /* ------------------------------------------------------------ events log */
+  var evList=$('evList');
+  function clock(){var s=Math.floor((Date.now()-S.t0)/1000);return Math.floor(s/60)+':'+('0'+s%60).slice(-2);}
+  function logEv(kind,reason,msg){
+    var d=document.createElement('div');
+    d.className='ev new '+(kind||'');
+    d.innerHTML='<span class="et"></span><span class="er"></span><span class="em"></span>';
+    d.children[0].textContent=clock();
+    d.children[1].textContent=reason; d.children[2].textContent=msg;
+    d.title=reason+'  —  '+msg;
+    evList.appendChild(d);
+    while(evList.children.length>90)evList.removeChild(evList.firstChild);
+    evList.scrollTop=evList.scrollHeight;
+  }
+
+  /* ------------------------------------------------------------ number fmt */
+  function fmt4(n){ return n.toFixed(4); }
+
+  /* ------------------------------------------------------------ render: pills */
+  function renderPills(){
+    var sw=$('sizePills'); sw.innerHTML='';
+    SIZES.forEach(function(sz){
+      var el=document.createElement('button');
+      el.className='pill'+(S.size===sz?' on':'');
+      el.setAttribute('role','radio'); el.setAttribute('aria-checked', S.size===sz?'true':'false');
+      el.title='Set chunk_size to '+sz+' chars — '+(sz<=150?'small, risks orphaned facts':sz>=1200?'large, risks noise dilution':'moderate');
+      el.textContent=sz;
+      el.addEventListener('click',function(){setSize(sz);});
+      sw.appendChild(el);
+    });
+    var ow=$('ovPills'); ow.innerHTML='';
+    OVERLAPS.forEach(function(ov){
+      var el=document.createElement('button');
+      el.className='pill'+(S.overlap===ov?' on':'');
+      el.setAttribute('role','radio'); el.setAttribute('aria-checked', S.overlap===ov?'true':'false');
+      el.title='Set chunk_overlap to '+ov+' chars';
+      el.textContent=ov;
+      el.addEventListener('click',function(){setOverlap(ov);});
+      ow.appendChild(el);
+    });
+    var kw=$('kPills'); kw.innerHTML='';
+    KS.forEach(function(k){
+      var el=document.createElement('button');
+      el.className='pill'+(S.k===k?' on':'');
+      el.setAttribute('role','radio'); el.setAttribute('aria-checked', S.k===k?'true':'false');
+      el.title='Set top-k to '+k+' — retrieve the '+k+' nearest chunk(s)';
+      el.textContent='k='+k;
+      el.addEventListener('click',function(){setK(k);});
+      kw.appendChild(el);
+    });
+    var qw=$('qList'); qw.innerHTML='';
+    QUESTIONS.forEach(function(q){
+      var el=document.createElement('button');
+      el.className='qopt'+(S.q===q.id?' on':'');
+      el.setAttribute('role','radio'); el.setAttribute('aria-checked', S.q===q.id?'true':'false');
+      el.title='Ask: '+q.text;
+      el.textContent=q.text;
+      el.addEventListener('click',function(){setQ(q.id);});
+      qw.appendChild(el);
+    });
+  }
+
+  /* ------------------------------------------------------------ render: corpus strip + results */
+  function renderStage(){
+    var chunks=chunkCorpus(S.size, S.overlap);
+    $('chunkCountLive').textContent=chunks.length+' chunks';
+    $('ovChunks').textContent=chunks.length;
+
+    // rank chunks by simulated distance: top-1 gets the real/interpolated distance,
+    // remaining chunks get a bounded fan-out; the retrieved set is the k lowest.
+    var qid=S.q;
+    var ranked=chunks.map(function(text,idx){
+      // heading-only detection: real orphan-chunk trap (starts with '#', short, no body)
+      var isHeadingOnly = /^#{1,6}\s/.test(text.trim()) && text.trim().length < 40;
+      return {idx:idx, text:text, isHeadingOnly:isHeadingOnly};
+    });
+    // assign distances: rank 0 = distanceFor (top-1), others fan out; heading-only chunks
+    // that match the anchor trap (150/0, backups Q) get pulled to rank 0 with the real 0.3700.
+    var orphanTrap = (S.size===150 && S.overlap===0 && S.q==='backups');
+    var dists = ranked.map(function(c,i){ return distanceForRank(qid, S.size, S.overlap, i+1); });
+    // sort indices by simulated distance ascending, but force the real orphan trap to rank 0
+    // when the exact dial combo matches the real captured anchor (150/0, backups question).
+    var order = ranked.map(function(c,i){return i;});
+    if (orphanTrap){
+      var headingIdx = ranked.findIndex(function(c){ return c.isHeadingOnly && /database backups/i.test(c.text); });
+      order.sort(function(a,b){
+        if (a===headingIdx) return -1;
+        if (b===headingIdx) return 1;
+        return dists[a]-dists[b];
+      });
+    } else {
+      order.sort(function(a,b){ return dists[a]-dists[b]; });
+    }
+    var topK = order.slice(0, Math.min(S.k, order.length));
+
+    // corpus strip
+    var strip=$('corpusStrip'); strip.innerHTML='';
+    ranked.forEach(function(c,i){
+      var chip=document.createElement('span');
+      var rankPos = topK.indexOf(i);
+      chip.className='chip'+(rankPos===0?' hit1':rankPos>0?' hit':'')+(c.isHeadingOnly?' orphan':'');
+      chip.textContent='['+i+'] '+c.text.replace(/\n/g,' ').slice(0,34)+(c.text.length>34?'…':'');
+      chip.title=(c.isHeadingOnly?'(heading-only chunk) ':'')+c.text.replace(/\n/g,' ');
+      strip.appendChild(chip);
+    });
+
+    // results panel
+    var rw=$('resultsWrap'); rw.innerHTML='';
+    var usedChars=0;
+    topK.forEach(function(ci,rank){
+      var c=ranked[ci];
+      var d=orphanTrap && ci===order[0] ? 0.3700 : dists[ci];
+      usedChars += c.text.length;
+      var card=document.createElement('div');
+      card.className='hitcard'+(c.isHeadingOnly?' orphanFlag':'');
+      var distClass = d<0.6?'best':d<0.85?'mid':'worst';
+      card.innerHTML =
+        '<div class="hh"><span class="rank">#'+(rank+1)+'</span><span class="dist '+distClass+'">dist '+fmt4(d)+'</span></div>'+
+        '<div class="body"></div>'+
+        (c.isHeadingOnly?'<div class="flag">⚠ heading only — no body text in this chunk</div>':'');
+      card.querySelector('.body').textContent=c.text.replace(/\n/g,' ');
+      rw.appendChild(card);
+    });
+
+    return {chunks:chunks, topK:topK, ranked:ranked, dists:dists, usedChars:usedChars, orphanTrap:orphanTrap};
+  }
+
+  /* ------------------------------------------------------------ render: everything */
+  var lastResult=null;
+  function render(){
+    var res=renderStage();
+    lastResult=res;
+
+    var qText=QUESTIONS.filter(function(q){return q.id===S.q;})[0].text;
+    var topDist = res.orphanTrap ? 0.3700 : (res.topK.length? res.dists[res.topK[0]] : NaN);
+    $('ovDist').textContent = isFinite(topDist)? fmt4(topDist) : '—';
+    var distEl=$('ovDist');
+    distEl.className='rv '+(topDist<0.6?'good':topDist<0.85?'warn':'bad');
+
+    // context budget: this tiny 823-char corpus never actually HAS k full-size chunks once
+    // chunk_size is large (a 1200-char config only ever produces 1 real chunk to retrieve).
+    // The deep-dive's own §4 arithmetic table projects budget the same way it teaches the
+    // concept: k (requested) x chunk_size chars, the shape a REAL larger corpus would hand
+    // the retriever at these dial settings — disclosed as the sim's one projected number,
+    // exactly mirroring the deep-dive's own "raise k to 10 on chunk_size=1500 -> ~3,750
+    // tokens" worked example. Retrieved-chunk PREVIEW cards below still show only the real
+    // chunks this corpus actually has.
+    var projectedChars = S.k * S.size;
+    var qTokens=tokensFor(qText.length);
+    var ctxTokens=tokensFor(projectedChars);
+    var totalTokens=TEMPLATE_TOKENS+ctxTokens+qTokens;
+    var pct=100*totalTokens/NUM_CTX;
+    $('budgetVal').textContent=totalTokens+' / '+NUM_CTX+' tok ('+pct.toFixed(1)+'%)';
+    var fill=$('meterFill');
+    fill.style.width=Math.min(100,pct).toFixed(1)+'%';
+    fill.className=(pct>=100 ? 'over' : '');
+    $('budgetNote').textContent=S.k+' chunk(s) × '+S.size+' chars (projected) + '+TEMPLATE_TOKENS+'tok template + '+qTokens+'tok question, ~4 chars/token';
+
+    // answer-quality indicator
+    var badge=$('qualBadge'), note=$('qualNote');
+    var hasOrphanInTopK = res.topK.some(function(ci){ return res.ranked[ci].isHeadingOnly; });
+    if (pct>=100){
+      badge.className='starved'; badge.textContent='context-starved';
+      note.textContent='retrieved context + template + question exceeds num_ctx=4096 — Ollama truncates the earliest chunks, the model may never see the answer.';
+    } else if (res.orphanTrap || hasOrphanInTopK){
+      badge.className='orphan'; badge.textContent='orphan-heading risk';
+      note.textContent='the top-ranked chunk is a heading with no body text — it reads as a strong match but carries no answer on its own; only a neighboring chunk (from top-k>1) supplies the fact.';
+    } else if (S.size>=1200 && res.chunks.length<=2){
+      badge.className='diluted'; badge.textContent='noise-diluted';
+      note.textContent='a large chunk holding multiple unrelated procedures — the embedding is an average of several topics, and distance rises even when the answer is technically present.';
+    } else if (topDist<0.7 && pct<50){
+      badge.className='grounded'; badge.textContent='grounded';
+      note.textContent='close distance, healthy budget — the retrieved chunk is a precise, self-contained match for the question.';
+    } else {
+      badge.className='grounded'; badge.textContent='grounded';
+      note.textContent='retrieved context plausibly contains the answer; distance and budget are both in a workable range.';
+    }
+
+    renderPills();
+    evalChallenge(res);
+    return res;
+  }
+
+  /* ------------------------------------------------------------ challenge */
+  /* Step 1: reproduce the orphan-heading trap — chunk 150/0, backups question,
+              see the heading-only top-1 chunk flagged.
+     Step 2: blow the context budget — big chunks (1200) x top-k=5.
+     Step 3: find a config where the payments question retrieves its full runbook
+              section with distance < 0.7 and budget under 25%. */
+  function evalChallenge(res){
+    if (CH.step===1){
+      if (S.size===150 && S.overlap===0 && S.q==='backups'){
+        CH.done[0]=true; CH.step=2;
+        logEv('warn','try-this','Step 1 done — top chunk for "backups" is a heading-only orphan at dist 0.3700. Best score in the whole experiment, and it has no answer in it.');
+      }
+    } else if (CH.step===2){
+      var qText=QUESTIONS.filter(function(q){return q.id===S.q;})[0].text;
+      var pct=projectedPct(S.size, S.k, qText.length);
+      if (S.size===1200 && S.k===5 && pct>=30){
+        CH.done[1]=true; CH.step=3;
+        logEv('bad','try-this','Step 2 done — chunk 1200 × top-5 pushes the projected budget to '+pct.toFixed(1)+'% of num_ctx=4096, over 3x the lab baseline. Scale either dial further on a real corpus and this crosses 100% — the point where Ollama starts silently truncating retrieved chunks.');
+      }
+    } else if (CH.step===3){
+      var qText2=QUESTIONS.filter(function(q){return q.id===S.q;})[0].text;
+      var pct2=projectedPct(S.size, S.k, qText2.length);
+      var topDist=res.orphanTrap?0.3700:(res.topK.length?res.dists[res.topK[0]]:99);
+      if (S.q==='payments' && topDist<0.7 && pct2<25){
+        CH.done[2]=true; CH.step=4;
+        logEv('ok','try-this','Step 3 done — payments question retrieved its runbook section at dist '+fmt4(topDist)+', budget '+pct2.toFixed(1)+'%. Precise match, cheap context — the sweet spot.');
+      }
+    }
+    paintChallenge();
+  }
+
+  var CH_TEXT=[
+    'Step 1 — Set <code>chunk size</code> to 150 and <code>overlap</code> to 0, pick the <code>backups</code> question. Watch the best-scoring chunk turn out to be a bare heading with no body text.',
+    'Step 2 — Set <code>chunk size</code> to 1200 and <code>top-k</code> to 5. Watch the projected context-budget bar climb past 3x the lab baseline — this is the dial combination that eats your context window.',
+    'Step 3 — Pick the <code>payments</code> question and find a dial combo where its runbook section comes back at <b>distance &lt; 0.7</b> while the budget stays <b>under 25%</b>.'
+  ];
+  var SUCCESS='Challenge complete! You felt the whole retrieval trade-off. <b>Small chunks</b> buy precision but can orphan a fact on its own heading with nothing to answer the question — the 150/0 backups chunk scored best in the whole sweep and was useless alone. <b>Large chunks</b> buy context but dilute the embedding into an average of several topics, and stacking them with a generous top-k can blow your context-window budget before the model ever reads the question. The practical target is the <b>same one the deep-dive lands on</b>: a chunk size close to one self-contained fact, a modest top-k, and a distance/budget combination that leaves plenty of headroom — exactly what step 3 just found for the payments question.';
+
+  function paintChallenge(){
+    for (var i=1;i<=3;i++){
+      var d=$('d'+i); d.className='dot'+(CH.done[i-1]?' done':CH.step===i?' cur':'');
+      d.textContent=CH.done[i-1]?'✓':i;
+    }
+    var box=$('challenge'), txt=$('chTxt');
+    if (CH.step>=4){ box.classList.add('success'); txt.innerHTML=SUCCESS; }
+    else { box.classList.remove('success'); txt.innerHTML=CH_TEXT[CH.step-1]; }
+  }
+
+  /* ------------------------------------------------------------ actions */
+  function setSize(sz){
+    S.size=sz; render();
+    logEv('','re-chunked',chunkCorpus(S.size,S.overlap).length+' chunks · chunk_size='+sz);
+  }
+  function setOverlap(ov){
+    S.overlap=ov; render();
+    logEv('','re-chunked',chunkCorpus(S.size,S.overlap).length+' chunks · overlap='+ov);
+  }
+  function setK(k){
+    S.k=k; render();
+    logEv('','top-k',k+' — retrieving '+k+' nearest chunk(s)');
+  }
+  function setQ(qid){
+    S.q=qid; var res=render();
+    var d = res.orphanTrap ? 0.3700 : (res.topK.length? res.dists[res.topK[0]] : NaN);
+    var label = QUESTIONS.filter(function(q){return q.id===qid;})[0].text;
+    logEv(res.orphanTrap?'warn':'', 'query', '"'+label+'" — retrieved #1 dist '+(isFinite(d)?fmt4(d):'—')+(res.orphanTrap?' — heading only!':''));
+  }
+
+  /* ------------------------------------------------------------ wiring */
+  $('reset').addEventListener('click',function(){ location.reload(); });
+
+  /* ------------------------------------------------------------ boot */
+  render();
+  paintChallenge();
+  logEv('','ready','ChromaDB + genai-app loaded · chunk_size=500, overlap=50, k=3 (lab baseline)');
+  logEv('','re-chunked','2 chunks (real captured baseline)');
+  logEv('ok','retrieved','#1 dist 0.6956 — payments runbook section');
+
+  /* ------------------------------------------------------------ test hook */
+  window.__sim={
+    S:S, CH:CH,
+    SIZES:SIZES, OVERLAPS:OVERLAPS, KS:KS, QUESTIONS:QUESTIONS, ANCHORS:ANCHORS,
+    consts:{DEFAULTS:DEFAULTS, NUM_CTX:NUM_CTX, CHARS_PER_TOKEN:CHARS_PER_TOKEN, TEMPLATE_TOKENS:TEMPLATE_TOKENS},
+    setSize:setSize, setOverlap:setOverlap, setK:setK, setQ:setQ,
+    chunkCorpus:chunkCorpus, distanceFor:distanceFor, distanceForRank:distanceForRank,
+    chunkCountFor:chunkCountFor, anchorKeyFor:anchorKeyFor,
+    lastResult:function(){return lastResult;}
+  };
+})();
+</script>
+</body>
+</html>

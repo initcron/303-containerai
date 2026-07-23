@@ -5,6 +5,7 @@ sidebar_label: 'Deep Dive (Part 2)'
 ---
 
 import Slides from '@site/src/components/Slides';
+import Embed from '@site/src/components/Embed';
 
 # Deep Dive: RAG Parameters Under the Hood
 
@@ -416,6 +417,13 @@ deviation). The L2≈cosine claim in §3 holds for this exact app code path — 
 guarantee, but true here, measured.
 
 ---
+
+Before running the real experiment below, feel the trade-off yourself. This playground re-chunks
+the exact Acme corpus live as you move the dials, retrieves against the real captured distances
+from this course's lab, and tracks the context-budget arithmetic from §4 — including the
+orphan-heading trap the 150/0 variant produces.
+
+<Embed src="/sims/m5-rag-retrieval.html" title="RAG Retrieval Playground" ratio="16 / 9" />
 
 ## 7 — Experiment: re-ingesting the corpus under different chunking strategies
 

@@ -3,7 +3,7 @@
 // Zero runtime deps: hand-rolled CDP client over Node built-ins (http + ws frames).
 // Chrome 150+: uses PUT /json/new?<url> and launch flag --remote-allow-origins=*.
 // Drives the sim through window.__sim (pure formulae, no wall-clock waits).
-// Run: node site/static/sims/m3b-lora-tradeoff.test.mjs
+// Run: node scripts/sim-tests/m3b-lora-tradeoff.test.mjs
 
 import { spawn } from 'node:child_process';
 import http from 'node:http';
@@ -14,7 +14,7 @@ import path from 'node:path';
 import fs from 'node:fs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const HTML = path.join(__dirname, 'm3b-lora-tradeoff.html');
+const HTML = path.join(__dirname, '..', '..', 'site', 'static', 'sims', 'm3b-lora-tradeoff.html');
 const FILE_URL = pathToFileURL(HTML).href;
 const PORT = 9860 + (process.pid % 400);
 
