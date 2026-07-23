@@ -89,6 +89,12 @@ PLATFORM READY — serve → RAG → agent → crew → package → secure → s
 
 Every green tick maps to something you built and validated in an earlier module. A red `✗` tells you exactly which layer is missing and which module covers it.
 
+:::tip[Try the Container X-Ray]
+
+`platform-check.sh` gives you a point-in-time pass/fail. For a live view as you bring the platform up, run `bash labs/tools/container-xray/serve.sh` and open the printed URL — its Platform lens shows every course image cached on this machine (M2 through M8), total image disk usage, and an everything-running overview; the Stack lens shows the capstone compose project's services, volumes, and networks as you start them. See `labs/tools/container-xray/README.md`.
+
+:::
+
 ### Step 1 — Serve the model (M2 / M3)
 
 The model server is already running — Ollama serves natively on the host:

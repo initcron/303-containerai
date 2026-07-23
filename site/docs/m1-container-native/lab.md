@@ -208,4 +208,8 @@ You proved the container → native-model wiring: a containerised process reache
 - **M5** adds a containerised RAG app that uses the same `host.docker.internal:11434` call to generate answers over Acme's runbooks
 - **M6** adds an agent container that calls the same endpoint as a reasoning tool
 
+### Try the Container X-Ray
+
+Want to *watch* this wiring live instead of just running the one-shot command? `labs/tools/container-xray/` is a small local tool that polls your real docker state and native Ollama every few seconds — its Wiring lens shows running containers, Ollama's status and pulled models, and a live `host.docker.internal` reachability check. Run `bash labs/tools/container-xray/serve.sh` and open the printed URL; see `labs/tools/container-xray/README.md` for details. It grows a lens per later module (Stack at M5–M7, Platform at the capstone).
+
 The one line — `http://host.docker.internal:11434` — is the thread that connects everything.
