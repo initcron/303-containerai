@@ -66,7 +66,6 @@ browser connection budget.
 - **State looks stale (yellow/red dot, top right)** — the poll loop stopped or a single
   `docker` call errored. Check the terminal running `serve.sh` for output; Ctrl-C and
   restart if needed. `state.json` is regenerated fresh on every restart.
-- **rtk / shell hook issues** — this tool intentionally avoids any pipeline that could be
-  rewritten by a shell hook: `collect.sh` and `serve.sh` are plain, self-contained scripts
-  with no piped `grep`/`jq` dependency. Run them with `bash serve.sh` directly if your
-  shell has command-rewriting hooks installed.
+- **rtk / shell hook issues** — this tool intentionally avoids heavy dependencies; `serve.sh`
+  and `collect.sh` rely on plain POSIX tools (no `jq` or Python for data transformation).
+  Run them with `bash serve.sh` directly if your shell has command-rewriting hooks installed.

@@ -54,4 +54,4 @@ cleanup() {
 trap cleanup EXIT INT TERM
 
 cd "${XRAY_DIR}"
-exec python3 -m http.server "${PORT}" --bind 127.0.0.1
+python3 -m http.server "${PORT}" --bind 127.0.0.1
