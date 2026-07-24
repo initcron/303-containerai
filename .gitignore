@@ -8,3 +8,6 @@ old/
 references.txt
 labs/tools/container-xray/state.json
 labs/tools/container-xray/state.json.tmp
+
+# scratch / non-versioned working area
+sandbox/
