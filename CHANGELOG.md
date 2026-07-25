@@ -5,6 +5,19 @@ All notable changes to this course build are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.1] - 2026-07-25
+
+### Changed
+
+- All four deep-dive decks (03b, 03, 05, 07) rebalanced to visual-first per founder feedback:
+  subtitles cut to a single line (worst case 257 chars -> under 90), diagrams grown to dominate
+  the slide, every load-bearing fact relocated into SVG labels or takeaways (none deleted).
+  Slide counts, order, palette, and self-containment unchanged.
+
+### Fixed
+
+- 05 deck: stale "~1,000-char corpus" figure corrected to ~800 chars (matches the page).
+
 ## [1.6.0] - 2026-07-23
 
 ### Added

@@ -140,32 +140,32 @@ footer, header, hgroup, main, menu, nav, section {
 <section data-auto-animate>
   <p class="kicker">MODULE 7 DEEP DIVE &nbsp;·&nbsp; CONTAINERS FOR GENAI &amp; AGENTIC AI</p>
   <h2 class="t" style="font-size:2.3em">The four knobs nobody explained</h2>
-  <p class="s" style="font-size:1.2em">The lab ran Triage &#8594; Investigator &#8594; Fixer &#8594; Reviewer end to end. It never asked why each agent's temperature differs, why the pipeline can't loop, how a finding actually moves between agents, or where the safety gates really sit. This deck opens crew.py.</p>
-  <svg viewBox="0 0 1100 300" role="img" aria-label="Four theme boxes — temperature, iteration, delegation, and gates — all feeding into one box asking what crew.py actually does">
-    <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.4" stroke-linecap="round">
-      <rect x="30" y="40" width="240" height="90" rx="10"/>
-      <rect x="300" y="40" width="240" height="90" rx="10"/>
-      <rect x="570" y="40" width="240" height="90" rx="10"/>
-      <rect x="840" y="40" width="230" height="90" rx="10"/>
+  <p class="s" style="font-size:1.2em">crew.py ran end to end in the lab — this deck opens it up and asks why</p>
+  <svg viewBox="0 0 1100 360" role="img" aria-label="Four theme boxes — temperature per agent not per crew, iteration with no loop or retry, delegation as a plain string baton, and gates as code not a prompt — all feeding into one box asking what crew.py actually does">
+    <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.6" stroke-linecap="round">
+      <rect x="20" y="50" width="250" height="110" rx="12"/>
+      <rect x="295" y="50" width="250" height="110" rx="12"/>
+      <rect x="570" y="50" width="250" height="110" rx="12"/>
+      <rect x="845" y="50" width="235" height="110" rx="12"/>
     </g>
-    <text x="150" y="78" text-anchor="middle" class="lbl-b">temperature</text>
-    <text x="150" y="103" text-anchor="middle" class="lbl-g">per agent, not per crew</text>
-    <text x="420" y="78" text-anchor="middle" class="lbl-b">iteration</text>
-    <text x="420" y="103" text-anchor="middle" class="lbl-g">no loop, no retry</text>
-    <text x="690" y="78" text-anchor="middle" class="lbl-b">delegation</text>
-    <text x="690" y="103" text-anchor="middle" class="lbl-g">a plain string baton</text>
-    <text x="955" y="78" text-anchor="middle" class="lbl-b">gates</text>
-    <text x="955" y="103" text-anchor="middle" class="lbl-g">code, not a prompt</text>
-    <g filter="url(#rough)" fill="none" stroke="#757575" stroke-width="2" stroke-linecap="round">
-      <path d="M150,135 C150,190 470,190 500,225" marker-end="url(#ahg)"/>
-      <path d="M420,135 C420,185 500,185 520,225" marker-end="url(#ahg)"/>
-      <path d="M690,135 C690,185 610,185 590,225" marker-end="url(#ahg)"/>
-      <path d="M955,135 C955,190 640,190 610,225" marker-end="url(#ahg)"/>
+    <text x="145" y="98" text-anchor="middle" class="lbl-b">temperature</text>
+    <text x="145" y="128" text-anchor="middle" class="lbl-g">per agent, not per crew</text>
+    <text x="420" y="98" text-anchor="middle" class="lbl-b">iteration</text>
+    <text x="420" y="128" text-anchor="middle" class="lbl-g">no loop, no retry</text>
+    <text x="695" y="98" text-anchor="middle" class="lbl-b">delegation</text>
+    <text x="695" y="128" text-anchor="middle" class="lbl-g">a plain string baton</text>
+    <text x="962" y="98" text-anchor="middle" class="lbl-b">gates</text>
+    <text x="962" y="128" text-anchor="middle" class="lbl-g">code, not a prompt</text>
+    <g filter="url(#rough)" fill="none" stroke="#757575" stroke-width="2.2" stroke-linecap="round">
+      <path d="M145,165 C145,230 460,230 495,270" marker-end="url(#ahg)"/>
+      <path d="M420,165 C420,225 495,225 520,270" marker-end="url(#ahg)"/>
+      <path d="M695,165 C695,225 605,225 585,270" marker-end="url(#ahg)"/>
+      <path d="M962,165 C962,230 640,230 610,270" marker-end="url(#ahg)"/>
     </g>
-    <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="3">
-      <rect x="390" y="228" width="320" height="60" rx="10" fill="var(--p-blue)"/>
+    <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="3.4">
+      <rect x="370" y="272" width="360" height="72" rx="12" fill="var(--p-blue)"/>
     </g>
-    <text x="550" y="264" text-anchor="middle" class="lbl-b">what crew.py actually does</text>
+    <text x="550" y="316" text-anchor="middle" class="lbl-b">what crew.py actually does</text>
   </svg>
   <p class="credit"><b>Gourav Shah</b> &nbsp;·&nbsp; School of DevOps &amp; AI &nbsp;·&nbsp; Deep Dive (Part 2)</p>
   <div class="pageno">M7-DD·01</div>
@@ -174,7 +174,7 @@ footer, header, hgroup, main, menu, nav, section {
 <!-- ============ SLIDE 2 — SCENE: musician improvisation ============ -->
 <section>
   <h2 class="t">Low temperature plays the melody exactly as written, every time</h2>
-  <p class="s">At low temperature the musician reproduces the score reliably. At high temperature they improvise — sometimes brilliant, sometimes off-key.</p>
+  <p class="s">Low temperature: reads the score exactly. High: improvises, sometimes off-key.</p>
   <svg viewBox="0 0 1100 380" role="img" aria-label="A musician at a music stand playing steadily from written sheet music on the left, and a second musician nearby improvising with musical notes scattering loosely off the page on the right">
     <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.6" stroke-linecap="round">
       <rect x="120" y="150" width="14" height="130" rx="4"/>
@@ -217,7 +217,7 @@ footer, header, hgroup, main, menu, nav, section {
 <!-- ============ SLIDE 3 — NUMBERED ROWS: per-agent table ============ -->
 <section>
   <h2 class="t">Three of four agents pin temperature=0 on purpose</h2>
-  <p class="s">Reading crew.py's four llm() call sites directly: Triage, the Investigator's relevance gate, and the Reviewer all set temperature=0 explicitly. Only the Fixer doesn't.</p>
+  <p class="s">crew.py's four llm() call sites, read directly — one exception stands out</p>
   <svg viewBox="0 0 1100 340" role="img" aria-label="Four numbered rows, one per agent, each showing its temperature value and the reason: Triage zero, Investigator gate zero, Fixer 0.2 default, Reviewer zero">
     <g class="lbl-b" text-anchor="middle" fill="#1e1e1e">
       <circle cx="70" cy="45" r="22" fill="var(--p-blue)" stroke="#1e1e1e" stroke-width="2"/>
@@ -245,7 +245,7 @@ footer, header, hgroup, main, menu, nav, section {
 <!-- ============ SLIDE 4 — PIPELINE: temperature cluster ============ -->
 <section>
   <h2 class="t">Raising a classifier's temperature removes repeatability, not adds creativity</h2>
-  <p class="s">Turning up temperature on a classification or gating call doesn't make it more capable — it makes its correctness less repeatable. Nothing in this crew calls llm() above 0.2.</p>
+  <p class="s">More temperature on a classifier isn't more capable — it's less repeatable</p>
   <svg viewBox="0 0 1100 300" role="img" aria-label="A four-step pipeline Triage to Investigator gate to Fixer to Reviewer with each box labeled by its temperature, Fixer highlighted orange as the one exception, and a dashed side note pointing at Triage saying raise its temperature and section six measures it directly">
     <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.4">
       <rect x="30" y="90" width="220" height="90" rx="10" fill="var(--p-blue)"/>
@@ -278,7 +278,7 @@ footer, header, hgroup, main, menu, nav, section {
 <!-- ============ SLIDE 5 — SCENE: re-googling ============ -->
 <section>
   <h2 class="t">Someone who never stops re-googling the same question</h2>
-  <p class="s">Without a rule saying "you get three tries," a loop that decides "not good enough, try again" can keep going indefinitely.</p>
+  <p class="s">No rule saying "three tries" — the loop can keep going indefinitely</p>
   <svg viewBox="0 0 1100 380" role="img" aria-label="A person sits at a laptop retyping a search box with slightly different wording each time, a small stack of discarded search attempts piling up beside them on the desk">
     <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.6" stroke-linecap="round">
       <circle cx="230" cy="120" r="28"/>
@@ -308,7 +308,7 @@ footer, header, hgroup, main, menu, nav, section {
 <!-- ============ SLIDE 6 — DIAGRAM: ReAct loop ============ -->
 <section>
   <h2 class="t">A ReAct loop can cycle back to "reason" again — until something stops it</h2>
-  <p class="s">The shape this crew deliberately isn't: reason, call a tool, observe the result, decide whether to answer or try again — with a path back to reason on "no."</p>
+  <p class="s">The reason &#8594; call &#8594; observe &#8594; decide shape this crew deliberately isn't</p>
   <svg viewBox="0 0 1100 340" role="img" aria-label="A cycle diagram: reason leads to call tool leads to observe leads to a decide diamond; the diamond has a no arrow curving back to reason and a yes arrow going to final answer; a dashed iteration cap box floats beside the decide diamond">
     <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.4">
       <rect x="40" y="140" width="180" height="70" rx="10" fill="var(--p-blue)"/>
@@ -351,7 +351,7 @@ footer, header, hgroup, main, menu, nav, section {
 <!-- ============ SLIDE 7 — PIPELINE: bounded 5 calls ============ -->
 <section>
   <h2 class="t">This crew costs exactly 5 model calls, always</h2>
-  <p class="s">retrieve() runs exactly once. run() has no while and no retry branch. 1 Triage + 1 retrieval-embedding + 1 relevance-gate + up to 1 Fixer + up to 1 Reviewer.</p>
+  <p class="s">retrieve() runs once — run() has no while loop and no retry branch</p>
   <svg viewBox="0 0 1100 300" role="img" aria-label="A fixed five-step pipeline numbered one through five: Triage, Investigator retrieval, relevance gate, Fixer, Reviewer, ending in a green box reading predictable p99 cost and latency">
     <g class="lbl-b" text-anchor="middle" fill="#1e1e1e">
       <circle cx="70" cy="90" r="20" fill="var(--p-blue)" stroke="#1e1e1e" stroke-width="2"/>
@@ -389,7 +389,7 @@ footer, header, hgroup, main, menu, nav, section {
 <!-- ============ SLIDE 8 — SCENE: relay race baton ============ -->
 <section>
   <h2 class="t">A relay race passes the baton, not the runner's whole race so far</h2>
-  <p class="s">Each runner only receives the baton — the plain string handed forward — not the previous runner's memory of the whole race.</p>
+  <p class="s">Each runner gets only the baton — not the whole race behind them</p>
   <svg viewBox="0 0 1100 340" role="img" aria-label="Three runners in a relay race positioned left to right along a track, a baton passing hand to hand between them, each runner drawn only holding what is directly in front of them, not looking back at the runner behind">
     <g filter="url(#rough)" fill="none" stroke="#757575" stroke-width="1.6" stroke-dasharray="9 9">
       <line x1="40" y1="290" x2="1060" y2="290"/>
@@ -437,31 +437,31 @@ footer, header, hgroup, main, menu, nav, section {
 <!-- ============ SLIDE 9 — TRACE: triage not fed to retrieval ============ -->
 <section>
   <h2 class="t">Triage's classification is printed for you — and thrown away by the code</h2>
-  <p class="s">retrieve() queries ChromaDB with the raw incident string, not with Triage's AREA/SEV output; Triage's line never reaches the Investigator's prompt.</p>
-  <svg viewBox="0 0 1100 320" role="img" aria-label="The incident string fans into two paths: a dashed dead-end arrow to Triage labeled printed only, and a solid arrow to the Investigator's retrieve function labeled the actual query">
+  <p class="s">retrieve() uses the raw incident string — never Triage's classification</p>
+  <svg viewBox="0 0 1100 340" role="img" aria-label="The incident string fans into two paths: a dashed dead-end arrow to Triage, which outputs an AREA/SEV classification that is printed only, and a solid arrow to the Investigator's retrieve function labeled the actual query">
     <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.8">
-      <rect x="40" y="120" width="220" height="80" rx="10" fill="var(--p-purple)"/>
+      <rect x="40" y="130" width="220" height="80" rx="10" fill="var(--p-purple)"/>
     </g>
-    <text x="150" y="155" text-anchor="middle" class="lbl-b">incident</text>
-    <text x="150" y="180" text-anchor="middle" class="lbl-g">raw string argument</text>
+    <text x="150" y="165" text-anchor="middle" class="lbl-b">incident</text>
+    <text x="150" y="190" text-anchor="middle" class="lbl-g">raw string argument</text>
     <g filter="url(#rough)" fill="none" stroke="#757575" stroke-width="2.2" stroke-dasharray="5 5">
-      <rect x="420" y="30" width="220" height="80" rx="10"/>
+      <rect x="420" y="30" width="240" height="95" rx="10"/>
     </g>
-    <text x="530" y="65" text-anchor="middle" class="lbl-b">Triage</text>
-    <text x="530" y="90" text-anchor="middle" class="lbl-g" fill="#c62828">printed only — a dead end</text>
+    <text x="540" y="65" text-anchor="middle" class="lbl-b">Triage &#8594; AREA/SEV</text>
+    <text x="540" y="90" text-anchor="middle" class="lbl-g" fill="#c62828">printed only — a dead end</text>
     <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.6">
-      <rect x="420" y="200" width="220" height="80" rx="10" fill="var(--p-blue)"/>
+      <rect x="420" y="215" width="240" height="90" rx="10" fill="var(--p-blue)"/>
     </g>
-    <text x="530" y="235" text-anchor="middle" class="lbl-b">Investigator</text>
-    <text x="530" y="260" text-anchor="middle" class="lbl-g">retrieve(incident)</text>
+    <text x="540" y="250" text-anchor="middle" class="lbl-b">Investigator</text>
+    <text x="540" y="275" text-anchor="middle" class="lbl-g">retrieve(incident)</text>
     <g filter="url(#rough)" fill="none" stroke="#757575" stroke-width="2" stroke-dasharray="4 6">
-      <path d="M260,145 C330,120 350,90 418,70" marker-end="url(#ahg)"/>
+      <path d="M260,155 C330,120 360,90 418,72" marker-end="url(#ahg)"/>
     </g>
     <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.4">
-      <path d="M260,175 C330,200 350,225 418,235" marker-end="url(#ah)"/>
+      <path d="M260,190 C330,230 360,250 418,260" marker-end="url(#ah)"/>
     </g>
-    <text x="900" y="65" text-anchor="middle" class="lbl-g">console output for a human</text>
-    <text x="900" y="240" text-anchor="middle" class="lbl-g" fill="#2e7d32">the actual query</text>
+    <text x="920" y="65" text-anchor="middle" class="lbl-g">console output for a human</text>
+    <text x="920" y="255" text-anchor="middle" class="lbl-g" fill="#2e7d32">the actual query</text>
   </svg>
   <p class="takeaway">Triage's job in this pipeline is display and an early sanity check — it does not narrow what the Investigator searches for, unless you extend the crew to make it.</p>
   <div class="pageno">M7-DD·09</div>
@@ -470,7 +470,7 @@ footer, header, hgroup, main, menu, nav, section {
 <!-- ============ SLIDE 10 — TWO-PANEL: dilution vs cascade ============ -->
 <section>
   <h2 class="t">Fixed order sidesteps two failure modes a dynamic router doesn't</h2>
-  <p class="s">A human-authored, hard-coded run() order avoids context dilution and error cascade — two costs of letting agents route work dynamically at runtime.</p>
+  <p class="s">A hard-coded run() order sidesteps both failure modes below</p>
   <svg viewBox="0 0 1100 320" role="img" aria-label="Two panels: context dilution shows a bloated shared history box feeding an agent that only needed a small part of it; error cascade shows a rephrased summary hiding an original mistake from a downstream agent">
     <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.8">
       <rect x="40" y="40" width="480" height="240" rx="10" fill="var(--p-red)"/>
@@ -507,7 +507,7 @@ footer, header, hgroup, main, menu, nav, section {
 <!-- ============ SLIDE 11 — ANATOMY: two code gates ============ -->
 <section>
   <h2 class="t">Two gates, two Python string checks, zero follow-up prompts</h2>
-  <p class="s">Both gates are deterministic checks on a model's output, not a second LLM call policing the first — a string check can't be talked out of its answer.</p>
+  <p class="s">Two deterministic string checks — not a second model policing the first</p>
   <svg viewBox="0 0 1100 300" role="img" aria-label="Two boxes side by side, each showing the literal startswith check from the code, both stamped deterministic not a second model call">
     <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="3">
       <rect x="50" y="50" width="460" height="180" rx="10" fill="var(--p-blue)"/>
@@ -531,7 +531,7 @@ footer, header, hgroup, main, menu, nav, section {
 <!-- ============ SLIDE 12 — PIPELINE: gate placement ============ -->
 <section>
   <h2 class="t">Gate 1 sits after the tool call, Gate 2 sits at final-answer time</h2>
-  <p class="s">The relevance gate validates a retrieval result before the Fixer trusts it; the Reviewer gate validates the Fixer's action before a human sees it.</p>
+  <p class="s">Where the two real gates physically sit in the pipeline</p>
   <svg viewBox="0 0 1100 300" role="img" aria-label="A pipeline: retrieval into gate one a relevance diamond into Fixer into gate two a reviewer diamond into outcome, with a dashed ghost box off to the side representing a third gate type this crew does not need before a tool call">
     <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.4">
       <rect x="20" y="110" width="170" height="70" rx="8" fill="var(--p-blue)"/>
@@ -576,7 +576,7 @@ footer, header, hgroup, main, menu, nav, section {
 <!-- ============ SLIDE 13 — NUMBERED ROWS: observing prompts ============ -->
 <section>
   <h2 class="t">No debug flag — read the profile file and the f-string instead</h2>
-  <p class="s">crew.py has no DEBUG or --verbose. Prints show each stage's output only. Reconstruct the exact prompt from the profile file plus run()'s f-string.</p>
+  <p class="s">No DEBUG flag — read the profile file plus run()'s f-string instead</p>
   <svg viewBox="0 0 1100 300" role="img" aria-label="Three numbered rows: docker compose run prints stage markers showing outputs only, cat the profile file shows the system prompt, the profile plus the f-string equal the complete prompt with no hidden step">
     <g class="lbl-b" text-anchor="middle" fill="#1e1e1e">
       <circle cx="70" cy="45" r="22" fill="var(--p-blue)" stroke="#1e1e1e" stroke-width="2"/>
@@ -600,7 +600,7 @@ footer, header, hgroup, main, menu, nav, section {
 <!-- ============ SLIDE 14 — NUMBERED ROWS: experiment ground rules ============ -->
 <section>
   <h2 class="t">Same incident, three knob variants, always run one at a time</h2>
-  <p class="s">Sequential only — never parallel. This machine's budget and, more importantly, small-model run-to-run noise would make it impossible to tell a knob change from ordinary variance.</p>
+  <p class="s">Sequential only — parallel runs would hide a knob change inside ordinary noise</p>
   <svg viewBox="0 0 1100 300" role="img" aria-label="Three numbered rows: baseline unmodified run, variant A triage temperature raised to zero point nine repeated three times, variant B relevance gate bypassed, each captioned sequential never parallel">
     <g class="lbl-b" text-anchor="middle" fill="#1e1e1e">
       <circle cx="70" cy="45" r="22" fill="var(--p-blue)" stroke="#1e1e1e" stroke-width="2"/>
@@ -624,7 +624,7 @@ footer, header, hgroup, main, menu, nav, section {
 <!-- ============ SLIDE 15 — THREE-COLUMN: variant A ============ -->
 <section>
   <h2 class="t">The outcome held at 0.9 — the prose didn't</h2>
-  <p class="s">All three runs land on OUTCOME: APPROVED. Triage's prose drifts from terse (run 1) to a run-on sentence (run 2) to an unrequested multi-section writeup (run 3).</p>
+  <p class="s">Three real repeats at temp 0.9 — the outcome held, the prose didn't</p>
   <svg viewBox="0 0 1100 320" role="img" aria-label="Three columns showing run one terse and on profile, run two a run-on sentence, run three unrequested numbered sections, all three sharing one green banner underneath reading outcome approved all three runs">
     <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.4">
       <rect x="30" y="40" width="320" height="150" rx="10" fill="var(--p-blue)"/>
@@ -655,7 +655,7 @@ footer, header, hgroup, main, menu, nav, section {
 <!-- ============ SLIDE 16 — SCENE: rubber stamp over mismatched runbook ============ -->
 <section>
   <h2 class="t">Bypass one gate and the crew launders a fabricated command through two agents</h2>
-  <p class="s">With the relevance gate always passing, the Kafka incident retrieves the wrong runbook, the Fixer invents a command, and in this captured run the Reviewer approves it as "backed by a runbook."</p>
+  <p class="s">Gate bypassed: wrong runbook retrieved, Fixer invents a command, Reviewer approves it</p>
   <svg viewBox="0 0 1100 380" role="img" aria-label="A rubber stamp marked approved coming down over a torn mismatched runbook page held together with the wrong staple, with red ink lines bleeding from the stamp mark">
     <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="3" stroke-dasharray="9 7">
       <rect x="140" y="100" width="260" height="180" rx="8" fill="var(--p-red)" transform="rotate(-3 270 190)"/>
@@ -686,7 +686,7 @@ footer, header, hgroup, main, menu, nav, section {
 <!-- ============ SLIDE 17 — NUMBERED ROWS: comparison table summary ============ -->
 <section>
   <h2 class="t">The gate pins the marker — remove it and the marker stops being pinned</h2>
-  <p class="s">OUTCOME: and which stages ran are exact reproducible facts — while the gate is intact. Wording is small-model noise. Remove the gate: wrong runbook every run, but OUTCOME itself flips run to run.</p>
+  <p class="s">Wrong runbook repeats every run — but OUTCOME stays stable only while the gate holds</p>
   <svg viewBox="0 0 1100 300" role="img" aria-label="Three numbered rows summarizing baseline approved with five calls, variant A approved across three runs with drifting prose, variant B retrieving the wrong runbook every run while its outcome marker flips between approved and rejected run to run because the gate that pinned it is gone">
     <g class="lbl-b" text-anchor="middle" fill="#1e1e1e">
       <circle cx="70" cy="45" r="22" fill="var(--p-blue)" stroke="#1e1e1e" stroke-width="2"/>

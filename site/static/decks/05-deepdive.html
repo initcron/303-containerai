@@ -140,32 +140,36 @@ footer, header, hgroup, main, menu, nav, section {
 <section data-auto-animate>
   <p class="kicker">MODULE 5 DEEP DIVE &nbsp;·&nbsp; CONTAINERS FOR GENAI &amp; AGENTIC AI</p>
   <h2 class="t" style="font-size:2.3em">The knobs nobody explained</h2>
-  <p class="s" style="font-size:1.2em">The lab wired ChromaDB and Streamlit together with chunk_size=500, k=3, and nomic-embed-text — values that were just already in app/main.py. This deck opens those knobs: chunking, top-k, the similarity metric, and the context budget.</p>
-  <svg viewBox="0 0 1100 300" role="img" aria-label="Four theme boxes — chunking, top-k, similarity metric, and context budget — all feeding into one box asking what actually changes">
-    <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.4" stroke-linecap="round">
-      <rect x="30" y="40" width="240" height="90" rx="10"/>
-      <rect x="300" y="40" width="240" height="90" rx="10"/>
-      <rect x="570" y="40" width="240" height="90" rx="10"/>
-      <rect x="840" y="40" width="230" height="90" rx="10"/>
+  <p class="s" style="font-size:1.2em">The lab's defaults were never explained — this deck opens them</p>
+  <svg viewBox="0 0 1100 400" role="img" aria-label="Four theme boxes — chunking with size and overlap, top-k deciding how many cards, the similarity metric L2 vs cosine, and context budget num_ctx=4096 — all feeding into one box asking what actually changes">
+    <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.6" stroke-linecap="round">
+      <rect x="20" y="50" width="250" height="120" rx="12"/>
+      <rect x="290" y="50" width="250" height="120" rx="12"/>
+      <rect x="560" y="50" width="250" height="120" rx="12"/>
+      <rect x="830" y="50" width="250" height="120" rx="12"/>
     </g>
-    <text x="150" y="78" text-anchor="middle" class="lbl-b">chunking</text>
-    <text x="150" y="103" text-anchor="middle" class="lbl-g">size &amp; overlap</text>
-    <text x="420" y="78" text-anchor="middle" class="lbl-b">top-k</text>
-    <text x="420" y="103" text-anchor="middle" class="lbl-g">how many cards</text>
-    <text x="690" y="78" text-anchor="middle" class="lbl-b">the metric</text>
-    <text x="690" y="103" text-anchor="middle" class="lbl-g">L2 vs cosine</text>
-    <text x="955" y="78" text-anchor="middle" class="lbl-b">context budget</text>
-    <text x="955" y="103" text-anchor="middle" class="lbl-g">num_ctx=4096</text>
-    <g filter="url(#rough)" fill="none" stroke="#757575" stroke-width="2" stroke-linecap="round">
-      <path d="M150,135 C150,190 470,190 500,225" marker-end="url(#ahg)"/>
-      <path d="M420,135 C420,185 500,185 520,225" marker-end="url(#ahg)"/>
-      <path d="M690,135 C690,185 610,185 590,225" marker-end="url(#ahg)"/>
-      <path d="M955,135 C955,190 640,190 610,225" marker-end="url(#ahg)"/>
+    <text x="145" y="105" text-anchor="middle" class="lbl-b" style="font-size:26px">chunking</text>
+    <text x="145" y="138" text-anchor="middle" class="lbl-g" style="font-size:19px">size &amp; overlap</text>
+    <text x="145" y="160" text-anchor="middle" class="lbl-g" style="font-size:19px">chunk_size=500</text>
+    <text x="415" y="105" text-anchor="middle" class="lbl-b" style="font-size:26px">top-k</text>
+    <text x="415" y="138" text-anchor="middle" class="lbl-g" style="font-size:19px">how many cards</text>
+    <text x="415" y="160" text-anchor="middle" class="lbl-g" style="font-size:19px">k=3</text>
+    <text x="685" y="105" text-anchor="middle" class="lbl-b" style="font-size:26px">the metric</text>
+    <text x="685" y="138" text-anchor="middle" class="lbl-g" style="font-size:19px">L2 vs cosine</text>
+    <text x="685" y="160" text-anchor="middle" class="lbl-g" style="font-size:19px">nomic-embed-text</text>
+    <text x="955" y="105" text-anchor="middle" class="lbl-b" style="font-size:26px">context budget</text>
+    <text x="955" y="138" text-anchor="middle" class="lbl-g" style="font-size:19px">the ceiling</text>
+    <text x="955" y="160" text-anchor="middle" class="lbl-g" style="font-size:19px">num_ctx=4096</text>
+    <g filter="url(#rough)" fill="none" stroke="#757575" stroke-width="2.2" stroke-linecap="round">
+      <path d="M145,175 C145,240 470,240 500,290" marker-end="url(#ahg)"/>
+      <path d="M415,175 C415,235 500,235 520,290" marker-end="url(#ahg)"/>
+      <path d="M685,175 C685,235 610,235 590,290" marker-end="url(#ahg)"/>
+      <path d="M955,175 C955,240 640,240 610,290" marker-end="url(#ahg)"/>
     </g>
-    <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="3">
-      <rect x="410" y="228" width="300" height="60" rx="10" fill="var(--p-blue)"/>
+    <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="3.4">
+      <rect x="390" y="295" width="340" height="80" rx="12" fill="var(--p-blue)"/>
     </g>
-    <text x="560" y="264" text-anchor="middle" class="lbl-b">what actually changes</text>
+    <text x="560" y="342" text-anchor="middle" class="lbl-b" style="font-size:26px">what actually changes</text>
   </svg>
   <p class="credit"><b>Gourav Shah</b> &nbsp;·&nbsp; School of DevOps &amp; AI &nbsp;·&nbsp; Deep Dive (Part 2)</p>
   <div class="pageno">M5-DD·01</div>
@@ -174,31 +178,31 @@ footer, header, hgroup, main, menu, nav, section {
 <!-- ============ SLIDE 2 — SCENE: index card too small ============ -->
 <section>
   <h2 class="t">Cut the index card too small and the fact loses its command</h2>
-  <p class="s">A chunk boundary that lands mid-idea splits a fact from the step that goes with it — the model reads one card and gets half a procedure.</p>
-  <svg viewBox="0 0 1100 380" role="img" aria-label="A hand holds two small separated index cards; the left card reads restart the payments service and the right card, held apart from it, holds the actual command; a magnifying glass hovers over the gap between them">
-    <g filter="url(#rough)" fill="none" stroke="#757575" stroke-width="2.2" stroke-linecap="round">
-      <path d="M120,300 C150,260 180,250 210,255 C240,260 250,290 240,320"/>
-      <ellipse cx="180" cy="240" rx="26" ry="28"/>
+  <p class="s">A chunk boundary mid-idea splits a fact from the step that follows it</p>
+  <svg viewBox="0 0 1100 420" role="img" aria-label="A hand holds two small separated index cards; the left card reads the payments service needs a restart and the right card, held apart from it, holds the actual kubectl command; a magnifying glass hovers over the gap between them">
+    <g filter="url(#rough)" fill="none" stroke="#757575" stroke-width="2.4" stroke-linecap="round">
+      <path d="M100,330 C135,285 170,272 205,278 C240,284 252,318 240,352"/>
+      <ellipse cx="165" cy="264" rx="30" ry="32"/>
     </g>
-    <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="3">
-      <rect x="90" y="90" width="230" height="150" rx="10" fill="var(--p-blue)" transform="rotate(-4 205 165)"/>
+    <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="3.4">
+      <rect x="60" y="90" width="260" height="180" rx="12" fill="var(--p-blue)" transform="rotate(-4 190 180)"/>
     </g>
-    <text x="205" y="150" text-anchor="middle" class="lbl-b" transform="rotate(-4 205 165)">the payments</text>
-    <text x="205" y="175" text-anchor="middle" class="lbl-b" transform="rotate(-4 205 165)">service needs</text>
-    <text x="205" y="200" text-anchor="middle" class="lbl-b" transform="rotate(-4 205 165)">a restart</text>
-    <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="3" stroke-dasharray="9 7">
-      <rect x="700" y="90" width="260" height="150" rx="10" fill="var(--p-orange)" transform="rotate(3 830 165)"/>
+    <text x="190" y="165" text-anchor="middle" class="lbl-b" style="font-size:24px" transform="rotate(-4 190 180)">the payments</text>
+    <text x="190" y="195" text-anchor="middle" class="lbl-b" style="font-size:24px" transform="rotate(-4 190 180)">service needs</text>
+    <text x="190" y="225" text-anchor="middle" class="lbl-b" style="font-size:24px" transform="rotate(-4 190 180)">a restart</text>
+    <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="3.4" stroke-dasharray="9 7">
+      <rect x="760" y="90" width="290" height="180" rx="12" fill="var(--p-orange)" transform="rotate(3 905 180)"/>
     </g>
-    <text x="830" y="150" text-anchor="middle" class="lbl-b" transform="rotate(3 830 165)">kubectl rollout</text>
-    <text x="830" y="175" text-anchor="middle" class="lbl-b" transform="rotate(3 830 165)">restart deploy/</text>
-    <text x="830" y="200" text-anchor="middle" class="lbl-b" transform="rotate(3 830 165)">payments -n prod</text>
-    <g filter="url(#rough)" fill="none" stroke="#757575" stroke-width="2" stroke-dasharray="5 5">
-      <circle cx="500" cy="140" r="55"/>
-      <line x1="540" y1="180" x2="580" y2="220"/>
+    <text x="905" y="165" text-anchor="middle" class="lbl-b" style="font-size:24px" transform="rotate(3 905 180)">kubectl rollout</text>
+    <text x="905" y="195" text-anchor="middle" class="lbl-b" style="font-size:24px" transform="rotate(3 905 180)">restart deploy/</text>
+    <text x="905" y="225" text-anchor="middle" class="lbl-b" style="font-size:24px" transform="rotate(3 905 180)">payments -n prod</text>
+    <g filter="url(#rough)" fill="none" stroke="#757575" stroke-width="2.2" stroke-dasharray="5 5">
+      <circle cx="530" cy="160" r="62"/>
+      <line x1="576" y1="204" x2="620" y2="248"/>
     </g>
-    <text x="500" y="240" text-anchor="middle" class="lbl-g">the gap between cards</text>
-    <text x="205" y="270" text-anchor="middle" class="lbl-sm">card 1: the fact</text>
-    <text x="830" y="270" text-anchor="middle" class="lbl-sm">card 2: the command</text>
+    <text x="530" y="270" text-anchor="middle" class="lbl-g" style="font-size:19px">the gap between cards</text>
+    <text x="190" y="300" text-anchor="middle" class="lbl-sm" style="font-size:19px">card 1: the fact</text>
+    <text x="905" y="300" text-anchor="middle" class="lbl-sm" style="font-size:19px">card 2: the command</text>
   </svg>
   <p class="takeaway">A retrieved chunk that's too small hands the model the fact without the command two sentences later — precise, but incomplete.</p>
   <div class="pageno">M5-DD·02</div>
@@ -207,29 +211,29 @@ footer, header, hgroup, main, menu, nav, section {
 <!-- ============ SLIDE 3 — SCENE: index card too large ============ -->
 <section>
   <h2 class="t">Cut it too large and four procedures blur into one average</h2>
-  <p class="s">An oversized chunk forces the embedding model to compress unrelated procedures into a single vector — the resulting match is mediocre for all of them.</p>
-  <svg viewBox="0 0 1100 380" role="img" aria-label="A hand holds one oversized index card crammed with four different runbook procedures written in cramped, overlapping handwriting">
-    <g filter="url(#rough)" fill="none" stroke="#757575" stroke-width="2.2" stroke-linecap="round">
-      <path d="M520,320 C540,280 560,265 585,268 C610,270 618,300 610,325"/>
-      <ellipse cx="565" cy="255" rx="26" ry="28"/>
+  <p class="s">An oversized chunk compresses unrelated procedures into one blurry vector</p>
+  <svg viewBox="0 0 1100 420" role="img" aria-label="A hand holds one oversized index card crammed with four different runbook procedures — restart payments, checkout 503 errors, database backups, on-call paging — written in cramped overlapping handwriting, producing a mediocre match for anything specific">
+    <g filter="url(#rough)" fill="none" stroke="#757575" stroke-width="2.4" stroke-linecap="round">
+      <path d="M540,355 C562,310 585,293 613,297 C641,300 650,334 641,362"/>
+      <ellipse cx="592" cy="283" rx="30" ry="32"/>
     </g>
-    <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="3">
-      <rect x="330" y="60" width="440" height="220" rx="10" fill="var(--p-red)"/>
+    <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="3.4">
+      <rect x="320" y="60" width="460" height="260" rx="12" fill="var(--p-red)"/>
     </g>
-    <text x="550" y="100" text-anchor="middle" class="lbl-sm">restart payments…</text>
-    <text x="550" y="135" text-anchor="middle" class="lbl-sm">checkout 503 errors…</text>
-    <text x="550" y="170" text-anchor="middle" class="lbl-sm">database backups…</text>
-    <text x="550" y="205" text-anchor="middle" class="lbl-sm">on-call paging…</text>
-    <text x="550" y="245" text-anchor="middle" class="lbl-b">one crowded card</text>
-    <text x="140" y="150" text-anchor="middle" class="lbl-g">4 topics,</text>
-    <text x="140" y="175" text-anchor="middle" class="lbl-g">1 embedding</text>
-    <g filter="url(#rough)" fill="none" stroke="#757575" stroke-width="2" stroke-dasharray="4 6">
-      <path d="M230,160 C270,160 290,160 320,160" marker-end="url(#ahg)"/>
+    <text x="550" y="108" text-anchor="middle" class="lbl-sm" style="font-size:20px">restart payments…</text>
+    <text x="550" y="150" text-anchor="middle" class="lbl-sm" style="font-size:20px">checkout 503 errors…</text>
+    <text x="550" y="192" text-anchor="middle" class="lbl-sm" style="font-size:20px">database backups…</text>
+    <text x="550" y="234" text-anchor="middle" class="lbl-sm" style="font-size:20px">on-call paging…</text>
+    <text x="550" y="285" text-anchor="middle" class="lbl-b" style="font-size:24px">one crowded card, 4 topics</text>
+    <text x="120" y="175" text-anchor="middle" class="lbl-g" style="font-size:20px">4 topics,</text>
+    <text x="120" y="205" text-anchor="middle" class="lbl-g" style="font-size:20px">1 embedding</text>
+    <g filter="url(#rough)" fill="none" stroke="#757575" stroke-width="2.2" stroke-dasharray="4 6">
+      <path d="M200,190 C240,190 270,190 310,190" marker-end="url(#ahg)"/>
     </g>
-    <text x="900" y="150" text-anchor="middle" class="lbl-g" fill="#c62828">a mediocre match</text>
-    <text x="900" y="175" text-anchor="middle" class="lbl-g" fill="#c62828">for anything specific</text>
-    <g filter="url(#rough)" fill="none" stroke="#757575" stroke-width="2" stroke-dasharray="4 6">
-      <path d="M780,160 C820,160 840,160 870,160" marker-end="url(#ahg)"/>
+    <text x="960" y="175" text-anchor="middle" class="lbl-g" style="font-size:20px" fill="#c62828">a mediocre match</text>
+    <text x="960" y="205" text-anchor="middle" class="lbl-g" style="font-size:20px" fill="#c62828">for anything specific</text>
+    <g filter="url(#rough)" fill="none" stroke="#757575" stroke-width="2.2" stroke-dasharray="4 6">
+      <path d="M790,190 C830,190 850,190 890,190" marker-end="url(#ahg)"/>
     </g>
   </svg>
   <p class="takeaway">A chunk that swallows several topics forces its embedding to represent the average of all of them — a mediocre match for anything specific.</p>
@@ -239,37 +243,37 @@ footer, header, hgroup, main, menu, nav, section {
 <!-- ============ SLIDE 4 — DIAGRAM: overlap mechanism ============ -->
 <section>
   <h2 class="t">Overlap photocopies the tail onto the next card</h2>
-  <p class="s">The last 50 characters of chunk 1 are repeated at the start of chunk 2 — a fact sitting on the cut boundary is never orphaned with no context on either side.</p>
-  <svg viewBox="0 0 1100 340" role="img" aria-label="One long document splits into chunk 1 and chunk 2 with a highlighted shared overlap band between them, each chunk arrowing into its own embedding box and into ChromaDB">
-    <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.6" stroke-linecap="round">
-      <rect x="60" y="30" width="980" height="60" rx="8"/>
+  <p class="s">The tail of chunk 1 is copied onto the start of chunk 2 — no fact is ever orphaned</p>
+  <svg viewBox="0 0 1100 400" role="img" aria-label="One long runbook document splits into chunk 1 and chunk 2, each 500 characters, with a highlighted shared overlap band of the last 50 characters of chunk 1 between them, each chunk arrowing into its own embed-to-vector box and into ChromaDB">
+    <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.8" stroke-linecap="round">
+      <rect x="60" y="30" width="980" height="70" rx="8"/>
     </g>
-    <text x="550" y="66" text-anchor="middle" class="lbl-b">runbook text (one long document)</text>
+    <text x="550" y="72" text-anchor="middle" class="lbl-b" style="font-size:24px">runbook text (one long document)</text>
+    <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.8">
+      <rect x="120" y="160" width="380" height="90" rx="8" fill="var(--p-blue)"/>
+      <rect x="440" y="160" width="380" height="90" rx="8" fill="var(--p-blue)"/>
+    </g>
+    <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="3.2">
+      <rect x="440" y="160" width="80" height="90" rx="6" fill="var(--p-orange)"/>
+    </g>
+    <text x="290" y="198" text-anchor="middle" class="lbl-b" style="font-size:24px">chunk 1</text>
+    <text x="290" y="226" text-anchor="middle" class="lbl-g" style="font-size:19px">500 chars</text>
+    <text x="640" y="198" text-anchor="middle" class="lbl-b" style="font-size:24px">chunk 2</text>
+    <text x="640" y="226" text-anchor="middle" class="lbl-g" style="font-size:19px">500 chars</text>
+    <text x="480" y="278" text-anchor="middle" class="lbl-g" style="font-size:18px" fill="#2e7d32">overlap band — last 50 chars of chunk 1, overlap=50</text>
+    <g filter="url(#rough)" fill="none" stroke="#757575" stroke-width="2.2" stroke-dasharray="4 6">
+      <path d="M290,105 C290,130 290,140 290,158" marker-end="url(#ahg)"/>
+      <path d="M640,105 C640,130 640,140 640,158" marker-end="url(#ahg)"/>
+    </g>
     <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.6">
-      <rect x="120" y="140" width="380" height="80" rx="8" fill="var(--p-blue)"/>
-      <rect x="440" y="140" width="380" height="80" rx="8" fill="var(--p-blue)"/>
+      <rect x="190" y="330" width="200" height="50" rx="8"/>
+      <rect x="550" y="330" width="200" height="50" rx="8"/>
     </g>
-    <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="3">
-      <rect x="440" y="140" width="80" height="80" rx="6" fill="var(--p-orange)"/>
-    </g>
-    <text x="290" y="175" text-anchor="middle" class="lbl-b">chunk 1</text>
-    <text x="290" y="200" text-anchor="middle" class="lbl-g">500 chars</text>
-    <text x="640" y="175" text-anchor="middle" class="lbl-b">chunk 2</text>
-    <text x="640" y="200" text-anchor="middle" class="lbl-g">500 chars</text>
-    <text x="480" y="250" text-anchor="middle" class="lbl-g" fill="#2e7d32">overlap band — last 50 chars of chunk 1</text>
-    <g filter="url(#rough)" fill="none" stroke="#757575" stroke-width="2" stroke-dasharray="4 6">
-      <path d="M290,90 C290,110 290,120 290,138" marker-end="url(#ahg)"/>
-      <path d="M640,90 C640,110 640,120 640,138" marker-end="url(#ahg)"/>
-    </g>
+    <text x="290" y="362" text-anchor="middle" class="lbl" style="font-size:19px">embed → vector</text>
+    <text x="650" y="362" text-anchor="middle" class="lbl" style="font-size:19px">embed → vector</text>
     <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.4">
-      <rect x="200" y="290" width="180" height="40" rx="8"/>
-      <rect x="560" y="290" width="180" height="40" rx="8"/>
-    </g>
-    <text x="290" y="315" text-anchor="middle" class="lbl">embed → vector</text>
-    <text x="650" y="315" text-anchor="middle" class="lbl">embed → vector</text>
-    <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.2">
-      <path d="M290,220 C290,255 290,265 290,288" marker-end="url(#ah)"/>
-      <path d="M640,220 C640,255 640,265 640,288" marker-end="url(#ah)"/>
+      <path d="M290,250 C290,290 290,300 290,328" marker-end="url(#ah)"/>
+      <path d="M640,250 C640,290 640,300 640,328" marker-end="url(#ah)"/>
     </g>
   </svg>
   <p class="takeaway">Overlap exists for facts that land exactly on a chunk boundary — with overlap=50 a boundary fact still appears whole in at least one chunk.</p>
@@ -279,28 +283,30 @@ footer, header, hgroup, main, menu, nav, section {
 <!-- ============ SLIDE 5 — NUMBERED ROWS: separator cascade + real count ============ -->
 <section>
   <h2 class="t">This corpus split into exactly 2 chunks, and that's why</h2>
-  <p class="s">The splitter prefers a paragraph break over a mid-sentence cut, trying each separator in order — on the ~1,000-char Acme corpus that means roughly two runbook sections per chunk.</p>
-  <svg viewBox="0 0 1100 320" role="img" aria-label="A numbered cascade of separators tried in order — double newline, single newline, space, empty string — arrowing to a result box reading 2 chunks for this corpus">
+  <p class="s">chunk_size=500 on this ~800-char corpus produces exactly 2 chunks</p>
+  <svg viewBox="0 0 1100 400" role="img" aria-label="A numbered cascade of separators tried in order — double newline paragraph break preferred, single newline, then space, then empty string as last resort — arrowing to a result box reading 2 chunks for this corpus at chunk_size 500">
     <g class="lbl-b" text-anchor="middle" fill="#1e1e1e">
-      <circle cx="90" cy="60" r="24" fill="var(--p-blue)" stroke="#1e1e1e" stroke-width="2"/>
-      <text x="90" y="68" class="num">1</text>
-      <circle cx="90" cy="140" r="24" fill="var(--p-blue)" stroke="#1e1e1e" stroke-width="2"/>
-      <text x="90" y="148" class="num">2</text>
-      <circle cx="90" cy="220" r="24" fill="var(--p-blue)" stroke="#1e1e1e" stroke-width="2"/>
-      <text x="90" y="228" class="num">3</text>
+      <circle cx="100" cy="70" r="28" fill="var(--p-blue)" stroke="#1e1e1e" stroke-width="2.2"/>
+      <text x="100" y="79" class="num" style="font-size:26px">1</text>
+      <circle cx="100" cy="175" r="28" fill="var(--p-blue)" stroke="#1e1e1e" stroke-width="2.2"/>
+      <text x="100" y="184" class="num" style="font-size:26px">2</text>
+      <circle cx="100" cy="280" r="28" fill="var(--p-blue)" stroke="#1e1e1e" stroke-width="2.2"/>
+      <text x="100" y="289" class="num" style="font-size:26px">3</text>
     </g>
-    <text x="150" y="66" text-anchor="start" class="lbl">try "\n\n" — paragraph break (preferred)</text>
-    <text x="150" y="146" text-anchor="start" class="lbl">then "\n" — line break</text>
-    <text x="150" y="226" text-anchor="start" class="lbl">then " " then "" — word, then hard cut (last resort)</text>
-    <g filter="url(#rough)" fill="none" stroke="#757575" stroke-width="2" stroke-dasharray="4 6">
-      <path d="M300,260 C450,290 550,290 650,270" marker-end="url(#ahg)"/>
+    <text x="165" y="78" text-anchor="start" class="lbl" style="font-size:23px">try "\n\n" — paragraph break (preferred)</text>
+    <text x="165" y="183" text-anchor="start" class="lbl" style="font-size:23px">then "\n" — line break</text>
+    <text x="165" y="278" text-anchor="start" class="lbl" style="font-size:23px">then " " — word</text>
+    <text x="165" y="308" text-anchor="start" class="lbl" style="font-size:23px">then "" — hard cut (last resort)</text>
+    <g filter="url(#rough)" fill="none" stroke="#757575" stroke-width="2.2" stroke-dasharray="4 6">
+      <path d="M330,330 C480,365 580,365 680,340" marker-end="url(#ahg)"/>
     </g>
-    <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="3">
-      <rect x="680" y="60" width="340" height="180" rx="10" fill="var(--p-green)"/>
+    <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="3.4">
+      <rect x="710" y="70" width="360" height="220" rx="12" fill="var(--p-green)"/>
     </g>
-    <text x="850" y="120" text-anchor="middle" class="lbl-b">2 chunks</text>
-    <text x="850" y="150" text-anchor="middle" class="lbl-g">this corpus, chunk_size=500</text>
-    <text x="850" y="180" text-anchor="middle" class="lbl-g">~2 runbook sections per chunk</text>
+    <text x="890" y="140" text-anchor="middle" class="lbl-b" style="font-size:28px">2 chunks</text>
+    <text x="890" y="180" text-anchor="middle" class="lbl-g" style="font-size:19px">this corpus, chunk_size=500</text>
+    <text x="890" y="210" text-anchor="middle" class="lbl-g" style="font-size:19px">~800-char Acme corpus</text>
+    <text x="890" y="240" text-anchor="middle" class="lbl-g" style="font-size:19px">~2 runbook sections per chunk</text>
   </svg>
   <p class="takeaway">The splitter always prefers a paragraph break over a mid-sentence cut — the chunk count you get is a direct function of corpus size vs chunk_size.</p>
   <div class="pageno">M5-DD·05</div>
@@ -309,35 +315,38 @@ footer, header, hgroup, main, menu, nav, section {
 <!-- ============ SLIDE 6 — FAN-OUT: top-k mechanism ============ -->
 <section>
   <h2 class="t">Top-k decides how many cards land on the model's desk</h2>
-  <p class="s">k=3 always retrieves the three nearest chunks, regardless of how many exist or how relevant the third-ranked one actually is.</p>
-  <svg viewBox="0 0 1100 340" role="img" aria-label="One query box fans out into three ranked chunk slots by distance, each arrowing into a box reading the model reads all of this">
-    <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.8">
-      <rect x="40" y="130" width="200" height="80" rx="10" fill="var(--p-purple)"/>
-    </g>
-    <text x="140" y="165" text-anchor="middle" class="lbl-b">query</text>
-    <text x="140" y="190" text-anchor="middle" class="lbl-g">"restart payments?"</text>
-    <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.4">
-      <rect x="360" y="30" width="220" height="70" rx="8" fill="var(--p-blue)"/>
-      <rect x="360" y="135" width="220" height="70" rx="8" fill="var(--p-blue)"/>
-      <rect x="360" y="240" width="220" height="70" rx="8" fill="var(--p-blue)"/>
-    </g>
-    <text x="470" y="60" text-anchor="middle" class="lbl-sm">1st nearest</text>
-    <text x="470" y="165" text-anchor="middle" class="lbl-sm">2nd nearest</text>
-    <text x="470" y="270" text-anchor="middle" class="lbl-sm">3rd nearest</text>
-    <g filter="url(#rough)" fill="none" stroke="#757575" stroke-width="2" stroke-linecap="round">
-      <path d="M240,170 C300,170 300,65 360,65" marker-end="url(#ahg)"/>
-      <path d="M240,170 C300,170 300,170 360,170" marker-end="url(#ahg)"/>
-      <path d="M240,170 C300,170 300,275 360,275" marker-end="url(#ahg)"/>
-    </g>
+  <p class="s">k=3 always retrieves the three nearest chunks, relevant or not</p>
+  <svg viewBox="0 0 1100 400" role="img" aria-label="One query box fans out into three ranked chunk slots by distance, each arrowing into a box reading the model must read all 3 every query">
     <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="3">
-      <rect x="800" y="120" width="260" height="100" rx="10" fill="var(--p-orange)"/>
+      <rect x="30" y="155" width="220" height="90" rx="12" fill="var(--p-purple)"/>
     </g>
-    <text x="930" y="160" text-anchor="middle" class="lbl-b">model must read</text>
-    <text x="930" y="185" text-anchor="middle" class="lbl-b">all 3, every query</text>
-    <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.2">
-      <path d="M580,65 C700,65 700,140 800,155" marker-end="url(#ah)"/>
-      <path d="M580,170 C700,170 700,170 800,170" marker-end="url(#ah)"/>
-      <path d="M580,275 C700,275 700,190 800,185" marker-end="url(#ah)"/>
+    <text x="140" y="195" text-anchor="middle" class="lbl-b" style="font-size:24px">query</text>
+    <text x="140" y="222" text-anchor="middle" class="lbl-g" style="font-size:18px">"restart payments?"</text>
+    <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.6">
+      <rect x="380" y="40" width="240" height="80" rx="8" fill="var(--p-blue)"/>
+      <rect x="380" y="160" width="240" height="80" rx="8" fill="var(--p-blue)"/>
+      <rect x="380" y="280" width="240" height="80" rx="8" fill="var(--p-blue)"/>
+    </g>
+    <text x="500" y="75" text-anchor="middle" class="lbl-sm" style="font-size:19px">1st nearest</text>
+    <text x="500" y="100" text-anchor="middle" class="lbl-g" style="font-size:16px">k=3, rank 1</text>
+    <text x="500" y="195" text-anchor="middle" class="lbl-sm" style="font-size:19px">2nd nearest</text>
+    <text x="500" y="220" text-anchor="middle" class="lbl-g" style="font-size:16px">k=3, rank 2</text>
+    <text x="500" y="315" text-anchor="middle" class="lbl-sm" style="font-size:19px">3rd nearest</text>
+    <text x="500" y="340" text-anchor="middle" class="lbl-g" style="font-size:16px">k=3, rank 3</text>
+    <g filter="url(#rough)" fill="none" stroke="#757575" stroke-width="2.2" stroke-linecap="round">
+      <path d="M250,195 C320,195 320,80 380,80" marker-end="url(#ahg)"/>
+      <path d="M250,195 C320,195 320,200 380,200" marker-end="url(#ahg)"/>
+      <path d="M250,195 C320,195 320,320 380,320" marker-end="url(#ahg)"/>
+    </g>
+    <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="3.4">
+      <rect x="840" y="140" width="230" height="120" rx="12" fill="var(--p-orange)"/>
+    </g>
+    <text x="955" y="190" text-anchor="middle" class="lbl-b" style="font-size:23px">model must read</text>
+    <text x="955" y="222" text-anchor="middle" class="lbl-b" style="font-size:23px">all 3, every query</text>
+    <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.4">
+      <path d="M620,80 C740,80 740,160 838,185" marker-end="url(#ah)"/>
+      <path d="M620,200 C740,200 740,200 838,200" marker-end="url(#ah)"/>
+      <path d="M620,320 C740,320 740,220 838,215" marker-end="url(#ah)"/>
     </g>
   </svg>
   <p class="takeaway">Every retrieved chunk is text the model must read before answering — retrieval doesn't just find information, it spends budget.</p>
@@ -347,30 +356,31 @@ footer, header, hgroup, main, menu, nav, section {
 <!-- ============ SLIDE 7 — TWO-PANEL: k=3 requested vs 2 exist ============ -->
 <section>
   <h2 class="t">k=3 requested, 2 returned — you're already retrieving everything</h2>
-  <p class="s">With only 2 chunks total in this collection, k=3 can't filter anything — ChromaDB hands back both and stops; there's no third chunk to return.</p>
-  <svg viewBox="0 0 1100 320" role="img" aria-label="Two panels compared — k equals 3 requested with 3 empty slots outlined in red dashed, versus 2 chunks that actually exist filled in blue, only 2 of 3 slots ever filling">
+  <p class="s">Only 2 chunks exist here, so k=3 can't filter anything at all</p>
+  <svg viewBox="0 0 1100 400" role="img" aria-label="Two panels compared — k equals 3 requested with 3 slots, the third empty and outlined in red dashed with nothing to give, versus 2 chunks that actually exist filled in blue at distance 0.6956 and 1.0968, only 2 of 3 slots ever filling">
+    <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.8">
+      <rect x="50" y="50" width="450" height="280" rx="12"/>
+    </g>
+    <text x="275" y="98" text-anchor="middle" class="lbl-b" style="font-size:26px">k=3 requested</text>
+    <g filter="url(#rough)" fill="none" stroke="#c62828" stroke-width="2.4" stroke-dasharray="9 7">
+      <rect x="100" y="130" width="350" height="50" rx="6"/>
+      <rect x="100" y="195" width="350" height="50" rx="6"/>
+      <rect x="100" y="260" width="350" height="50" rx="6" fill="var(--p-red)"/>
+    </g>
+    <text x="275" y="162" text-anchor="middle" class="lbl-sm" style="font-size:19px">slot 1 — filled</text>
+    <text x="275" y="227" text-anchor="middle" class="lbl-sm" style="font-size:19px">slot 2 — filled</text>
+    <text x="275" y="292" text-anchor="middle" class="lbl-sm" style="font-size:19px" fill="#c62828">slot 3 — nothing to give</text>
+    <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.8">
+      <rect x="600" y="50" width="450" height="280" rx="12"/>
+    </g>
+    <text x="825" y="98" text-anchor="middle" class="lbl-b" style="font-size:26px">2 chunks exist</text>
     <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.6">
-      <rect x="60" y="40" width="420" height="220" rx="10"/>
+      <rect x="650" y="130" width="350" height="50" rx="6" fill="var(--p-blue)"/>
+      <rect x="650" y="195" width="350" height="50" rx="6" fill="var(--p-blue)"/>
     </g>
-    <text x="270" y="80" text-anchor="middle" class="lbl-b">k=3 requested</text>
-    <g filter="url(#rough)" fill="none" stroke="#c62828" stroke-width="2.2" stroke-dasharray="9 7">
-      <rect x="110" y="105" width="320" height="40" rx="6"/>
-      <rect x="110" y="155" width="320" height="40" rx="6"/>
-      <rect x="110" y="205" width="320" height="40" rx="6" fill="var(--p-red)"/>
-    </g>
-    <text x="270" y="130" text-anchor="middle" class="lbl-sm">slot 1 — filled</text>
-    <text x="270" y="180" text-anchor="middle" class="lbl-sm">slot 2 — filled</text>
-    <text x="270" y="230" text-anchor="middle" class="lbl-sm" fill="#c62828">slot 3 — nothing to give</text>
-    <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.6">
-      <rect x="620" y="40" width="420" height="220" rx="10"/>
-    </g>
-    <text x="830" y="80" text-anchor="middle" class="lbl-b">2 chunks exist</text>
-    <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.4">
-      <rect x="670" y="105" width="320" height="40" rx="6" fill="var(--p-blue)"/>
-      <rect x="670" y="155" width="320" height="40" rx="6" fill="var(--p-blue)"/>
-    </g>
-    <text x="830" y="130" text-anchor="middle" class="lbl-sm">chunk 1 — dist 0.6956</text>
-    <text x="830" y="180" text-anchor="middle" class="lbl-sm">chunk 2 — dist 1.0968</text>
+    <text x="825" y="162" text-anchor="middle" class="lbl-sm" style="font-size:19px">chunk 1 — dist 0.6956</text>
+    <text x="825" y="227" text-anchor="middle" class="lbl-sm" style="font-size:19px">chunk 2 — dist 1.0968</text>
+    <text x="825" y="292" text-anchor="middle" class="lbl-g" style="font-size:18px">no third chunk to return</text>
   </svg>
   <p class="takeaway">On a corpus this small, k isn't doing retrieval work at all; on a larger corpus a k this generous would start diluting more than helping.</p>
   <div class="pageno">M5-DD·07</div>
@@ -379,33 +389,34 @@ footer, header, hgroup, main, menu, nav, section {
 <!-- ============ SLIDE 8 — SCENE: librarian with a ruler ============ -->
 <section>
   <h2 class="t">Distance, not similarity — and lower means closer</h2>
-  <p class="s">ChromaDB's documents collection runs on default squared-L2 (Euclidean) distance — a distance, not a percentage, so smaller numbers mean more relevant.</p>
-  <svg viewBox="0 0 1100 380" role="img" aria-label="A librarian holds a ruler up to two books on a shelf, measuring the physical gap between them, with a caption reading closer means a smaller number">
-    <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.6" stroke-linecap="round">
-      <circle cx="220" cy="120" r="34"/>
-      <path d="M220,154 L220,250"/>
-      <path d="M220,175 L160,220"/>
-      <path d="M220,175 L300,150"/>
-      <path d="M220,250 L185,320"/>
-      <path d="M220,250 L255,320"/>
+  <p class="s">ChromaDB ranks by distance, not similarity — smaller number wins</p>
+  <svg viewBox="0 0 1100 420" role="img" aria-label="A librarian holds a ruler up to two books on a shelf, measuring the physical gap between them, with a caption reading closer means a smaller number, labeled as the default squared L2 Euclidean distance">
+    <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.8" stroke-linecap="round">
+      <circle cx="230" cy="140" r="40"/>
+      <path d="M230,180 L230,290"/>
+      <path d="M230,205 L160,255"/>
+      <path d="M230,205 L320,175"/>
+      <path d="M230,290 L190,370"/>
+      <path d="M230,290 L270,370"/>
     </g>
-    <text x="220" y="345" text-anchor="middle" class="lbl-sm">the librarian</text>
-    <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.4">
-      <rect x="60" y="60" width="1000" height="20" rx="4"/>
+    <text x="230" y="400" text-anchor="middle" class="lbl-sm" style="font-size:19px">the librarian</text>
+    <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.6">
+      <rect x="60" y="70" width="1000" height="22" rx="4"/>
     </g>
-    <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="3">
-      <rect x="560" y="20" width="70" height="120" rx="6" fill="var(--p-blue)"/>
-      <rect x="780" y="20" width="70" height="120" rx="6" fill="var(--p-blue)"/>
+    <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="3.2">
+      <rect x="570" y="20" width="80" height="140" rx="6" fill="var(--p-blue)"/>
+      <rect x="810" y="20" width="80" height="140" rx="6" fill="var(--p-blue)"/>
     </g>
-    <text x="595" y="90" text-anchor="middle" class="lbl-sm">book A</text>
-    <text x="815" y="90" text-anchor="middle" class="lbl-sm">book B</text>
-    <g filter="url(#rough)" fill="none" stroke="#757575" stroke-width="2.2" stroke-linecap="round">
-      <path d="M300,150 L555,150"/>
-      <path d="M300,140 L300,160"/>
-      <path d="M555,140 L555,160"/>
+    <text x="610" y="100" text-anchor="middle" class="lbl-sm" style="font-size:19px">book A</text>
+    <text x="850" y="100" text-anchor="middle" class="lbl-sm" style="font-size:19px">book B</text>
+    <g filter="url(#rough)" fill="none" stroke="#757575" stroke-width="2.4" stroke-linecap="round">
+      <path d="M320,175 L565,175"/>
+      <path d="M320,163 L320,187"/>
+      <path d="M565,163 L565,187"/>
     </g>
-    <text x="700" y="180" text-anchor="middle" class="lbl-g">ruler measures the gap</text>
-    <text x="700" y="280" text-anchor="middle" class="lbl-b" fill="#2e7d32">closer = smaller number</text>
+    <text x="740" y="210" text-anchor="middle" class="lbl-g" style="font-size:20px">ruler measures the gap</text>
+    <text x="740" y="240" text-anchor="middle" class="lbl-g" style="font-size:18px">default squared-L2 (Euclidean) distance</text>
+    <text x="740" y="310" text-anchor="middle" class="lbl-b" style="font-size:26px" fill="#2e7d32">closer = smaller number</text>
   </svg>
   <p class="takeaway">Every "Found N relevant chunks" line in the lab is ChromaDB returning the smallest-distance chunks — a distance, not a percentage score.</p>
   <div class="pageno">M5-DD·08</div>
@@ -414,28 +425,29 @@ footer, header, hgroup, main, menu, nav, section {
 <!-- ============ SLIDE 9 — ANATOMY: unit circle, L2 = cosine ============ -->
 <section>
   <h2 class="t">Same ranking here, but only because the vectors sit on the unit circle</h2>
-  <p class="s">nomic-embed-text's embeddings are close to unit-norm, and ‖a−b‖² = 2 − 2·cos(a,b) when both vectors have norm 1 — so L2 and cosine agree.</p>
-  <svg viewBox="0 0 1100 360" role="img" aria-label="A unit circle with two vectors on its rim, the chord between their tips labeled L2 distance, and the angle between them labeled cosine angle, connected by an equals sign">
-    <g filter="url(#rough)" fill="none" stroke="#757575" stroke-width="2" stroke-dasharray="4 6">
-      <circle cx="330" cy="180" r="140"/>
+  <p class="s">On the unit circle, L2 distance and cosine angle agree exactly</p>
+  <svg viewBox="0 0 1100 400" role="img" aria-label="A unit circle with two vectors on its rim, the chord between their tips labeled L2 distance, and the angle between them labeled cosine angle, connected by an equals sign to the formula L2 squared equals 2 minus 2 cosine a b, true only when both vectors have norm 1, and nomic-embed-text sits close to unit-norm">
+    <g filter="url(#rough)" fill="none" stroke="#757575" stroke-width="2.2" stroke-dasharray="4 6">
+      <circle cx="330" cy="200" r="160"/>
     </g>
-    <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.6" stroke-linecap="round">
-      <path d="M330,180 L440,80" marker-end="url(#ah)"/>
-      <path d="M330,180 L455,240" marker-end="url(#ah)"/>
+    <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.8" stroke-linecap="round">
+      <path d="M330,200 L460,85" marker-end="url(#ah)"/>
+      <path d="M330,200 L480,270" marker-end="url(#ah)"/>
     </g>
-    <text x="450" y="70" text-anchor="middle" class="lbl-sm">vector a</text>
-    <text x="470" y="255" text-anchor="middle" class="lbl-sm">vector b</text>
-    <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.4">
-      <path d="M440,80 L455,240"/>
+    <text x="470" y="70" text-anchor="middle" class="lbl-sm" style="font-size:19px">vector a</text>
+    <text x="495" y="290" text-anchor="middle" class="lbl-sm" style="font-size:19px">vector b</text>
+    <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.6">
+      <path d="M460,85 L480,270"/>
     </g>
-    <text x="500" y="165" text-anchor="middle" class="lbl-g">L2 distance</text>
-    <text x="330" y="150" text-anchor="middle" class="lbl-g">cosine angle</text>
-    <text x="650" y="185" text-anchor="middle" class="lbl-b">=</text>
-    <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="3">
-      <rect x="720" y="130" width="330" height="100" rx="10" fill="var(--p-green)"/>
+    <text x="530" y="185" text-anchor="middle" class="lbl-g" style="font-size:19px">L2 distance</text>
+    <text x="330" y="165" text-anchor="middle" class="lbl-g" style="font-size:19px">cosine angle</text>
+    <text x="680" y="205" text-anchor="middle" class="lbl-b" style="font-size:30px">=</text>
+    <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="3.2">
+      <rect x="750" y="140" width="330" height="130" rx="12" fill="var(--p-green)"/>
     </g>
-    <text x="885" y="170" text-anchor="middle" class="lbl-b">‖a−b‖² = 2 − 2·cos(a,b)</text>
-    <text x="885" y="200" text-anchor="middle" class="lbl-g">true only when ‖a‖=‖b‖=1</text>
+    <text x="915" y="190" text-anchor="middle" class="lbl-b" style="font-size:23px">‖a−b‖² = 2 − 2·cos(a,b)</text>
+    <text x="915" y="225" text-anchor="middle" class="lbl-g" style="font-size:18px">true only when ‖a‖=‖b‖=1</text>
+    <text x="915" y="252" text-anchor="middle" class="lbl-g" style="font-size:18px">nomic-embed-text ≈ unit-norm</text>
   </svg>
   <p class="takeaway">This equivalence is specific to unit-norm vectors — swap in a model that doesn't normalize, and L2 starts rewarding vector length, which cosine ignores.</p>
   <div class="pageno">M5-DD·09</div>
@@ -444,28 +456,28 @@ footer, header, hgroup, main, menu, nav, section {
 <!-- ============ SLIDE 10 — PIPELINE: embedder defines retrieval ============ -->
 <section>
   <h2 class="t">The embedder decides what "similar" means — the LLM never gets a vote</h2>
-  <p class="s">The LLM never sees your documents until after retrieval hands it a slice of text; every retrieval decision is made entirely by the embedding model's vector space.</p>
-  <svg viewBox="0 0 1100 300" role="img" aria-label="A pipeline from the corpus through the embedding model which defines what is similar, into ChromaDB ranking, into retrieved chunks, into the LLM which never sees the rest">
-    <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.4">
-      <rect x="30" y="100" width="160" height="70" rx="8"/>
-      <rect x="250" y="90" width="220" height="90" rx="8" fill="var(--p-blue)"/>
-      <rect x="530" y="100" width="180" height="70" rx="8"/>
-      <rect x="770" y="100" width="150" height="70" rx="8" fill="var(--p-orange)"/>
-      <rect x="970" y="90" width="100" height="90" rx="8"/>
+  <p class="s">The LLM never sees the corpus until retrieval hands it a slice</p>
+  <svg viewBox="0 0 1100 380" role="img" aria-label="A pipeline from the corpus through the embedding model nomic-embed-text which defines what is similar, into ChromaDB ranking, into retrieved chunks, into the LLM qwen2.5:1.5b which never sees the rest">
+    <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.6">
+      <rect x="20" y="150" width="170" height="90" rx="10"/>
+      <rect x="245" y="130" width="240" height="130" rx="10" fill="var(--p-blue)"/>
+      <rect x="545" y="150" width="190" height="90" rx="10"/>
+      <rect x="795" y="150" width="160" height="90" rx="10" fill="var(--p-orange)"/>
+      <rect x="1010" y="130" width="80" height="130" rx="10"/>
     </g>
-    <text x="110" y="140" text-anchor="middle" class="lbl-sm">corpus</text>
-    <text x="360" y="128" text-anchor="middle" class="lbl-b">nomic-embed-text</text>
-    <text x="360" y="153" text-anchor="middle" class="lbl-g">defines "similar"</text>
-    <text x="620" y="135" text-anchor="middle" class="lbl-sm">Chroma ranking</text>
-    <text x="845" y="130" text-anchor="middle" class="lbl-sm">retrieved</text>
-    <text x="845" y="150" text-anchor="middle" class="lbl-sm">chunks</text>
-    <text x="1020" y="128" text-anchor="middle" class="lbl-sm">qwen2.5</text>
-    <text x="1020" y="150" text-anchor="middle" class="lbl-g" fill="#757575">never sees the rest</text>
-    <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.2" stroke-linecap="round">
-      <path d="M190,135 L248,135" marker-end="url(#ah)"/>
-      <path d="M470,135 L528,135" marker-end="url(#ah)"/>
-      <path d="M710,135 L768,135" marker-end="url(#ah)"/>
-      <path d="M920,135 L968,135" marker-end="url(#ah)"/>
+    <text x="105" y="200" text-anchor="middle" class="lbl-sm" style="font-size:20px">corpus</text>
+    <text x="365" y="188" text-anchor="middle" class="lbl-b" style="font-size:21px">nomic-embed-text</text>
+    <text x="365" y="218" text-anchor="middle" class="lbl-g" style="font-size:18px">defines "similar"</text>
+    <text x="640" y="200" text-anchor="middle" class="lbl-sm" style="font-size:19px">Chroma ranking</text>
+    <text x="875" y="192" text-anchor="middle" class="lbl-sm" style="font-size:19px">retrieved</text>
+    <text x="875" y="217" text-anchor="middle" class="lbl-sm" style="font-size:19px">chunks</text>
+    <text x="1050" y="188" text-anchor="middle" class="lbl-sm" style="font-size:18px">qwen2.5</text>
+    <text x="1050" y="212" text-anchor="middle" class="lbl-g" style="font-size:15px" fill="#757575">never sees the rest</text>
+    <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.4" stroke-linecap="round">
+      <path d="M190,195 L243,195" marker-end="url(#ah)"/>
+      <path d="M485,195 L543,195" marker-end="url(#ah)"/>
+      <path d="M735,195 L793,195" marker-end="url(#ah)"/>
+      <path d="M955,195 L1008,195" marker-end="url(#ah)"/>
     </g>
   </svg>
   <p class="takeaway">If the embedding model doesn't distinguish "restart" from "backup" in its vector space, no downstream LLM quality fixes a bad retrieval.</p>
@@ -475,28 +487,29 @@ footer, header, hgroup, main, menu, nav, section {
 <!-- ============ SLIDE 11 — TWO-PANEL: incomparable coordinate spaces ============ -->
 <section>
   <h2 class="t">Two embedding models never share a coordinate system</h2>
-  <p class="s">Two different models place the same sentence at different, incomparable coordinates — storing embeddings from one and querying with another produces meaningless distances.</p>
-  <svg viewBox="0 0 1100 320" role="img" aria-label="Two panels — model A's vector space with a sentence plotted as a blue point, and model B's vector space with the same sentence plotted at an unrelated orange point, a crossed-out arrow between the two spaces">
-    <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.4">
-      <rect x="60" y="40" width="420" height="220" rx="10"/>
-      <rect x="620" y="40" width="420" height="220" rx="10"/>
-    </g>
-    <text x="270" y="75" text-anchor="middle" class="lbl-b">model A's space</text>
-    <text x="830" y="75" text-anchor="middle" class="lbl-b">model B's space</text>
+  <p class="s">Two embedding models never share a coordinate system</p>
+  <svg viewBox="0 0 1100 400" role="img" aria-label="Two panels — model A's vector space with the sentence restart payments plotted as a blue point, and model B's vector space with the same sentence plotted at an unrelated orange point, a crossed-out arrow labeled not comparable between the two spaces, meaning swapping embedding models requires a full re-ingest">
     <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.6">
-      <circle cx="230" cy="180" r="14" fill="var(--p-blue)"/>
+      <rect x="50" y="50" width="450" height="280" rx="12"/>
+      <rect x="600" y="50" width="450" height="280" rx="12"/>
     </g>
-    <text x="230" y="215" text-anchor="middle" class="lbl-sm">"restart payments"</text>
-    <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.6">
-      <circle cx="920" cy="110" r="14" fill="var(--p-orange)"/>
+    <text x="275" y="95" text-anchor="middle" class="lbl-b" style="font-size:24px">model A's space</text>
+    <text x="825" y="95" text-anchor="middle" class="lbl-b" style="font-size:24px">model B's space</text>
+    <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.8">
+      <circle cx="230" cy="230" r="17" fill="var(--p-blue)"/>
     </g>
-    <text x="920" y="145" text-anchor="middle" class="lbl-sm">"restart payments"</text>
-    <g filter="url(#rough)" fill="none" stroke="#c62828" stroke-width="2.2" stroke-dasharray="5 5">
-      <path d="M490,150 L610,150"/>
-      <path d="M480,135 L500,165"/>
-      <path d="M500,135 L480,165"/>
+    <text x="230" y="275" text-anchor="middle" class="lbl-sm" style="font-size:19px">"restart payments"</text>
+    <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.8">
+      <circle cx="900" cy="140" r="17" fill="var(--p-orange)"/>
     </g>
-    <text x="550" y="120" text-anchor="middle" class="lbl-g" fill="#c62828">not comparable</text>
+    <text x="900" y="185" text-anchor="middle" class="lbl-sm" style="font-size:19px">"restart payments"</text>
+    <g filter="url(#rough)" fill="none" stroke="#c62828" stroke-width="2.4" stroke-dasharray="5 5">
+      <path d="M505,190 L595,190"/>
+      <path d="M492,172 L518,208"/>
+      <path d="M518,172 L492,208"/>
+    </g>
+    <text x="550" y="155" text-anchor="middle" class="lbl-g" style="font-size:19px" fill="#c62828">not comparable</text>
+    <text x="550" y="245" text-anchor="middle" class="lbl-g" style="font-size:18px">swap models = full re-ingest</text>
   </svg>
   <p class="takeaway">Storing embeddings from one model and querying with another doesn't degrade gracefully — it produces meaningless distances, not just worse ones.</p>
   <div class="pageno">M5-DD·11</div>
@@ -505,22 +518,23 @@ footer, header, hgroup, main, menu, nav, section {
 <!-- ============ SLIDE 12 — ANATOMY: context budget ============ -->
 <section>
   <h2 class="t">Four pieces have to fit inside one 4096-token ceiling</h2>
-  <p class="s">num_ctx=4096 caps every prompt this app builds — template scaffolding, retrieved context, the question, and headroom for the answer all compete for the same budget.</p>
-  <svg viewBox="0 0 1100 260" role="img" aria-label="One outer box labeled 4096 tokens divided into four labeled inner segments — scaffolding, context, question, and answer headroom — stacked to fill it">
-    <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="3">
-      <rect x="60" y="30" width="980" height="160" rx="10"/>
+  <p class="s">Four pieces compete for one fixed 4096-token ceiling</p>
+  <svg viewBox="0 0 1100 380" role="img" aria-label="One outer box labeled num_ctx equals 4096 tokens divided into four labeled inner segments — scaffold, context, question, and answer headroom — stacked to fill it, the real ceiling independent of the model's larger native training context">
+    <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="3.2">
+      <rect x="60" y="70" width="980" height="240" rx="12"/>
     </g>
-    <text x="550" y="20" text-anchor="middle" class="lbl-b">num_ctx = 4096 tokens</text>
-    <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2">
-      <rect x="70" y="40" width="60" height="140" fill="var(--p-purple)"/>
-      <rect x="130" y="40" width="140" height="140" fill="var(--p-blue)"/>
-      <rect x="270" y="40" width="50" height="140" fill="var(--p-orange)"/>
-      <rect x="320" y="40" width="710" height="140" fill="var(--p-green)"/>
+    <text x="550" y="45" text-anchor="middle" class="lbl-b" style="font-size:27px">num_ctx = 4096 tokens</text>
+    <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.2">
+      <rect x="75" y="85" width="65" height="210" fill="var(--p-purple)"/>
+      <rect x="140" y="85" width="155" height="210" fill="var(--p-blue)"/>
+      <rect x="295" y="85" width="55" height="210" fill="var(--p-orange)"/>
+      <rect x="350" y="85" width="670" height="210" fill="var(--p-green)"/>
     </g>
-    <text x="100" y="115" text-anchor="middle" class="lbl-sm">scaffold</text>
-    <text x="200" y="115" text-anchor="middle" class="lbl-sm">context</text>
-    <text x="295" y="115" text-anchor="middle" class="lbl-sm">Q</text>
-    <text x="670" y="115" text-anchor="middle" class="lbl-b">answer headroom</text>
+    <text x="107" y="195" text-anchor="middle" class="lbl-sm" style="font-size:17px">scaffold</text>
+    <text x="217" y="195" text-anchor="middle" class="lbl-sm" style="font-size:17px">context</text>
+    <text x="322" y="195" text-anchor="middle" class="lbl-sm" style="font-size:17px">Q</text>
+    <text x="685" y="195" text-anchor="middle" class="lbl-b" style="font-size:24px">answer headroom</text>
+    <text x="685" y="345" text-anchor="middle" class="lbl-g" style="font-size:18px">real ceiling, independent of qwen2.5:1.5b's native training context</text>
   </svg>
   <p class="takeaway">num_ctx=4096 is the real ceiling, independent of qwen2.5:1.5b's larger native training context — the app never uses more than this.</p>
   <div class="pageno">M5-DD·12</div>
@@ -529,25 +543,25 @@ footer, header, hgroup, main, menu, nav, section {
 <!-- ============ SLIDE 13 — NUMBERED ROWS: real arithmetic ============ -->
 <section>
   <h2 class="t">At this lab's scale, the prompt uses under 15% of the ceiling</h2>
-  <p class="s">Working the real arithmetic for chunk_size=500 and k=3: roughly 350-450 tokens spent, leaving over 3,650 tokens of headroom for the answer.</p>
-  <svg viewBox="0 0 1100 300" role="img" aria-label="Numbered rows working the arithmetic — template about 20 tokens, context about 300 to 390 tokens, question about 15 to 30 tokens, total about 350 to 450 tokens, headroom about 3650 to 3700 tokens">
+  <p class="s">This prompt uses under 15% of the 4096-token ceiling</p>
+  <svg viewBox="0 0 1100 380" role="img" aria-label="Numbered rows working the real arithmetic for chunk_size 500 and k=3 — template about 20 tokens, retrieved context 3 chunks about 300 to 390 tokens, question about 15 to 30 tokens, prompt total about 350 to 450 tokens, headroom about 3650 to 3700 tokens">
     <g class="lbl-b" text-anchor="middle" fill="#1e1e1e">
-      <circle cx="70" cy="45" r="20" fill="var(--p-blue)" stroke="#1e1e1e" stroke-width="2"/>
-      <text x="70" y="52" class="num">1</text>
-      <circle cx="70" cy="100" r="20" fill="var(--p-blue)" stroke="#1e1e1e" stroke-width="2"/>
-      <text x="70" y="107" class="num">2</text>
-      <circle cx="70" cy="155" r="20" fill="var(--p-blue)" stroke="#1e1e1e" stroke-width="2"/>
-      <text x="70" y="162" class="num">3</text>
-      <circle cx="70" cy="210" r="20" fill="var(--p-green)" stroke="#1e1e1e" stroke-width="2"/>
-      <text x="70" y="217" class="num">=</text>
-      <circle cx="70" cy="265" r="20" fill="var(--p-green)" stroke="#1e1e1e" stroke-width="2"/>
-      <text x="70" y="272" class="num">+</text>
+      <circle cx="75" cy="55" r="24" fill="var(--p-blue)" stroke="#1e1e1e" stroke-width="2.2"/>
+      <text x="75" y="63" class="num" style="font-size:24px">1</text>
+      <circle cx="75" cy="128" r="24" fill="var(--p-blue)" stroke="#1e1e1e" stroke-width="2.2"/>
+      <text x="75" y="136" class="num" style="font-size:24px">2</text>
+      <circle cx="75" cy="201" r="24" fill="var(--p-blue)" stroke="#1e1e1e" stroke-width="2.2"/>
+      <text x="75" y="209" class="num" style="font-size:24px">3</text>
+      <circle cx="75" cy="274" r="24" fill="var(--p-green)" stroke="#1e1e1e" stroke-width="2.2"/>
+      <text x="75" y="282" class="num" style="font-size:24px">=</text>
+      <circle cx="75" cy="340" r="24" fill="var(--p-green)" stroke="#1e1e1e" stroke-width="2.2"/>
+      <text x="75" y="348" class="num" style="font-size:24px">+</text>
     </g>
-    <text x="110" y="52" text-anchor="start" class="lbl">template scaffolding — ~20 tokens</text>
-    <text x="110" y="107" text-anchor="start" class="lbl">retrieved context: 3 chunks × ~500 chars — ~300–390 tokens</text>
-    <text x="110" y="162" text-anchor="start" class="lbl">user question — ~15–30 tokens</text>
-    <text x="110" y="217" text-anchor="start" class="lbl-b">prompt total — ~350–450 tokens</text>
-    <text x="110" y="272" text-anchor="start" class="lbl-b" fill="#2e7d32">headroom for the answer — ~3,650–3,700 tokens</text>
+    <text x="125" y="63" text-anchor="start" class="lbl" style="font-size:21px">template scaffolding — ~20 tokens</text>
+    <text x="125" y="136" text-anchor="start" class="lbl" style="font-size:21px">retrieved context: 3 chunks × ~500 chars — ~300–390 tokens</text>
+    <text x="125" y="209" text-anchor="start" class="lbl" style="font-size:21px">user question — ~15–30 tokens</text>
+    <text x="125" y="282" text-anchor="start" class="lbl-b" style="font-size:23px">prompt total — ~350–450 tokens (chunk_size=500, k=3)</text>
+    <text x="125" y="348" text-anchor="start" class="lbl-b" style="font-size:23px" fill="#2e7d32">headroom for the answer — ~3,650–3,700 tokens</text>
   </svg>
   <p class="takeaway">There's no pressure on this corpus — but raise k to 10 on chunk_size=1500 and context alone hits ~3,750 tokens, crowding out the answer.</p>
   <div class="pageno">M5-DD·13</div>
@@ -556,25 +570,26 @@ footer, header, hgroup, main, menu, nav, section {
 <!-- ============ SLIDE 14 — STAIRCASE: truncation mechanism ============ -->
 <section>
   <h2 class="t">Ollama keeps the tail and drops the front, verified live</h2>
-  <p class="s">A 33,742-token oversized prompt got cut to prompt_eval_count=2050 with keep=4 — a marker at the front was lost, one at the back survived.</p>
-  <svg viewBox="0 0 1100 300" role="img" aria-label="A long prompt bar with a tiny kept prefix of 4 tokens at the very start, a large discarded middle section shown hatched, and a surviving tail segment labeled limit=2050">
-    <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.4">
-      <rect x="60" y="80" width="980" height="90" rx="8"/>
-    </g>
+  <p class="s">Verified live: Ollama keeps the tail and drops the front</p>
+  <svg viewBox="0 0 1100 380" role="img" aria-label="A long prompt bar of 33742 tokens with a tiny kept prefix of 4 tokens at the very start labeled keep=4, a large discarded middle section shown hatched and red, and a surviving tail segment labeled limit=2050 in green where the question lives, from a real captured truncating input prompt log line">
     <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.6">
-      <rect x="60" y="80" width="14" height="90" fill="var(--p-purple)"/>
+      <rect x="60" y="120" width="980" height="120" rx="10"/>
     </g>
-    <g filter="url(#rough)" fill="none" stroke="#757575" stroke-width="1.6" stroke-dasharray="6 6">
-      <rect x="74" y="80" width="740" height="90" fill="var(--p-red)"/>
+    <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.8">
+      <rect x="60" y="120" width="18" height="120" fill="var(--p-purple)"/>
     </g>
-    <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.6">
-      <rect x="814" y="80" width="226" height="90" fill="var(--p-green)"/>
+    <g filter="url(#rough)" fill="none" stroke="#757575" stroke-width="1.8" stroke-dasharray="6 6">
+      <rect x="78" y="120" width="736" height="120" fill="var(--p-red)"/>
     </g>
-    <text x="67" y="55" text-anchor="middle" class="lbl-sm">keep=4</text>
-    <text x="440" y="55" text-anchor="middle" class="lbl-g">discarded — prompt=33742 tokens</text>
-    <text x="925" y="55" text-anchor="middle" class="lbl-sm" fill="#2e7d32">surviving tail — limit=2050</text>
-    <text x="440" y="200" text-anchor="middle" class="lbl-g">"truncating input prompt"</text>
-    <text x="925" y="200" text-anchor="middle" class="lbl-b">the question lives here</text>
+    <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.8">
+      <rect x="814" y="120" width="226" height="120" fill="var(--p-green)"/>
+    </g>
+    <text x="70" y="85" text-anchor="middle" class="lbl-sm" style="font-size:19px">keep=4</text>
+    <text x="440" y="85" text-anchor="middle" class="lbl-g" style="font-size:19px">discarded — prompt=33,742 tokens total</text>
+    <text x="925" y="85" text-anchor="middle" class="lbl-sm" style="font-size:19px" fill="#2e7d32">surviving tail — limit=2050</text>
+    <text x="440" y="280" text-anchor="middle" class="lbl-g" style="font-size:19px">log line: "truncating input prompt"</text>
+    <text x="925" y="280" text-anchor="middle" class="lbl-b" style="font-size:22px">the question lives here</text>
+    <text x="440" y="310" text-anchor="middle" class="lbl-g" style="font-size:18px">prompt_eval_count=2050</text>
   </svg>
   <p class="takeaway">On this app's prompt shape — context first, question last — an over-budget prompt loses your earliest retrieved chunks first, not the question.</p>
   <div class="pageno">M5-DD·14</div>
@@ -583,22 +598,22 @@ footer, header, hgroup, main, menu, nav, section {
 <!-- ============ SLIDE 15 — TWO-PANEL: retrieval miss vs generation miss ============ -->
 <section>
   <h2 class="t">Two answers wrong for two different reasons</h2>
-  <p class="s">A retrieval miss means the wrong chunk was retrieved; a generation miss means the right chunk was handed over and the model still got it wrong.</p>
-  <svg viewBox="0 0 1100 300" role="img" aria-label="Two panels compared — a retrieval miss where the wrong chunk was retrieved but the model reasoned correctly on bad input, versus a generation miss where the right chunk was retrieved but the model still answered wrong">
-    <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.6">
-      <rect x="60" y="40" width="450" height="220" rx="10" fill="var(--p-red)"/>
-      <rect x="590" y="40" width="450" height="220" rx="10" fill="var(--p-orange)"/>
+  <p class="s">Two wrong answers, two different root causes to check first</p>
+  <svg viewBox="0 0 1100 380" role="img" aria-label="Two panels compared — a retrieval miss where the wrong chunk was retrieved but the model reasoned correctly on bad input, fix chunking top-k or embedding, versus a generation miss where the right chunk was retrieved but the model still answered wrong or hallucinates, fix the prompt or the model">
+    <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.8">
+      <rect x="50" y="50" width="470" height="280" rx="12" fill="var(--p-red)"/>
+      <rect x="580" y="50" width="470" height="280" rx="12" fill="var(--p-orange)"/>
     </g>
-    <text x="285" y="80" text-anchor="middle" class="lbl-b">retrieval miss</text>
-    <text x="285" y="120" text-anchor="middle" class="lbl-sm">wrong chunk retrieved</text>
-    <text x="285" y="150" text-anchor="middle" class="lbl-sm">model reasons fine</text>
-    <text x="285" y="180" text-anchor="middle" class="lbl-sm">on what it was given</text>
-    <text x="285" y="220" text-anchor="middle" class="lbl-g">fix: chunking / top-k / embedding</text>
-    <text x="815" y="80" text-anchor="middle" class="lbl-b">generation miss</text>
-    <text x="815" y="120" text-anchor="middle" class="lbl-sm">right chunk retrieved</text>
-    <text x="815" y="150" text-anchor="middle" class="lbl-sm">model still answers wrong</text>
-    <text x="815" y="180" text-anchor="middle" class="lbl-sm">or hallucinates</text>
-    <text x="815" y="220" text-anchor="middle" class="lbl-g">fix: the prompt or the model</text>
+    <text x="285" y="100" text-anchor="middle" class="lbl-b" style="font-size:25px">retrieval miss</text>
+    <text x="285" y="150" text-anchor="middle" class="lbl-sm" style="font-size:19px">wrong chunk retrieved</text>
+    <text x="285" y="180" text-anchor="middle" class="lbl-sm" style="font-size:19px">model reasons fine</text>
+    <text x="285" y="210" text-anchor="middle" class="lbl-sm" style="font-size:19px">on what it was given</text>
+    <text x="285" y="270" text-anchor="middle" class="lbl-g" style="font-size:19px">fix: chunking / top-k / embedding</text>
+    <text x="815" y="100" text-anchor="middle" class="lbl-b" style="font-size:25px">generation miss</text>
+    <text x="815" y="150" text-anchor="middle" class="lbl-sm" style="font-size:19px">right chunk retrieved</text>
+    <text x="815" y="180" text-anchor="middle" class="lbl-sm" style="font-size:19px">model still answers wrong</text>
+    <text x="815" y="210" text-anchor="middle" class="lbl-sm" style="font-size:19px">or hallucinates</text>
+    <text x="815" y="270" text-anchor="middle" class="lbl-g" style="font-size:19px">fix: the prompt or the model</text>
   </svg>
   <p class="takeaway">Confusing the two wastes debugging time — check "View Source Chunks" or query ChromaDB directly before touching the prompt or the model.</p>
   <div class="pageno">M5-DD·15</div>
@@ -607,26 +622,27 @@ footer, header, hgroup, main, menu, nav, section {
 <!-- ============ SLIDE 16 — PIPELINE with broken re-ranker link ============ -->
 <section>
   <h2 class="t">Naive RAG never asks "is the 2nd-best chunk actually better?"</h2>
-  <p class="s">There is no re-ranking step between the vector search and the LLM — whatever comes back by raw distance goes straight to the model.</p>
-  <svg viewBox="0 0 1100 260" role="img" aria-label="A pipeline from query through vector search to a crossed-out re-ranker box shown dashed, then straight to the LLM with no second look">
-    <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.4">
-      <rect x="40" y="90" width="200" height="80" rx="8"/>
-      <rect x="330" y="90" width="220" height="80" rx="8" fill="var(--p-blue)"/>
-      <rect x="920" y="90" width="150" height="80" rx="8" fill="var(--p-orange)"/>
+  <p class="s">Naive RAG never re-ranks — whatever wins on raw distance goes straight to the model</p>
+  <svg viewBox="0 0 1100 340" role="img" aria-label="A pipeline from query through vector search using raw distance only to a crossed-out missing re-ranker box shown dashed, then straight to the LLM with no second look — the gap that M6's agentic retrieval addresses">
+    <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.6">
+      <rect x="30" y="120" width="220" height="100" rx="10"/>
+      <rect x="360" y="120" width="240" height="100" rx="10" fill="var(--p-blue)"/>
+      <rect x="1000" y="120" width="70" height="100" rx="10" fill="var(--p-orange)"/>
     </g>
-    <g filter="url(#rough)" fill="none" stroke="#757575" stroke-width="2.2" stroke-dasharray="9 7">
-      <rect x="640" y="90" width="200" height="80" rx="8"/>
+    <g filter="url(#rough)" fill="none" stroke="#757575" stroke-width="2.4" stroke-dasharray="9 7">
+      <rect x="700" y="120" width="220" height="100" rx="10"/>
     </g>
-    <text x="140" y="135" text-anchor="middle" class="lbl-sm">query</text>
-    <text x="440" y="130" text-anchor="middle" class="lbl-sm">vector search</text>
-    <text x="440" y="150" text-anchor="middle" class="lbl-g">raw distance only</text>
-    <text x="740" y="130" text-anchor="middle" class="lbl-g">re-ranker</text>
-    <text x="740" y="150" text-anchor="middle" class="lbl-g" fill="#c62828">— missing —</text>
-    <text x="995" y="135" text-anchor="middle" class="lbl-sm">LLM</text>
-    <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.2" stroke-linecap="round">
-      <path d="M240,130 L328,130" marker-end="url(#ah)"/>
-      <path d="M550,130 C600,130 620,130 638,130" marker-end="url(#ahg)"/>
-      <path d="M550,150 C700,220 850,220 918,155" marker-end="url(#ah)"/>
+    <text x="140" y="178" text-anchor="middle" class="lbl-sm" style="font-size:20px">query</text>
+    <text x="480" y="170" text-anchor="middle" class="lbl-sm" style="font-size:20px">vector search</text>
+    <text x="480" y="198" text-anchor="middle" class="lbl-g" style="font-size:18px">raw distance only</text>
+    <text x="810" y="170" text-anchor="middle" class="lbl-g" style="font-size:20px">re-ranker</text>
+    <text x="810" y="198" text-anchor="middle" class="lbl-g" style="font-size:18px" fill="#c62828">— missing —</text>
+    <text x="1035" y="178" text-anchor="middle" class="lbl-sm" style="font-size:20px">LLM</text>
+    <text x="550" y="290" text-anchor="middle" class="lbl-g" style="font-size:19px">the gap M6's agentic retrieval fills</text>
+    <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.4" stroke-linecap="round">
+      <path d="M250,170 L358,170" marker-end="url(#ah)"/>
+      <path d="M600,170 C650,170 670,170 698,170" marker-end="url(#ahg)"/>
+      <path d="M600,198 C750,260 900,260 998,190" marker-end="url(#ah)"/>
     </g>
   </svg>
   <p class="takeaway">A semantically-adjacent-but-wrong chunk can outrank the truly relevant one — that's the class of gap M6's agentic retrieval addresses.</p>
@@ -636,20 +652,21 @@ footer, header, hgroup, main, menu, nav, section {
 <!-- ============ SLIDE 17 — NUMBERED ROWS: direct-Chroma API ============ -->
 <section>
   <h2 class="t">ChromaDB's own API confirms the metric, not a guess</h2>
-  <p class="s">Querying /api/v1/collections shows hnsw_configuration.space: "l2" and dimension: 768 straight from the running collection — no override was ever set.</p>
-  <svg viewBox="0 0 1100 280" role="img" aria-label="Numbered rows — curl the collections endpoint, read the returned JSON, highlighted fields space equals l2 and dimension equals 768, arrow to confirms the claim not assumed">
+  <p class="s">ChromaDB's own API confirms the metric — no override was ever set</p>
+  <svg viewBox="0 0 1100 380" role="img" aria-label="Numbered rows — curl the collections endpoint, read the returned JSON showing hnsw_configuration space equals l2 and dimension equals 768, arrow to confirms the claim not assumed, no override was ever set in app main.py">
     <g class="lbl-b" text-anchor="middle" fill="#1e1e1e">
-      <circle cx="70" cy="50" r="20" fill="var(--p-blue)" stroke="#1e1e1e" stroke-width="2"/>
-      <text x="70" y="57" class="num">1</text>
-      <circle cx="70" cy="130" r="20" fill="var(--p-blue)" stroke="#1e1e1e" stroke-width="2"/>
-      <text x="70" y="137" class="num">2</text>
-      <circle cx="70" cy="210" r="20" fill="var(--p-green)" stroke="#1e1e1e" stroke-width="2"/>
-      <text x="70" y="217" class="num">3</text>
+      <circle cx="75" cy="60" r="24" fill="var(--p-blue)" stroke="#1e1e1e" stroke-width="2.2"/>
+      <text x="75" y="68" class="num" style="font-size:24px">1</text>
+      <circle cx="75" cy="175" r="24" fill="var(--p-blue)" stroke="#1e1e1e" stroke-width="2.2"/>
+      <text x="75" y="183" class="num" style="font-size:24px">2</text>
+      <circle cx="75" cy="290" r="24" fill="var(--p-green)" stroke="#1e1e1e" stroke-width="2.2"/>
+      <text x="75" y="298" class="num" style="font-size:24px">3</text>
     </g>
-    <text x="110" y="57" text-anchor="start" class="lbl">curl .../api/v1/collections</text>
-    <text x="110" y="130" text-anchor="start" class="lbl-b">"space": "l2"</text>
-    <text x="380" y="130" text-anchor="start" class="lbl-b">"dimension": 768</text>
-    <text x="110" y="217" text-anchor="start" class="lbl-b" fill="#2e7d32">confirms §3's claim — not inferred, read straight from the API</text>
+    <text x="125" y="68" text-anchor="start" class="lbl" style="font-size:22px">curl .../api/v1/collections</text>
+    <text x="125" y="168" text-anchor="start" class="lbl-b" style="font-size:24px">"space": "l2"</text>
+    <text x="125" y="200" text-anchor="start" class="lbl-b" style="font-size:24px">"dimension": 768</text>
+    <text x="125" y="290" text-anchor="start" class="lbl-b" style="font-size:22px" fill="#2e7d32">confirms §3's claim — not inferred, read straight from the API</text>
+    <text x="125" y="320" text-anchor="start" class="lbl-g" style="font-size:18px">no override set in app/main.py</text>
   </svg>
   <p class="takeaway">No override was ever set in app/main.py — the collection came up on ChromaDB's default, and the API says so directly.</p>
   <div class="pageno">M5-DD·17</div>
@@ -658,20 +675,20 @@ footer, header, hgroup, main, menu, nav, section {
 <!-- ============ SLIDE 18 — NUMBERED ROWS: real distances ============ -->
 <section>
   <h2 class="t">0.6956 and 1.0968 — the numbers behind "Found 2 relevant chunks"</h2>
-  <p class="s">Querying the payments question directly returns two real L2 distances, lower ranked first — only two print because only two chunks exist.</p>
-  <svg viewBox="0 0 1100 280" role="img" aria-label="Numbered rows — the query how do I restart the payments service, chunk 1 at distance 0.6956, chunk 2 at distance 1.0968, caption noting only 2 print though k=3 was requested">
+  <p class="s">The real distances behind "Found 2 relevant chunks"</p>
+  <svg viewBox="0 0 1100 380" role="img" aria-label="Numbered rows — the query how do I restart the payments service, chunk 1 at distance 0.6956 the payments runbook chunk, chunk 2 at distance 1.0968 the checkout 503 chunk, caption noting only 2 print though k=3 was requested because only 2 chunks exist">
     <g class="lbl-b" text-anchor="middle" fill="#1e1e1e">
-      <circle cx="70" cy="50" r="20" fill="var(--p-purple)" stroke="#1e1e1e" stroke-width="2"/>
-      <text x="70" y="57" class="num">Q</text>
-      <circle cx="70" cy="130" r="20" fill="var(--p-blue)" stroke="#1e1e1e" stroke-width="2"/>
-      <text x="70" y="137" class="num">1</text>
-      <circle cx="70" cy="210" r="20" fill="var(--p-blue)" stroke="#1e1e1e" stroke-width="2"/>
-      <text x="70" y="217" class="num">2</text>
+      <circle cx="75" cy="60" r="24" fill="var(--p-purple)" stroke="#1e1e1e" stroke-width="2.2"/>
+      <text x="75" y="68" class="num" style="font-size:24px">Q</text>
+      <circle cx="75" cy="175" r="24" fill="var(--p-blue)" stroke="#1e1e1e" stroke-width="2.2"/>
+      <text x="75" y="183" class="num" style="font-size:24px">1</text>
+      <circle cx="75" cy="290" r="24" fill="var(--p-blue)" stroke="#1e1e1e" stroke-width="2.2"/>
+      <text x="75" y="298" class="num" style="font-size:24px">2</text>
     </g>
-    <text x="110" y="57" text-anchor="start" class="lbl">"How do I restart the payments service?"</text>
-    <text x="110" y="130" text-anchor="start" class="lbl-b">dist 0.6956 — payments runbook chunk</text>
-    <text x="110" y="217" text-anchor="start" class="lbl-b">dist 1.0968 — checkout 503 chunk</text>
-    <text x="760" y="175" text-anchor="middle" class="lbl-g">only 2 print — k=3 requested, 2 chunks exist</text>
+    <text x="125" y="68" text-anchor="start" class="lbl" style="font-size:21px">"How do I restart the payments service?"</text>
+    <text x="125" y="175" text-anchor="start" class="lbl-b" style="font-size:23px">dist 0.6956 — payments runbook chunk</text>
+    <text x="125" y="298" text-anchor="start" class="lbl-b" style="font-size:23px">dist 1.0968 — checkout 503 chunk</text>
+    <text x="760" y="235" text-anchor="middle" class="lbl-g" style="font-size:19px">only 2 print — k=3 requested, 2 chunks exist</text>
   </svg>
   <p class="takeaway">The Streamlit UI never shows you this number — only the resulting text — but this is exactly what ChromaDB ranks on.</p>
   <div class="pageno">M5-DD·18</div>
@@ -680,31 +697,31 @@ footer, header, hgroup, main, menu, nav, section {
 <!-- ============ SLIDE 19 — NUMBERED ROWS: measured norm ============ -->
 <section>
   <h2 class="t">Three sentences, three vectors, norm 1.000000 every time</h2>
-  <p class="s">Three arbitrary sentences through this app's exact OllamaEmbeddings code path all measure at L2 norm ≈ 1.000000 — confirmed, not assumed.</p>
-  <svg viewBox="0 0 1100 280" role="img" aria-label="Numbered rows — three sentence boxes each arrowing to a result of L2norm equals 1.000000, one flagged as float rounding not a real deviation">
+  <p class="s">Three sentences, three vectors, norm 1.000000 every time — measured, not assumed</p>
+  <svg viewBox="0 0 1100 380" role="img" aria-label="Numbered rows — three sentence boxes through this app's exact OllamaEmbeddings code path, each arrowing to a result of L2norm equals 1.000000, one flagged 1.000001 as float rounding not a real deviation">
     <g class="lbl-b" text-anchor="middle" fill="#1e1e1e">
-      <circle cx="70" cy="50" r="20" fill="var(--p-blue)" stroke="#1e1e1e" stroke-width="2"/>
-      <text x="70" y="57" class="num">1</text>
-      <circle cx="70" cy="130" r="20" fill="var(--p-blue)" stroke="#1e1e1e" stroke-width="2"/>
-      <text x="70" y="137" class="num">2</text>
-      <circle cx="70" cy="210" r="20" fill="var(--p-blue)" stroke="#1e1e1e" stroke-width="2"/>
-      <text x="70" y="217" class="num">3</text>
+      <circle cx="75" cy="65" r="24" fill="var(--p-blue)" stroke="#1e1e1e" stroke-width="2.2"/>
+      <text x="75" y="73" class="num" style="font-size:24px">1</text>
+      <circle cx="75" cy="180" r="24" fill="var(--p-blue)" stroke="#1e1e1e" stroke-width="2.2"/>
+      <text x="75" y="188" class="num" style="font-size:24px">2</text>
+      <circle cx="75" cy="295" r="24" fill="var(--p-blue)" stroke="#1e1e1e" stroke-width="2.2"/>
+      <text x="75" y="303" class="num" style="font-size:24px">3</text>
     </g>
-    <text x="110" y="57" text-anchor="start" class="lbl">"restart payments service?"</text>
-    <text x="110" y="137" text-anchor="start" class="lbl">"checkout 503 errors…"</text>
-    <text x="110" y="217" text-anchor="start" class="lbl">"database backups…"</text>
-    <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2">
-      <rect x="700" y="30" width="330" height="40" rx="6" fill="var(--p-green)"/>
-      <rect x="700" y="110" width="330" height="40" rx="6" fill="var(--p-orange)"/>
-      <rect x="700" y="190" width="330" height="40" rx="6" fill="var(--p-green)"/>
+    <text x="125" y="73" text-anchor="start" class="lbl" style="font-size:20px">"restart payments service?"</text>
+    <text x="125" y="188" text-anchor="start" class="lbl" style="font-size:20px">"checkout 503 errors…"</text>
+    <text x="125" y="303" text-anchor="start" class="lbl" style="font-size:20px">"database backups…"</text>
+    <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.2">
+      <rect x="700" y="40" width="340" height="55" rx="8" fill="var(--p-green)"/>
+      <rect x="700" y="152" width="340" height="55" rx="8" fill="var(--p-orange)"/>
+      <rect x="700" y="264" width="340" height="55" rx="8" fill="var(--p-green)"/>
     </g>
-    <text x="865" y="56" text-anchor="middle" class="lbl-sm">L2norm=1.000000</text>
-    <text x="865" y="136" text-anchor="middle" class="lbl-sm">L2norm=1.000001 — rounding</text>
-    <text x="865" y="216" text-anchor="middle" class="lbl-sm">L2norm=1.000000</text>
-    <g filter="url(#rough)" fill="none" stroke="#757575" stroke-width="2" stroke-dasharray="4 6">
-      <path d="M420,50 L698,50" marker-end="url(#ahg)"/>
-      <path d="M420,130 L698,130" marker-end="url(#ahg)"/>
-      <path d="M420,210 L698,210" marker-end="url(#ahg)"/>
+    <text x="870" y="73" text-anchor="middle" class="lbl-sm" style="font-size:19px">L2norm=1.000000</text>
+    <text x="870" y="185" text-anchor="middle" class="lbl-sm" style="font-size:19px">L2norm=1.000001 — rounding</text>
+    <text x="870" y="297" text-anchor="middle" class="lbl-sm" style="font-size:19px">L2norm=1.000000</text>
+    <g filter="url(#rough)" fill="none" stroke="#757575" stroke-width="2.2" stroke-dasharray="4 6">
+      <path d="M430,65 L698,65" marker-end="url(#ahg)"/>
+      <path d="M430,180 L698,180" marker-end="url(#ahg)"/>
+      <path d="M430,295 L698,295" marker-end="url(#ahg)"/>
     </g>
   </svg>
   <p class="takeaway">This confirms the unit-norm claim through the app's exact code path, not a general Ollama guarantee — measured, not assumed.</p>
@@ -714,28 +731,28 @@ footer, header, hgroup, main, menu, nav, section {
 <!-- ============ SLIDE 20 — THREE-COLUMN: real 3-variant results ============ -->
 <section>
   <h2 class="t">Same corpus, three chunk sizes, three different stories</h2>
-  <p class="s">baseline sits in the middle, variant-a (11 tiny chunks) wins on precision, variant-b (1 giant chunk) loses on every question in this experiment.</p>
-  <svg viewBox="0 0 1100 300" role="img" aria-label="Three columns compared — baseline with 2 chunks and distance 0.6956, variant-a with 11 chunks and distance 0.5146 marked best, variant-b with 1 chunk and distance 0.75 to 1.08 marked worst">
-    <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.6">
-      <rect x="40" y="40" width="320" height="220" rx="10" fill="var(--p-blue)"/>
-      <rect x="390" y="40" width="320" height="220" rx="10" fill="var(--p-green)"/>
-      <rect x="740" y="40" width="320" height="220" rx="10" fill="var(--p-red)"/>
+  <p class="s">Same corpus, three chunk sizes, three very different outcomes</p>
+  <svg viewBox="0 0 1100 400" role="img" aria-label="Three columns compared — baseline chunk_size 500 overlap 50 with 2 chunks and distance 0.6956 the middle ground, variant-a chunk_size 150 overlap 0 with 11 chunks and distance 0.5146 marked best because nothing dilutes the vector, variant-b chunk_size 1200 overlap 200 with 1 chunk and distance 0.75 to 1.08 marked worst because every question retrieves the same chunk">
+    <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.8">
+      <rect x="30" y="50" width="330" height="300" rx="12" fill="var(--p-blue)"/>
+      <rect x="385" y="50" width="330" height="300" rx="12" fill="var(--p-green)"/>
+      <rect x="740" y="50" width="330" height="300" rx="12" fill="var(--p-red)"/>
     </g>
-    <text x="200" y="80" text-anchor="middle" class="lbl-b">baseline</text>
-    <text x="200" y="110" text-anchor="middle" class="lbl-sm">500 / overlap 50</text>
-    <text x="200" y="140" text-anchor="middle" class="lbl-sm">2 chunks</text>
-    <text x="200" y="175" text-anchor="middle" class="lbl-b">dist 0.6956</text>
-    <text x="200" y="220" text-anchor="middle" class="lbl-g">the middle ground</text>
-    <text x="550" y="80" text-anchor="middle" class="lbl-b">variant-a</text>
-    <text x="550" y="110" text-anchor="middle" class="lbl-sm">150 / overlap 0</text>
-    <text x="550" y="140" text-anchor="middle" class="lbl-sm">11 chunks</text>
-    <text x="550" y="175" text-anchor="middle" class="lbl-b" fill="#2e7d32">dist 0.5146 — best</text>
-    <text x="550" y="220" text-anchor="middle" class="lbl-g">nothing dilutes the vector</text>
-    <text x="900" y="80" text-anchor="middle" class="lbl-b">variant-b</text>
-    <text x="900" y="110" text-anchor="middle" class="lbl-sm">1200 / overlap 200</text>
-    <text x="900" y="140" text-anchor="middle" class="lbl-sm">1 chunk</text>
-    <text x="900" y="175" text-anchor="middle" class="lbl-b" fill="#c62828">dist 0.75–1.08 — worst</text>
-    <text x="900" y="220" text-anchor="middle" class="lbl-g">every question, same chunk</text>
+    <text x="195" y="100" text-anchor="middle" class="lbl-b" style="font-size:24px">baseline</text>
+    <text x="195" y="135" text-anchor="middle" class="lbl-sm" style="font-size:19px">500 / overlap 50</text>
+    <text x="195" y="165" text-anchor="middle" class="lbl-sm" style="font-size:19px">2 chunks</text>
+    <text x="195" y="210" text-anchor="middle" class="lbl-b" style="font-size:23px">dist 0.6956</text>
+    <text x="195" y="280" text-anchor="middle" class="lbl-g" style="font-size:18px">the middle ground</text>
+    <text x="550" y="100" text-anchor="middle" class="lbl-b" style="font-size:24px">variant-a</text>
+    <text x="550" y="135" text-anchor="middle" class="lbl-sm" style="font-size:19px">150 / overlap 0</text>
+    <text x="550" y="165" text-anchor="middle" class="lbl-sm" style="font-size:19px">11 chunks</text>
+    <text x="550" y="210" text-anchor="middle" class="lbl-b" style="font-size:23px" fill="#2e7d32">dist 0.5146 — best</text>
+    <text x="550" y="280" text-anchor="middle" class="lbl-g" style="font-size:18px">nothing dilutes the vector</text>
+    <text x="905" y="100" text-anchor="middle" class="lbl-b" style="font-size:24px">variant-b</text>
+    <text x="905" y="135" text-anchor="middle" class="lbl-sm" style="font-size:19px">1200 / overlap 200</text>
+    <text x="905" y="165" text-anchor="middle" class="lbl-sm" style="font-size:19px">1 chunk</text>
+    <text x="905" y="210" text-anchor="middle" class="lbl-b" style="font-size:23px" fill="#c62828">dist 0.75–1.08 — worst</text>
+    <text x="905" y="280" text-anchor="middle" class="lbl-g" style="font-size:18px">every question, same chunk</text>
   </svg>
   <p class="takeaway">variant-a's tiny chunks isolate the exact restart command; variant-b collapses the whole corpus into one chunk every question retrieves.</p>
   <div class="pageno">M5-DD·20</div>
@@ -745,28 +762,28 @@ footer, header, hgroup, main, menu, nav, section {
 <section>
   <p class="kicker">MODULE 5 DEEP DIVE &nbsp;·&nbsp; TAKEAWAYS</p>
   <h2 class="t">On a corpus this small, even the worst chunking still works</h2>
-  <svg viewBox="0 0 1100 340" role="img" aria-label="Five numbered rows listing the five real work takeaways from the deep dive, preceded by the honest small corpus caveat">
+  <svg viewBox="0 0 1100 380" role="img" aria-label="Five numbered rows listing the five real work takeaways from the deep dive, preceded by the honest small corpus caveat that variant-b's one-chunk-fits-all collapse only looks harmless because this corpus is 823 bytes">
     <g class="lbl-b" text-anchor="middle" fill="#1e1e1e">
-      <circle cx="60" cy="30" r="20" fill="var(--p-orange)" stroke="#1e1e1e" stroke-width="2"/>
-      <text x="60" y="37" class="num">!</text>
-      <circle cx="60" cy="85" r="20" fill="var(--p-blue)" stroke="#1e1e1e" stroke-width="2"/>
-      <text x="60" y="92" class="num">1</text>
-      <circle cx="60" cy="140" r="20" fill="var(--p-blue)" stroke="#1e1e1e" stroke-width="2"/>
-      <text x="60" y="147" class="num">2</text>
-      <circle cx="60" cy="195" r="20" fill="var(--p-blue)" stroke="#1e1e1e" stroke-width="2"/>
-      <text x="60" y="202" class="num">3</text>
-      <circle cx="60" cy="250" r="20" fill="var(--p-blue)" stroke="#1e1e1e" stroke-width="2"/>
-      <text x="60" y="257" class="num">4</text>
-      <circle cx="60" cy="305" r="20" fill="var(--p-blue)" stroke="#1e1e1e" stroke-width="2"/>
-      <text x="60" y="312" class="num">5</text>
+      <circle cx="65" cy="35" r="23" fill="var(--p-orange)" stroke="#1e1e1e" stroke-width="2.2"/>
+      <text x="65" y="43" class="num" style="font-size:23px">!</text>
+      <circle cx="65" cy="98" r="23" fill="var(--p-blue)" stroke="#1e1e1e" stroke-width="2.2"/>
+      <text x="65" y="106" class="num" style="font-size:23px">1</text>
+      <circle cx="65" cy="161" r="23" fill="var(--p-blue)" stroke="#1e1e1e" stroke-width="2.2"/>
+      <text x="65" y="169" class="num" style="font-size:23px">2</text>
+      <circle cx="65" cy="224" r="23" fill="var(--p-blue)" stroke="#1e1e1e" stroke-width="2.2"/>
+      <text x="65" y="232" class="num" style="font-size:23px">3</text>
+      <circle cx="65" cy="287" r="23" fill="var(--p-blue)" stroke="#1e1e1e" stroke-width="2.2"/>
+      <text x="65" y="295" class="num" style="font-size:23px">4</text>
+      <circle cx="65" cy="350" r="23" fill="var(--p-blue)" stroke="#1e1e1e" stroke-width="2.2"/>
+      <text x="65" y="358" class="num" style="font-size:23px">5</text>
     </g>
-    <g class="lbl" text-anchor="start">
-      <text x="105" y="37" fill="#c62828">small-corpus-masks-dilution — variant-b's collapse-everything failure would bite on a larger corpus</text>
-      <text x="105" y="92">chunk size trades context completeness against embedding precision — size it to your corpus</text>
-      <text x="105" y="147">top-k is a context-budget decision, not a "more retrieval is safer" dial</text>
-      <text x="105" y="202">ChromaDB's default metric is L2, not cosine — verify, don't assume, when you swap embedders</text>
-      <text x="105" y="257">the embedder — not the LLM — determines what gets retrieved; re-embed the whole corpus on a swap</text>
-      <text x="105" y="312">"RAG answered wrong" splits into retrieval miss vs generation miss — diagnose before you fix</text>
+    <g class="lbl" text-anchor="start" style="font-size:19px">
+      <text x="115" y="43" fill="#c62828">small-corpus-masks-dilution — variant-b's collapse-everything failure would bite on a larger corpus (this one is 823 bytes)</text>
+      <text x="115" y="106">chunk size trades context completeness against embedding precision — size it to your corpus</text>
+      <text x="115" y="169">top-k is a context-budget decision, not a "more retrieval is safer" dial</text>
+      <text x="115" y="232">ChromaDB's default metric is L2, not cosine — verify, don't assume, when you swap embedders</text>
+      <text x="115" y="295">the embedder — not the LLM — determines what gets retrieved; re-embed the whole corpus on a swap</text>
+      <text x="115" y="358">"RAG answered wrong" splits into retrieval miss vs generation miss — diagnose before you fix</text>
     </g>
   </svg>
   <p class="credit">Next: apply these levers to a real corpus. &nbsp;·&nbsp; <b>Gourav Shah</b> &nbsp;·&nbsp; School of DevOps &amp; AI</p>

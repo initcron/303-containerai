@@ -141,7 +141,7 @@ footer, header, hgroup, main, menu, nav, section {
 <section data-auto-animate>
   <p class="kicker">MODULE 3B &nbsp;·&nbsp; CONTAINERS FOR GENAI &amp; AGENTIC AI</p>
   <h2 class="t" style="font-size:2.3em">The flags you didn't touch</h2>
-  <p class="s" style="font-size:1.2em">The lab ran <code>mlx_lm.lora</code> with flags you copied. This deck opens each one: what shapes the adapter, why 4-bit survives, what the loss curve is really saying, and where a silent mismatch ruins a run.</p>
+  <p class="s" style="font-size:1.2em">The flags <code>mlx_lm.lora</code> ran — and what each one controls.</p>
   <svg viewBox="0 0 1100 300" role="img" aria-label="Four theme boxes — rank and alpha, NF4 quantization, loss curves, chat template — all feeding into one training run box">
     <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.4" stroke-linecap="round">
       <rect x="30" y="40" width="220" height="90" rx="10"/>
@@ -175,7 +175,7 @@ footer, header, hgroup, main, menu, nav, section {
 <!-- ============ SLIDE 2 — SCENE: rank = notepad width ============ -->
 <section>
   <h2 class="t">`r` is how wide the correction notepad is</h2>
-  <p class="s">The frozen base model is a printed textbook. The LoRA adapter is a notepad clipped to each page for corrections — rank is how many lines that notepad gives you.</p>
+  <p class="s">Rank is the notepad's width — more lines, more correction capacity.</p>
   <svg viewBox="0 0 1100 380" role="img" aria-label="A frozen textbook with two notepads clipped to it side by side, a narrow four-line notepad for rank four and a wide sixty-four-line notepad for rank sixty-four">
     <!-- left cell: frozen book -->
     <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="3">
@@ -238,7 +238,7 @@ footer, header, hgroup, main, menu, nav, section {
 <!-- ============ SLIDE 3 — matrix mechanics, 2 fragments ============ -->
 <section>
   <h2 class="t">Two thin matrices instead of one fat one</h2>
-  <p class="s">LoRA replaces a weight update to W (d×d) with two small matrices A (d×r) and B (r×d). Trained parameter count scales with r, not with d².</p>
+  <p class="s">Two thin matrices replace one fat update — params scale with r.</p>
   <svg viewBox="0 0 1100 340" role="img" aria-label="A frozen weight matrix W stays untouched while two small trainable matrices A and B appear beside it and feed into their product A times B">
     <g filter="url(#rough)" fill="var(--p-blue)" stroke="#1e1e1e" stroke-width="2.4" stroke-dasharray="9 7">
       <rect x="60" y="90" width="200" height="180" rx="10"/>
@@ -285,7 +285,7 @@ footer, header, hgroup, main, menu, nav, section {
 <!-- ============ SLIDE 4 — alpha/r ratio ============ -->
 <section>
   <h2 class="t">`alpha/r` is a ratio, not two knobs</h2>
-  <p class="s">The effective update is (alpha/r) × (A×B), not just A×B. Two configs at different widths can carry the exact same effective step size.</p>
+  <p class="s">alpha/r is the real dial — not alpha or r alone.</p>
   <svg viewBox="0 0 1100 300" role="img" aria-label="Two configuration cards, rank eight alpha sixteen and rank sixteen alpha thirty two, both circled as carrying the same ratio of two">
     <g filter="url(#rough)" fill="var(--p-blue)" stroke="#1e1e1e" stroke-width="2.6">
       <rect x="100" y="60" width="330" height="150" rx="12"/>
@@ -314,7 +314,7 @@ footer, header, hgroup, main, menu, nav, section {
 <!-- ============ SLIDE 5 — target_modules anatomy ============ -->
 <section>
   <h2 class="t">Not every layer gets a notepad</h2>
-  <p class="s">target_modules picks which weight matrices get adapted. Query/value projections shape what the model attends to — the default starting point.</p>
+  <p class="s">target_modules decides which layers get a notepad clipped on.</p>
   <svg viewBox="0 0 1100 320" role="img" aria-label="A transformer layer anatomy box showing query and value projections clipped with notepads in green, and key projection, output projection, and feed-forward layers left untouched in gray">
     <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.6">
       <rect x="40" y="40" width="1020" height="250" rx="14"/>
@@ -363,7 +363,7 @@ footer, header, hgroup, main, menu, nav, section {
 <!-- ============ SLIDE 6 — dropout, 2 fragments ============ -->
 <section>
   <h2 class="t">Dropout stops the notepad memorizing example order</h2>
-  <p class="s">During training, dropout randomly zeroes a fraction of the adapter's activations each step, so the adapter can't over-rely on any one path.</p>
+  <p class="s">Dropout zeroes a random adapter path each step.</p>
   <svg viewBox="0 0 1100 300" role="img" aria-label="An adapter with three parallel paths, one path lights up as active then gets randomly crossed out by dropout on the next step">
     <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.6">
       <rect x="60" y="110" width="150" height="80" rx="10"/>
@@ -408,7 +408,7 @@ footer, header, hgroup, main, menu, nav, section {
 <!-- ============ SLIDE 7 — SCENE: NF4 warehouse buckets ============ -->
 <section>
   <h2 class="t">16 buckets, placed where the weights actually live</h2>
-  <p class="s">Neural network weights cluster near zero with thin tails. NF4 places its 16 representable values to match that bell curve, not spread evenly across the range.</p>
+  <p class="s">NF4 places its 16 buckets where the weight distribution is dense.</p>
   <svg viewBox="0 0 1100 340" role="img" aria-label="A warehouse shelf with sixteen size buckets drawn dense in the middle and sparse at the edges, with parts clustering densely near the middle buckets">
     <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.6">
       <rect x="60" y="220" width="980" height="20" rx="4"/>
@@ -467,7 +467,7 @@ footer, header, hgroup, main, menu, nav, section {
 <!-- ============ SLIDE 8 — double quantization, 2 fragments ============ -->
 <section>
   <h2 class="t">Double quantization: quantizing the quantizer's own numbers</h2>
-  <p class="s">NF4 needs small per-block scaling constants to map weights into its buckets. Those constants add up across a whole model — so double quantization quantizes them too.</p>
+  <p class="s">Double quantization compresses NF4's own scaling constants too.</p>
   <svg viewBox="0 0 1100 300" role="img" aria-label="A scale constants box feeds into the main NF4 bucket box, then a second dashed pass wraps around the constants box compressing it to eight bit">
     <g filter="url(#rough)" fill="var(--p-blue)" stroke="#1e1e1e" stroke-width="2.8">
       <rect x="80" y="110" width="280" height="100" rx="12"/>
@@ -498,7 +498,7 @@ footer, header, hgroup, main, menu, nav, section {
 <!-- ============ SLIDE 9 — storage vs compute dtype ============ -->
 <section>
   <h2 class="t">Storage in 4-bit, math in 16-bit</h2>
-  <p class="s">The frozen base sits in NF4 at rest — that's the memory saving. It's dequantized on the fly to bf16/fp16 for the actual matmul; the adapter itself never touches 4-bit.</p>
+  <p class="s">4-bit at rest, bf16 for the math — the adapter stays fp16 throughout.</p>
   <svg viewBox="0 0 1100 320" role="img" aria-label="Two panel comparison, weights at rest in four bit on the left, weights during compute dequantized to bf16 on the right, with a small adapter box staying in fp16 outside the four bit path">
     <g filter="url(#rough)" fill="var(--p-blue)" stroke="#1e1e1e" stroke-width="2.6">
       <rect x="60" y="70" width="330" height="150" rx="12"/>
@@ -533,7 +533,7 @@ footer, header, hgroup, main, menu, nav, section {
 <!-- ============ SLIDE 10 — learning rate staircase ============ -->
 <section>
   <h2 class="t">The learning rate is the optimizer's step size</h2>
-  <p class="s">Too high and loss oscillates or diverges; too low and 50 iterations won't move the needle. The lab's default is deliberately conservative for a tiny run.</p>
+  <p class="s">Learning rate is the optimizer's step size toward the loss floor.</p>
   <svg viewBox="0 0 1100 320" role="img" aria-label="A staircase toward a loss minimum floor with three step sizes, tiny steps that stall short, right sized steps that land, and huge steps that overshoot past the floor">
     <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.6">
       <line x1="60" y1="260" x2="1040" y2="260"/>
@@ -568,7 +568,7 @@ footer, header, hgroup, main, menu, nav, section {
 <!-- ============ SLIDE 11 — overfitting signature comparison ============ -->
 <section>
   <h2 class="t">Falling train loss can still mean the adapter is memorizing</h2>
-  <p class="s">A healthy curve keeps falling on train and validation together. The memorization signature is train loss falling while validation stalls or rises.</p>
+  <p class="s">Val loss stalling while train falls is the memorization signature.</p>
   <svg viewBox="0 0 1100 320" role="img" aria-label="Two panel comparison of loss curves, healthy on the left with train and validation both falling together in green, overfitting on the right with train falling but validation stalling or rising in red">
     <g filter="url(#rough)" fill="var(--p-green)" stroke="#1e1e1e" stroke-width="2.4">
       <rect x="60" y="50" width="440" height="230" rx="12"/>
@@ -601,7 +601,7 @@ footer, header, hgroup, main, menu, nav, section {
 <!-- ============ SLIDE 12 — batch vs grad accum comparison ============ -->
 <section>
   <h2 class="t">Bigger batch costs memory; more accumulation steps don't</h2>
-  <p class="s">A larger batch gives a more stable gradient but costs proportionally more memory. Gradient accumulation simulates a larger batch without the memory cost.</p>
+  <p class="s">Gradient accumulation buys a bigger effective batch at flat memory.</p>
   <svg viewBox="0 0 1100 320" role="img" aria-label="Two panel comparison, bigger batch on the left with a climbing memory gauge into the red zone, gradient accumulation on the right with several small passes and a flat memory gauge in green">
     <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.4">
       <rect x="60" y="50" width="440" height="230" rx="12"/>
@@ -643,7 +643,7 @@ footer, header, hgroup, main, menu, nav, section {
 <!-- ============ SLIDE 13 — SCENE: chat template mismatch ============ -->
 <section>
   <h2 class="t">Same JSON shape, wrong token boundaries — and it still trains</h2>
-  <p class="s">Every instruct model has a chat template baked into its tokenizer. If your training data's shape doesn't match it, training runs and loss falls — but silently on the wrong signal.</p>
+  <p class="s">A chat-template mismatch trains silently — no error, no warning.</p>
   <svg viewBox="0 0 1100 340" role="img" aria-label="A training data page being fed through a translator stamped with the wrong template icon, coming out mismatched on the other side with no error or warning sign anywhere">
     <g filter="url(#rough)" fill="var(--p-blue)" stroke="#1e1e1e" stroke-width="2.6">
       <rect x="60" y="120" width="220" height="140" rx="10"/>
@@ -686,7 +686,7 @@ footer, header, hgroup, main, menu, nav, section {
 <!-- ============ SLIDE 14 — evaluation methodology fan-out ============ -->
 <section>
   <h2 class="t">One fixed prompt set, reused every time you change a knob</h2>
-  <p class="s">Generation is stochastic — one good-looking output proves nothing. Compare variants side by side on the same fixed held-out prompts, every time.</p>
+  <p class="s">Compare variants on the same fixed held-out prompts, every time.</p>
   <svg viewBox="0 0 1100 300" role="img" aria-label="A fixed prompt set fans out to three variant outputs, baseline, rank four, and high learning rate, lined up for comparison">
     <g filter="url(#rough)" fill="var(--p-blue)" stroke="#1e1e1e" stroke-width="2.8">
       <rect x="60" y="110" width="220" height="90" rx="10"/>
@@ -731,7 +731,7 @@ footer, header, hgroup, main, menu, nav, section {
 <!-- ============ SLIDE 15 — decision tree ============ -->
 <section>
   <h2 class="t">Missing knowledge or missing behavior — the fork before you fine-tune</h2>
-  <p class="s">A bad prompt costs an edit. A bad fine-tune costs a training run and a re-evaluation. Reach for fine-tuning only after prompting and RAG are exhausted.</p>
+  <p class="s">Knowledge gap leads to RAG. Behaviour gap leads to prompt, then fine-tune.</p>
   <svg viewBox="0 0 1100 320" role="img" aria-label="A decision tree starting from the model gets it wrong, branching to missing knowledge leading to RAG, or missing behavior leading to a check whether a better prompt fixes it, leading to prompting or fine-tuning">
     <g filter="url(#rough)" fill="var(--p-purple)" stroke="#1e1e1e" stroke-width="2.6">
       <rect x="430" y="20" width="240" height="60" rx="30"/>
@@ -781,7 +781,7 @@ footer, header, hgroup, main, menu, nav, section {
 <!-- ============ SLIDE 16 — experiment setup branching ============ -->
 <section>
   <h2 class="t">Same lab, three adapters, one comparison table</h2>
-  <p class="s">Baseline (rank 8, lr 1e-5), Variant A (rank 4), Variant B (lr 1e-4) — same eight training rows, each written to its own adapter directory.</p>
+  <p class="s">One shared dataset, three adapters — only rank or lr changes.</p>
   <svg viewBox="0 0 1100 300" role="img" aria-label="One shared training data box branching into three labeled adapter directory boxes, baseline, variant A, and variant B">
     <g filter="url(#rough)" fill="var(--p-purple)" stroke="#1e1e1e" stroke-width="2.8">
       <rect x="440" y="30" width="220" height="80" rx="10"/>
@@ -820,7 +820,7 @@ footer, header, hgroup, main, menu, nav, section {
 <!-- ============ SLIDE 17 — result A comparison ============ -->
 <section>
   <h2 class="t">Cutting rank in half measurably raises the floor</h2>
-  <p class="s">Rank 8 (baseline) lands at train loss 0.200. Rank 4 (Variant A), same data and learning rate, converges to a measurably higher 0.449.</p>
+  <p class="s">Rank 4 lands at loss 0.449 vs rank 8's 0.200 — same data, same lr.</p>
   <svg viewBox="0 0 1100 320" role="img" aria-label="Two panel loss curve comparison, rank eight landing at zero point two zero zero in green, rank four landing at zero point four four nine in orange, both starting from the same three point seven two one">
     <g filter="url(#rough)" fill="var(--p-green)" stroke="#1e1e1e" stroke-width="2.4">
       <rect x="60" y="40" width="460" height="240" rx="12"/>
@@ -849,7 +849,7 @@ footer, header, hgroup, main, menu, nav, section {
 <!-- ============ SLIDE 18 — result B comparison ============ -->
 <section>
   <h2 class="t">10x the learning rate, and no instability shows up</h2>
-  <p class="s">Variant B (10x learning rate) converged faster and lower — 0.054 vs baseline's 0.200 — with a smooth monotonic curve, no oscillation.</p>
+  <p class="s">10x lr converged faster and lower — 0.054 vs baseline's 0.200.</p>
   <svg viewBox="0 0 1100 320" role="img" aria-label="Loss curve comparison, baseline landing at zero point two zero zero, ten x learning rate landing at zero point zero five four, both smooth curves, with a gray annotation that instability needs a harder noisier dataset to show up">
     <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.4">
       <rect x="60" y="40" width="980" height="200" rx="12"/>

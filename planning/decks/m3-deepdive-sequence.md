@@ -10,6 +10,18 @@
      deck) because this deep-dive's material is dense mechanics the learner reasons
      with directly, same as 3B's. -->
 
+<!-- 2026-07-25 visual rebalance: per .superpowers/sdd/deck-rebalance-contract.md, all 17
+     subtitle (.s) paragraphs were cut to one line (≤80 chars) — the SVG is now the slide,
+     not a caption under a paragraph. Every load-bearing fact the old multi-line subtitles
+     carried was RELOCATED, not deleted: slide 3's "block table" term now labels the ledger
+     directly in-SVG; slide 4's "16 tokens each" now labels the physical-blocks row; slide 15's
+     literal Prometheus metric names (`num_requests_running`, `num_requests_waiting`,
+     `gpu_cache_usage_perc`) and the "CPU pool, historically GPU-named" note now label the
+     gauges themselves in-SVG instead of living only in prose. All other trimmed detail (flag
+     names, verification sources, qualifiers like "toy CPU scale" / "3 prompts") was already
+     duplicated in-SVG or in the slide's takeaway line before this pass, so no coverage changed.
+     Slide count, pagenos, order, palette, fonts, shared defs, and fragments are unchanged. -->
+
 This companion doc maps the 18-slide explainer deck (`site/static/decks/03-deepdive.html`) to the
 Module 3 deep-dive page (`site/docs/m3-vllm/deep-dive.md`). Like 3B's deep-dive deck, this page's
 material is dense mechanics (paged memory allocation, scheduler internals, a real flag-by-flag
@@ -103,8 +115,8 @@ Every deep-dive.md section maps to at least one slide.
 |---|---|---|
 | Opening framing — the lab's swap, what this page opens up | 1 | Title theme boxes name the three arcs (paging, batching, flags) |
 | §1 — naive contiguous per-request KV reservation, worst-case sizing | 2 | Scene: hotel books an entire floor for a maybe, illustration-author scene |
-| §1 — PagedAttention: rooms handed out on demand, front desk = block table | 3 | Scene: same hotel, rooms on demand, illustration-author scene |
-| §1 — fixed-size KV blocks (16 tokens), per-sequence block table, physical mapping, free-pool return | 4 | Mapping diagram: two sequences' block tables to scattered physical blocks, one free |
+| §1 — PagedAttention: rooms handed out on demand, front desk = block table | 3 | Scene: same hotel, rooms on demand, illustration-author scene; "block table" now labels the ledger in-SVG (2026-07-25) |
+| §1 — fixed-size KV blocks (16 tokens), per-sequence block table, physical mapping, free-pool return | 4 | Mapping diagram: two sequences' block tables to scattered physical blocks, one free; "16 tokens each" now labels the physical-blocks row in-SVG (2026-07-25) |
 | §1 — concrete waste: 20-token answer inside a 1024-token reservation, ~98% unused | 5 | Big-box anatomy with real percentage from the page |
 | §1 — fragmentation: 40% free in aggregate but no single span big enough, admission blocked | 6 | Fan-out of scattered gaps vs one blocked pending request |
 | §2 intro — static-batch server reseats only once the whole room finishes | 7 | Scene: restaurant, one lingering table blocks everyone, illustration-author scene |
@@ -117,7 +129,7 @@ Every deep-dive.md section maps to at least one slide.
 | §3 — `--max-model-len`: direct KV-cache budget line, worked backward from the container's 5 GB cap | 12 | Same anatomy box, second feed-in arrow |
 | §3 — real startup-log arithmetic: `VLLM_CPU_KVCACHE_SPACE=1 GiB` → 1456 blocks → "22.75x concurrency for 1024 tokens" | 14 | Numbered-row arrow chain with this run's real captured numbers |
 | §3 — `--max-num-seqs`: continuous-batching concurrency cap; raising it without cache budget just moves the queue | 14 | Same slide, closing takeaway line |
-| §4 — `/metrics` Prometheus endpoint; three gauges (`num_requests_running`, `num_requests_waiting`, `gpu_cache_usage_perc`) | 15 | Anatomy: three gauge dials |
+| §4 — `/metrics` Prometheus endpoint; three gauges (`num_requests_running`, `num_requests_waiting`, `gpu_cache_usage_perc`) | 15 | Anatomy: three gauge dials, now labeled with the literal metric names + "CPU pool, GPU-named" note in-SVG (2026-07-25) |
 | §4 — reading gauges together to decide which §3 flag to move (raise `MAX_NUM_SEQS` vs raise KV budget) | 15 | Same slide, two diagnosis arrows |
 | §5 — PagedAttention/continuous batching only pay off under overlapping, competing requests; Ollama is the right call for single-user | 16 | Decision tree mirroring the page's own mermaid diagram |
 | §6 — sequential run: Ollama visibly faster in absolute wall time than vLLM-CPU at this toy scale | 17 | Left panel: absolute-speed bars |

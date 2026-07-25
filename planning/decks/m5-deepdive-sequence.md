@@ -1,5 +1,18 @@
 # Module 5 Deep Dive — RAG Parameters Under the Hood · Explainer Deck Sequence
 
+**2026-07-25 visual rebalance:** applied the founder's deck-rebalance contract to all 21 slides.
+Every `.s` subtitle was cut from a multi-sentence paragraph (125–275 chars) to one line (≤ ~85
+chars) — the sharpest hook for that slide's idea, not a recap of the takeaway. Every SVG `viewBox`
+height was grown toward the 380–420 range (from a compressed 260–380) with internal font sizes and
+shape sizes scaled up proportionally so the diagram fills ~55–65% of slide height, matching
+`05-naive-rag.html`'s reference proportions. No facts were dropped: numbers and mechanism details
+that used to live only in subtitle prose were relocated into SVG `<text>` labels or folded into the
+one-line takeaway (see the "Notes" column below and in the coverage table for where each landed).
+Slide 21 (closing) had no `.s` subtitle before or after — its title already states the caveat
+directly — so only its SVG viewBox/fonts were grown (340→380) for consistency with the rest of the
+deck. Slide count (21), pagenos (M5-DD·01..21), order, palette, fonts, shared `#rough`/`#ah`/`#ahg`
+defs, and the no-fragments policy are all unchanged.
+
 <!-- CourseSmith sequence spec — authored and approved BEFORE the deck HTML is built.
      Convention: whiteboard-style-guide.md §5. One row per slide; every slide needs
      purpose + visual + takeaway. NO slide-count cap (§0): one idea per slide, every
@@ -104,7 +117,7 @@ Every deep-dive.md section maps to at least one slide.
 
 | Deep-dive section / concept | Slide(s) | Notes (analogy used, echoes/forward pointers) |
 |---|---|---|
-| Opening framing — the lab's unexplained knobs (`chunk_size`, `k`, `nomic-embed-text`) | 1 | Title theme boxes name the four arcs (chunking, top-k, metric, budget) |
+| Opening framing — the lab's unexplained knobs (`chunk_size`, `k`, `nomic-embed-text`) | 1 | Title theme boxes name the four arcs (chunking, top-k, metric, budget). 2026-07-25: the four real values (`chunk_size=500`, `k=3`, `nomic-embed-text`, `num_ctx=4096`) moved from the old paragraph subtitle into SVG labels under each theme box; the subtitle is now one line |
 | §1 — chunking too small: fact and command split across cards | 2 | Scene: index card pair, illustration-author scene |
 | §1 — chunking too large: several procedures blur into one averaged embedding | 3 | Scene: one crammed index card, illustration-author scene |
 | §1 — overlap mechanism: last N chars of chunk 1 repeated at start of chunk 2 | 4 | Pipeline diagram with highlighted overlap band |
@@ -125,7 +138,7 @@ Every deep-dive.md section maps to at least one slide.
 | §6 — embedding norm verification: `L2norm=1.000000` across three sentences via the app's exact code path | 19 | Numbered rows with the page's real measured norms |
 | §7 — 3-variant re-ingest experiment: baseline (2 chunks), variant-a (11 chunks), variant-b (1 chunk) | 20 | Three-column comparison with the page's real chunk counts and distances |
 | §7 — real results: variant-a best (0.5146), baseline middle (0.6956), variant-b worst (0.75–1.08) | 20 | Same slide, the three measured distance ranges labeled directly |
-| §7 — honesty: small-corpus-masks-dilution, all three variants still answered correctly here | 21 | Closing slide states the caveat explicitly before the takeaways |
+| §7 — honesty: small-corpus-masks-dilution, all three variants still answered correctly here | 21 | Closing slide states the caveat explicitly before the takeaways. 2026-07-25: the caveat row now names the corpus size directly ("this one is 823 bytes") for concreteness |
 | "Where you will use this" — 5 real-work triggers | 21 | Closing numbered rows, one per trigger |
 
 **No orphans.** Every deep-dive.md section (§1–§7, the opening framing paragraph, and the closing

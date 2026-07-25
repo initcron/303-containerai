@@ -23,6 +23,17 @@ RAG vs. prompt → the real three-run experiment and its numbers.**
 Page numbers are `M3B-DD·NN` to distinguish this deck from the lesson concept deck's `M3B·NN`
 (`03b-finetuning.html`, untouched by this work).
 
+**2026-07-25 visual rebalance.** Per `.superpowers/sdd/deck-rebalance-contract.md`, every slide's
+`.s` subtitle was rewritten from a multi-line paragraph (130–196 chars) down to a single line
+(≤74 chars, all ≤80). No load-bearing fact was dropped — every number, term, and comparison the
+old subtitles stated was already present as a label inside that slide's SVG (e.g. slide 17's
+"0.200 / 0.449" loss values, slide 5's `q_proj`/`v_proj` "default target" labels), so shortening
+the prose text required no relocation into the SVGs or takeaways. SVG sizing, viewBoxes, palette,
+fragments, slide count, and pagenos are unchanged — the deck's `max-height:58%` SVG rule already
+matched the style-guide contract before this pass. The "Purpose" column below is descriptive prose
+(not a verbatim quote of the old `.s` text), so the coverage table's claims remain truthful
+unchanged.
+
 ## Slide table
 
 | # | Slide | Purpose | Visual | Takeaway |

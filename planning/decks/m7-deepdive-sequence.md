@@ -12,6 +12,23 @@
      learner reasons with directly (a temperature table, a bounded-vs-ReAct
      contrast, two real code gates, and captured transcripts from Variant A/B). -->
 
+<!-- 2026-07-25 visual rebalance: per founder feedback (deck-rebalance-contract.md),
+     every slide's .s subtitle was cut to one line (~80 chars target, ≤90 hard ceiling —
+     slides 16-17 sit at 84-85 chars to preserve exact wording on the gate-bypass finding,
+     see note below) and SVGs were widened/grown to dominate the slide, matching the
+     already-shipped 05-naive-rag.html / 07-multi-agent.html look. No load-bearing fact was
+     dropped: every number and claim that used to live only in subtitle prose (e.g. slide 1's
+     four framing questions, slide 3's temperature values, slide 9's AREA/SEV detail, slide
+     16's Kafka/payments-runbook mismatch) is still present — either already duplicated in the
+     slide's SVG labels/numbered rows, or relocated into an SVG label (slide 9's Triage box now
+     reads "Triage → AREA/SEV" directly). Per-slide Purpose/Visual/Takeaway descriptions below
+     are UNCHANGED in substance — they describe the underlying content the slide teaches, which
+     is still fully covered by the shortened on-slide text plus its SVG; the coverage mapping
+     and zero-orphan gate below remain true as written. Slides 16-17's honesty-language claims
+     (structural wrong-runbook retrieval is repeatable; the OUTCOME marker is NOT stable on its
+     own and depends on the gate to pin it) are preserved verbatim in meaning in both the
+     shortened subtitles and the unchanged takeaway lines. -->
+
 This companion doc maps the 18-slide explainer deck (`site/static/decks/07-deepdive.html`) to the
 Module 7 deep-dive page (`site/docs/m7-multi-agent/deep-dive.md`). Like M5's deep-dive deck, this
 page opens a working file (`crew.py`) the lab already ran and asks *why* it's built the way it is —

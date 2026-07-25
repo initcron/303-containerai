@@ -141,7 +141,7 @@ footer, header, hgroup, main, menu, nav, section {
 <section data-auto-animate>
   <p class="kicker">MODULE 3 DEEP DIVE &nbsp;·&nbsp; CONTAINERS FOR GENAI &amp; AGENTIC AI</p>
   <h2 class="t" style="font-size:2.3em">The swap that made this worth doing</h2>
-  <p class="s" style="font-size:1.2em">The lab pointed your M2 client at a patched CPU vLLM image with a two-variable swap. This deck opens the machinery behind that swap: paged memory, continuous batching, and what your four flags actually buy against it.</p>
+  <p class="s" style="font-size:1.2em">The lab's two-variable swap onto vLLM — this deck opens the machinery behind it.</p>
   <svg viewBox="0 0 1100 300" role="img" aria-label="Three theme boxes — paged memory, continuous batching, and the labs flags — all feeding into one box asking why the swap was worth it">
     <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.4" stroke-linecap="round">
       <rect x="60" y="40" width="300" height="90" rx="10"/>
@@ -171,7 +171,7 @@ footer, header, hgroup, main, menu, nav, section {
 <!-- ============ SLIDE 2 — SCENE: naive hotel books the whole floor ============ -->
 <section>
   <h2 class="t">A naive server books the whole floor for a maybe</h2>
-  <p class="s">A naive KV-cache allocator reserves a contiguous span sized for the worst case — every request, whether or not it ever needs that much.</p>
+  <p class="s">Naive KV-cache allocation reserves a contiguous worst-case span per request.</p>
   <svg viewBox="0 0 1100 380" role="img" aria-label="A hotel front desk clerk reserves an entire floor of rooms to one guest who might stay one night or a month, and most of the floor sits empty and locked">
     <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.6">
       <rect x="60" y="260" width="160" height="90" rx="8"/>
@@ -217,13 +217,13 @@ footer, header, hgroup, main, menu, nav, section {
 <!-- ============ SLIDE 3 — SCENE: PagedAttention hands out rooms on demand ============ -->
 <section>
   <h2 class="t">PagedAttention runs the hotel by the room, not the floor</h2>
-  <p class="s">Guests get one room at a time, checked in as they need it. A front-desk ledger — the block table — tracks who's in which room.</p>
+  <p class="s">PagedAttention hands out rooms on demand — a ledger tracks who holds which.</p>
   <svg viewBox="0 0 1100 380" role="img" aria-label="The same front desk now hands single rooms from a shared pool on demand, with a ledger tracking which guest occupies which room, and a short-stay guest checking out and freeing the room immediately">
     <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.6">
       <rect x="60" y="240" width="170" height="110" rx="8"/>
     </g>
     <text x="145" y="270" text-anchor="middle" class="lbl-b">front desk</text>
-    <text x="145" y="292" text-anchor="middle" class="lbl-g">ledger:</text>
+    <text x="145" y="292" text-anchor="middle" class="lbl-g">block table:</text>
     <text x="145" y="312" text-anchor="middle" class="lbl-g">A → room 2</text>
     <text x="145" y="330" text-anchor="middle" class="lbl-g">B → room 4, 7</text>
     <g filter="url(#rough)" fill="var(--p-blue)" stroke="#1e1e1e" stroke-width="2.4">
@@ -257,7 +257,7 @@ footer, header, hgroup, main, menu, nav, section {
 <!-- ============ SLIDE 4 — block table mapping diagram ============ -->
 <section>
   <h2 class="t">Block tables map logical tokens to scattered physical blocks</h2>
-  <p class="s">Fixed-size KV blocks (16 tokens each) are handed out on demand. A per-sequence block table maps logical position to physical block — no request needs a contiguous span.</p>
+  <p class="s">Fixed-size KV blocks map logical position to scattered physical blocks.</p>
   <svg viewBox="0 0 1100 360" role="img" aria-label="Two requests generating tokens map through their own block tables to non-contiguous physical blocks in a shared pool, with one block still free">
     <g filter="url(#rough)" fill="var(--p-blue)" stroke="#1e1e1e" stroke-width="2.4">
       <rect x="40" y="40" width="230" height="70" rx="8"/>
@@ -295,7 +295,7 @@ footer, header, hgroup, main, menu, nav, section {
     <text x="820" y="160" text-anchor="middle" class="lbl-sm">block 4 — B</text>
     <text x="960" y="160" text-anchor="middle" class="lbl-g">block 3</text>
     <text x="960" y="178" text-anchor="middle" class="lbl-g">free</text>
-    <text x="890" y="220" text-anchor="middle" class="lbl-b">physical KV cache blocks (fixed size)</text>
+    <text x="890" y="220" text-anchor="middle" class="lbl-b">physical KV blocks — 16 tokens each</text>
 
     <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.2" stroke-linecap="round">
       <path d="M610,75 C700,75 700,70 755,70" marker-end="url(#ah)"/>
@@ -310,7 +310,7 @@ footer, header, hgroup, main, menu, nav, section {
 <!-- ============ SLIDE 5 — 98% reserved, unused ============ -->
 <section>
   <h2 class="t">98% reserved, unused, and still unavailable to anyone else</h2>
-  <p class="s">A naive server sizes its reservation for `--max-model-len`. A 20-token answer inside a 1024-token reservation leaves nearly all of it sitting empty but locked.</p>
+  <p class="s">A 1024-token reservation for a 20-token answer — the rest sits empty, locked.</p>
   <svg viewBox="0 0 1100 320" role="img" aria-label="A large box representing a 1024 token reservation with a small filled sliver representing 20 tokens actually used, and the rest hatched and unavailable">
     <g filter="url(#rough)" fill="var(--p-red)" stroke="#1e1e1e" stroke-width="2.8">
       <rect x="120" y="50" width="860" height="180" rx="10"/>
@@ -339,7 +339,7 @@ footer, header, hgroup, main, menu, nav, section {
 <!-- ============ SLIDE 6 — fragmentation ============ -->
 <section>
   <h2 class="t">40% free in aggregate, but no single gap big enough</h2>
-  <p class="s">Contiguity — not total free memory — is what naive allocation runs out of. Scattered free spans can't be stitched into one worst-case reservation.</p>
+  <p class="s">Contiguity, not total free memory, is what naive allocation runs out of.</p>
   <svg viewBox="0 0 1100 320" role="img" aria-label="Three scattered small free memory gaps next to one large pending request that needs a bigger contiguous span than any single gap, blocked with a red X">
     <g filter="url(#rough)" fill="var(--p-green)" stroke="#1e1e1e" stroke-width="2.2">
       <rect x="60" y="60" width="130" height="70" rx="6"/>
@@ -371,7 +371,7 @@ footer, header, hgroup, main, menu, nav, section {
 <!-- ============ SLIDE 7 — SCENE: static-batch restaurant stalls ============ -->
 <section>
   <h2 class="t">A static-batch table waits for the slowest guest to leave</h2>
-  <p class="s">A static-batch server only reseats once the whole dining room has finished. One lingering table blocks every finished table — and the door — from moving on.</p>
+  <p class="s">A static batch reseats only once the whole dining room has finished.</p>
   <svg viewBox="0 0 1100 360" role="img" aria-label="A restaurant with several already-finished tables sitting uncleared while one table still lingers over dessert, and a closed sign hangs on the front door">
     <g filter="url(#rough)" fill="var(--p-green)" stroke="#1e1e1e" stroke-width="2.2">
       <rect x="60" y="60" width="150" height="90" rx="8"/>
@@ -417,7 +417,7 @@ footer, header, hgroup, main, menu, nav, section {
 <!-- ============ SLIDE 8 — SCENE: vLLM reseats immediately ============ -->
 <section>
   <h2 class="t">vLLM reseats the moment a table clears</h2>
-  <p class="s">The instant a table finishes, it's cleared and a new party is seated — no correlation to any other table's pace.</p>
+  <p class="s">The instant a table clears, a new party is seated — no batch boundary.</p>
   <svg viewBox="0 0 1100 360" role="img" aria-label="The same restaurant with one table being cleared and a new party seated at it immediately, while the other tables keep eating undisturbed">
     <g filter="url(#rough)" fill="var(--p-blue)" stroke="#1e1e1e" stroke-width="2.2">
       <rect x="60" y="60" width="150" height="90" rx="8"/>
@@ -465,7 +465,7 @@ footer, header, hgroup, main, menu, nav, section {
 <!-- ============ SLIDE 9 — scheduler mechanics, 2 fragments ============ -->
 <section>
   <h2 class="t">The scheduler checks every slot, every single step</h2>
-  <p class="s">On every decoding step, vLLM frees any slot whose sequence just finished — and can admit a waiting request into that same slot in the same iteration.</p>
+  <p class="s">Every decoding step, vLLM frees finished slots and admits a waiting request.</p>
   <svg viewBox="0 0 1100 360" role="img" aria-label="A running batch of sequence slots, one of which finishes and is freed, and a waiting sequence is admitted into that same slot in the same scheduling iteration">
     <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.8">
       <rect x="60" y="60" width="880" height="200" rx="12"/>
@@ -511,7 +511,7 @@ footer, header, hgroup, main, menu, nav, section {
 <!-- ============ SLIDE 10 — throughput vs tail-latency, two-panel ============ -->
 <section>
   <h2 class="t">Continuous batching helps throughput; static batching hurts short jobs twice</h2>
-  <p class="s">Static batching pads to the slowest member and holds finished slots idle. Continuous batching keeps every slot busy — and lets a short request return the moment it's done.</p>
+  <p class="s">Static batching pads to the slowest job; continuous batching stays always-busy.</p>
   <svg viewBox="0 0 1100 360" role="img" aria-label="Two panel comparison: static batching pads the whole batch to its longest member and traps a short job behind long ones, while continuous batching keeps every slot always busy and returns the short job immediately">
     <g filter="url(#rough)" fill="var(--p-red)" stroke="#1e1e1e" stroke-width="2.6">
       <rect x="60" y="60" width="460" height="260" rx="10"/>
@@ -552,7 +552,7 @@ footer, header, hgroup, main, menu, nav, section {
 <!-- ============ SLIDE 11 — hub-and-spoke: paging enables batching ============ -->
 <section>
   <h2 class="t">Paging is what makes admitting a request every step affordable</h2>
-  <p class="s">Continuous batching's whole value depends on being able to cheaply allocate KV cache for each newly admitted request — every single iteration.</p>
+  <p class="s">Cheap paged allocation is what makes admitting a request every step affordable.</p>
   <svg viewBox="0 0 1100 260" role="img" aria-label="Two boxes, paged memory and continuous batching, connected by a two way arrow labeled makes admission cheap enough to do every iteration">
     <g filter="url(#rough)" fill="var(--p-blue)" stroke="#1e1e1e" stroke-width="2.8">
       <rect x="90" y="70" width="330" height="120" rx="12"/>
@@ -580,7 +580,7 @@ footer, header, hgroup, main, menu, nav, section {
 <!-- ============ SLIDE 12 — dtype + max-model-len anatomy ============ -->
 <section>
   <h2 class="t">Two flags spend the same memory two different ways</h2>
-  <p class="s">`--dtype float32` doubles KV bytes per token versus bf16. `--max-model-len` × `--max-num-seqs` sets the worst-case blocks reserved. Both feed one shared budget.</p>
+  <p class="s">Two flags — dtype and max-model-len × max-num-seqs — spend one shared budget.</p>
   <svg viewBox="0 0 1100 320" role="img" aria-label="A KV cache memory budget box with two feed in arrows, one labeled dtype float32 doubling bytes per token, and one labeled max model len times max num seqs setting blocks reserved">
     <g filter="url(#rough)" fill="var(--p-orange)" stroke="#1e1e1e" stroke-width="2.4">
       <rect x="60" y="40" width="270" height="90" rx="10"/>
@@ -616,7 +616,7 @@ footer, header, hgroup, main, menu, nav, section {
 <!-- ============ SLIDE 13 — swap-space inert on CPU, two-panel ============ -->
 <section>
   <h2 class="t">`--swap-space` is accepted, validated, and does nothing here</h2>
-  <p class="s">Verified against `cpu_worker.py` source and this run's own `/metrics`: `num_cpu_blocks="0"` — every block came from `VLLM_CPU_KVCACHE_SPACE` alone.</p>
+  <p class="s">`--swap-space` is accepted and validated, but contributes zero blocks here.</p>
   <svg viewBox="0 0 1100 320" role="img" aria-label="Two panel comparison: on GPU, swap space is a real overflow tier in host RAM when VRAM KV cache runs out, but on this CPU build swap space is accepted and validated at startup yet contributes zero blocks, confirmed live on metrics">
     <g filter="url(#rough)" fill="var(--p-green)" stroke="#1e1e1e" stroke-width="2.6">
       <rect x="60" y="50" width="440" height="230" rx="10"/>
@@ -665,7 +665,7 @@ footer, header, hgroup, main, menu, nav, section {
 <!-- ============ SLIDE 14 — real startup arithmetic, numbered rows ============ -->
 <section>
   <h2 class="t">The engine log already did the arithmetic for you</h2>
-  <p class="s">This run's own startup log ties the KV budget straight to a concurrency number — the same arithmetic `--max-num-seqs` caps at the scheduler.</p>
+  <p class="s">This run's own startup log ties the KV budget straight to a concurrency number.</p>
   <svg viewBox="0 0 1100 320" role="img" aria-label="A chain of three numbered facts from this runs real startup log: one gibibyte of KV cache space produced fourteen fifty six blocks of sixteen tokens each, giving twenty two point seven five times concurrency for one thousand twenty four token requests">
     <g class="lbl-b" text-anchor="middle" fill="#1e1e1e">
       <circle cx="70" cy="60" r="24" fill="var(--p-blue)" stroke="#1e1e1e" stroke-width="2"/>
@@ -695,19 +695,20 @@ footer, header, hgroup, main, menu, nav, section {
 <!-- ============ SLIDE 15 — /metrics three gauges anatomy ============ -->
 <section>
   <h2 class="t">Three gauges tell you which lever to pull</h2>
-  <p class="s">`num_requests_running`, `num_requests_waiting`, and `gpu_cache_usage_perc` (CPU pool, historically GPU-named) read together diagnose the bottleneck.</p>
-  <svg viewBox="0 0 1100 320" role="img" aria-label="Three gauge dials in a row for running requests, waiting requests, and cache usage percent, with two diagnosis arrows below pointing to raise max num seqs or raise the KV cache budget depending on the readings">
+  <p class="s">Running, waiting, and cache-usage gauges read together diagnose the bottleneck.</p>
+  <svg viewBox="0 0 1100 320" role="img" aria-label="Three gauge dials in a row for the metrics num_requests_running, num_requests_waiting, and gpu_cache_usage_perc (a CPU pool despite the GPU-named metric), with two diagnosis arrows below pointing to raise max num seqs or raise the KV cache budget depending on the readings">
     <g filter="url(#rough)" fill="var(--p-blue)" stroke="#1e1e1e" stroke-width="2.4">
       <circle cx="185" cy="100" r="80"/>
       <circle cx="550" cy="100" r="80"/>
       <circle cx="915" cy="100" r="80"/>
     </g>
-    <text x="185" y="95" text-anchor="middle" class="lbl-b">running</text>
-    <text x="185" y="118" text-anchor="middle" class="lbl-g">slots busy now</text>
-    <text x="550" y="95" text-anchor="middle" class="lbl-b">waiting</text>
-    <text x="550" y="118" text-anchor="middle" class="lbl-g">queued, not admitted</text>
-    <text x="915" y="95" text-anchor="middle" class="lbl-b">cache usage %</text>
-    <text x="915" y="118" text-anchor="middle" class="lbl-g">how full the pool is</text>
+    <text x="185" y="90" text-anchor="middle" class="lbl-sm">num_requests_running</text>
+    <text x="185" y="112" text-anchor="middle" class="lbl-g">slots busy now</text>
+    <text x="550" y="90" text-anchor="middle" class="lbl-sm">num_requests_waiting</text>
+    <text x="550" y="112" text-anchor="middle" class="lbl-g">queued, not admitted</text>
+    <text x="915" y="90" text-anchor="middle" class="lbl-sm">gpu_cache_usage_perc</text>
+    <text x="915" y="112" text-anchor="middle" class="lbl-g">how full the pool is</text>
+    <text x="915" y="132" text-anchor="middle" class="lbl-g">(CPU pool — GPU-named metric)</text>
 
     <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.2" stroke-linecap="round">
       <path d="M550,190 C450,230 350,240 260,255" marker-end="url(#ah)"/>
@@ -725,7 +726,7 @@ footer, header, hgroup, main, menu, nav, section {
 <!-- ============ SLIDE 16 — decision tree: vLLM vs Ollama ============ -->
 <section>
   <h2 class="t">One developer at a time never creates the problem this machinery solves</h2>
-  <p class="s">Paging and continuous batching only pay for themselves once requests overlap in time and compete for the same memory.</p>
+  <p class="s">Paging and batching only pay off once requests overlap and compete for memory.</p>
   <svg viewBox="0 0 1100 320" role="img" aria-label="Decision tree: serving a model to one developer one request at a time means an Ollama class server is enough, while serving many concurrent users or services means vLLM class serving pays for itself">
     <g filter="url(#rough)" fill="var(--p-purple)" stroke="#1e1e1e" stroke-width="2.6">
       <rect x="450" y="30" width="200" height="70" rx="10"/>
@@ -759,7 +760,7 @@ footer, header, hgroup, main, menu, nav, section {
 <!-- ============ SLIDE 17 — the experiment: absolute vs scaling, two-panel ============ -->
 <section>
   <h2 class="t">Ollama wins the scoreboard; vLLM wins the scaling curve</h2>
-  <p class="s">At this toy CPU scale, Ollama is faster in absolute tok/s. But run the same 3 prompts sequential vs. concurrent, and vLLM-CPU scales 3.13x while Ollama scales only 1.10x.</p>
+  <p class="s">Ollama wins raw tok/s here; vLLM-CPU scales 3.13x to Ollama's 1.10x.</p>
   <svg viewBox="0 0 1100 340" role="img" aria-label="Left panel: absolute speed bar chart where Ollama is taller and faster than vLLM-CPU. Right panel: scaling factor arrows from sequential to concurrent baseline, vLLM-CPU climbing steeply at 3.13x and Ollama nearly flat at 1.10x">
     <text x="255" y="30" text-anchor="middle" class="lbl-b">absolute speed (tok/s, sequential)</text>
     <g filter="url(#rough)" fill="var(--p-blue)" stroke="#1e1e1e" stroke-width="2.4">
