@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Containers for GenAI &amp; Agentic AI — Module 5: Docs Assistant &mdash; Naive RAG</title>
+<title>Containers for GenAI &amp; Agentic AI — Module 5: Docs Assistant — Naive RAG</title>
 
 <!-- ============================================================
      CourseSmith whiteboard deck skeleton (self-contained).
      Style contract: templates/deck/whiteboard-style-guide.md
-     Tokens: Containers for GenAI &amp; Agentic AI 5 Docs Assistant &mdash; Naive RAG
+     Tokens: Containers for GenAI &amp; Agentic AI 5 Docs Assistant — Naive RAG
              Grounding an LLM in your own documents M5 (e.g. M1)
      Zero external requests: reveal.js 5.x runtime + Patrick Hand
      woff2 are inlined below. Keep it that way.
@@ -137,7 +137,7 @@ footer, header, hgroup, main, menu, nav, section {
 <!-- ============ SLIDE 1 — TITLE ============ -->
 <section data-auto-animate>
   <p class="kicker">MODULE 5 &nbsp;&middot;&nbsp; DAY 2</p>
-  <h2 class="t" style="font-size:2.3em">Docs Assistant &mdash; Naive RAG</h2>
+  <h2 class="t" style="font-size:2.3em">Docs Assistant — Naive RAG</h2>
   <p class="s" style="font-size:1.2em">Grounding an LLM in your own documents</p>
   <svg viewBox="0 0 1100 380" role="img" aria-label="A user question flows through retrieved document context into a grounded answer">
     <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="3" stroke-linecap="round">
@@ -164,7 +164,7 @@ footer, header, hgroup, main, menu, nav, section {
 <!-- ============ SLIDE 2 — WHAT YOU'LL LEARN ============ -->
 <section>
   <h2 class="t">What you'll learn</h2>
-  <p class="s">The anatomy of a real GenAI app &mdash; and how to wire it in containers.</p>
+  <p class="s">The anatomy of a real GenAI app — and how to wire it in containers.</p>
   <svg viewBox="0 0 1100 400" role="img" aria-label="Five learning objectives listed as numbered rows">
     <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.4">
       <circle cx="120" cy="70"  r="24"/>
@@ -443,8 +443,8 @@ footer, header, hgroup, main, menu, nav, section {
 
 <!-- ============ SLIDE 9 — CHROMADB, LIGHTEST STORE ============ -->
 <section>
-  <h2 class="t">ChromaDB &mdash; the lightest vector store</h2>
-  <p class="s">Zero-config and under 2 GB &mdash; the right default for a 16 GB laptop.</p>
+  <h2 class="t">ChromaDB — the lightest vector store</h2>
+  <p class="s">Zero-config and under 2 GB — the right default for a 16 GB laptop.</p>
   <svg viewBox="0 0 1100 380" role="img" aria-label="ChromaDB as the default choice with Qdrant and pgvector as scale-up options">
     <!-- default -->
     <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="3">
@@ -480,7 +480,7 @@ footer, header, hgroup, main, menu, nav, section {
 <!-- ============ SLIDE 10 — WRITE THE COMPOSE ============ -->
 <section>
   <h2 class="t">Wired via environment variables</h2>
-  <p class="s">Hand-author the compose service by service &mdash; endpoints are just env vars.</p>
+  <p class="s">Hand-author the compose service by service — endpoints are just env vars.</p>
   <svg viewBox="0 0 1100 380" role="img" aria-label="A compose file with model, embeddings, ChromaDB and app services connected by environment variables">
     <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.6">
       <rect x="360" y="30" width="380" height="330" rx="12"/>
@@ -518,8 +518,8 @@ footer, header, hgroup, main, menu, nav, section {
 
 <!-- ============ SLIDE 11 — LEARNING MODE ============ -->
 <section>
-  <h2 class="t">Learning Mode &mdash; watch the pipeline run</h2>
-  <p class="s">The app surfaces each step live &mdash; the invisible parts of RAG become visible.</p>
+  <h2 class="t">Learning Mode — watch the pipeline run</h2>
+  <p class="s">The app surfaces each step live — the invisible parts of RAG become visible.</p>
   <svg viewBox="0 0 1100 380" role="img" aria-label="Four Learning Mode panels showing query embedding, similarity search, retrieved context and generation with timings">
     <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.4">
       <rect x="50"  y="70" width="230" height="240" rx="10"/>
@@ -592,7 +592,7 @@ footer, header, hgroup, main, menu, nav, section {
 <!-- ============ SLIDE 13 — CLOSING ============ -->
 <section>
   <p class="kicker">TO THE LAB</p>
-  <h2 class="t" style="font-size:2.3em">Retrieve, then generate &mdash; grounded.</h2>
+  <h2 class="t" style="font-size:2.3em">Retrieve, then generate — grounded.</h2>
   <p class="s" style="font-size:1.15em">Hand-author the compose, ingest Acme's runbooks, watch Learning Mode explain.</p>
   <svg viewBox="0 0 1100 320" role="img" aria-label="A user question retrieving the right runbook chunk and generating the correct kubectl command">
     <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="3" stroke-linecap="round">
@@ -611,7 +611,7 @@ footer, header, hgroup, main, menu, nav, section {
     <text x="365" y="105" text-anchor="middle" class="lbl-g">retrieve</text>
     <text x="735" y="105" text-anchor="middle" class="lbl-g">generate</text>
   </svg>
-  <p class="credit">Next: <b>Lab &mdash; build the Docs Assistant</b>. &nbsp;&middot;&nbsp; Gourav Shah &middot; School of DevOps &amp; AI</p>
+  <p class="credit">Next: <b>Lab — build the Docs Assistant</b>. &nbsp;&middot;&nbsp; Gourav Shah &middot; School of DevOps &amp; AI</p>
   <div class="pageno">M5&middot;13</div>
 </section>
 
