@@ -5,6 +5,22 @@ All notable changes to this course build are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.0] - 2026-07-30
+
+### Changed
+
+- All 15 slide decks regenerated on the CourseSmith round-3 skeleton: anchored layout (title top,
+  visual centered, one-line caption bottom), no on-slide takeaway band (exit lines moved to the
+  per-deck sequence specs for narration), subtitles capped at one line, diagrams dominate.
+- Every deck is now fully self-contained — the 11 original decks no longer load reveal.js or
+  fonts from CDNs, so all decks work offline (classroom/locked-network safe).
+- Per-deck sequence specs authored for all 11 original decks (planning/decks/).
+
+### Fixed
+
+- 03-deepdive: duplicate wrapper closers; 05-naive-rag: entity-inflated subtitle;
+  08-security: restored a subtitle fact dropped during regeneration ("runs in CI on every push").
+
 ## [1.6.1] - 2026-07-25
 
 ### Changed
