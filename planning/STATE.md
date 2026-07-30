@@ -75,6 +75,14 @@ dependency (11 decks break offline), three-repo split (repo exposes planning/ to
 CDN question, the three-repo split (skillcoco/skillcoco-pro/skillcoco-hub — see
 `~/work/apps/learning/CLAUDE.md`).
 
+## Deck regeneration (2026-07-26 → 2026-07-30)
+
+All 15 decks (11 originals + 4 deep-dives) regenerated on the coursesmith round-3 skeleton —
+anchored layout, no on-slide takeaways, one-line subtitles, fully self-contained (CDN dependency
+of the originals eliminated; decks now work offline). Per-deck sequence specs authored for the
+originals. Staging-verified; shipping as **v1.7.0 via PR from the fork to upstream** (new flow:
+fork PR → merge → tag, replacing direct origin pushes).
+
 ## Post-completion work (2026-07-05, later)
 
 - ✅ **Phase A — full learner-QA pass (M1→Capstone).** A learner-simulating subagent followed each

@@ -13,6 +13,17 @@ directly — so only its SVG viewBox/fonts were grown (340→380) for consistenc
 deck. Slide count (21), pagenos (M5-DD·01..21), order, palette, fonts, shared `#rough`/`#ah`/`#ahg`
 defs, and the no-fragments policy are all unchanged.
 
+**2026-07-25 round-3 skeleton regen:** rebuilt `05-deepdive.html` byte-for-byte from the turnkey
+`templates/deck/deck-skeleton.html.tmpl` (anchored layout, `Reveal.initialize({display:'flex'})`,
+`svg{order:2; max-height:68%}`) per `.superpowers/sdd/deck-regen-contract.md`. `p.takeaway` is no
+longer rendered on any slide — the exit line for each slide now lives ONLY in this spec's Takeaway
+column below (presenter/narration guidance, never on-slide). Two subtitles that had crept to 82–83
+chars during the port (slide 4 "Overlap photocopies…" and slide 16 "Naive RAG never asks…") were
+re-cut to ≤80 chars without dropping the fact (both facts already live in the SVG). Content parity
+otherwise verified against the prior deck: same 21 slides, same order, same pagenos (M5-DD·01..21),
+same facts/numbers/SVG scenes, same ~800-char / 823-byte corpus-size correction (both mentions —
+slide 5's "~800-char" and slide 21's "823 bytes" — carried through unchanged). No slides split.
+
 <!-- CourseSmith sequence spec — authored and approved BEFORE the deck HTML is built.
      Convention: whiteboard-style-guide.md §5. One row per slide; every slide needs
      purpose + visual + takeaway. NO slide-count cap (§0): one idea per slide, every

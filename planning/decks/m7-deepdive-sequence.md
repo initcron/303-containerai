@@ -29,6 +29,39 @@
      own and depends on the gate to pin it) are preserved verbatim in meaning in both the
      shortened subtitles and the unchanged takeaway lines. -->
 
+<!-- 2026-07-25 round-3 skeleton regen (deck-regen-contract.md): 07-deepdive.html was rebuilt
+     byte-for-byte from templates/deck/deck-skeleton.html.tmpl (anchored layout, svg{order:2;
+     max-height:68%}, Reveal.initialize({display:'flex'})). All 18 slides ported with their SVGs
+     reused VERBATIM (byte-identical, diffed) — same count, same order, same M7-DD·01..18
+     pagenos, same facts. The on-slide `p.takeaway` element (round-2 leftover, 16 rendered
+     instances on slides 2-17) was REMOVED from every slide per the round-3 contract; each
+     takeaway's exact sentence already lived in this spec's Takeaway column above and needed no
+     rewording — this file is now the sole home of that presenter-guidance line, per style-guide
+     §3/§5. Two subtitles that had been allowed to run to 84-85 chars under the round-2 ≤90 hard
+     ceiling (slides 16, 17 — the exact ones carrying the gate-bypass honesty language) were
+     re-trimmed to the round-3 ≤80-char hard limit with NO relaxation this time:
+       - Slide 16: "Gate bypassed: wrong runbook retrieved, Fixer invents a command, Reviewer
+         approves it" (85 chars) -> "Gate bypassed: wrong runbook, a fabricated command,
+         approved anyway" (67 chars). Same four facts (bypass -> wrong runbook -> fabricated
+         command -> approved), tighter wording; nothing dropped.
+       - Slide 17: "Wrong runbook repeats every run — but OUTCOME stays stable only while the
+         gate holds" (84 chars) -> "Wrong runbook repeats every run — OUTCOME stable only while
+         gate holds" (70 chars). Same conditional claim, same words minus "but"/"stays".
+       - Slide 6's subtitle was also reworded (not for length — it was 71 rendered chars — but
+         because its `&#8594;` arrow entities inflate the contract's literal char-count regex
+         past 80): "The reason → call → observe → decide shape this crew deliberately isn't" ->
+         "The reason-call-observe-decide loop this crew deliberately isn't" (64 chars, same
+         4-step sequence named, no entities).
+     HONESTY GUARD held: slide 16's title ("...launders a fabricated command through two agents")
+     and slide 17's title ("The gate pins the marker — remove it and the marker stops being
+     pinned") are unchanged; slide 17's SVG numbered-row labels ("but OUTCOME itself flips run to
+     run — not stable", "wrong runbook every run") are unchanged (byte-identical SVG, confirmed
+     by diff). The gate-bypass structural failure is still stated as repeatable; the OUTCOME
+     marker is still stated as NOT stable without the gate; no reproducibility claim was
+     introduced or implied by the re-trim. Self-gates a-e all passed (see repo for the exact
+     command output at regen time); no slide was split — section count stayed 18, matching this
+     spec's 18 rows and the pre-regen deck's 18 sections exactly. -->
+
 This companion doc maps the 18-slide explainer deck (`site/static/decks/07-deepdive.html`) to the
 Module 7 deep-dive page (`site/docs/m7-multi-agent/deep-dive.md`). Like M5's deep-dive deck, this
 page opens a working file (`crew.py`) the lab already ran and asks *why* it's built the way it is —

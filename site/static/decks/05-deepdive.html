@@ -3,12 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Containers for GenAI &amp; Agentic AI — Module 5 Deep Dive: RAG Parameters Under the Hood</title>
+<title>Containers for GenAI &amp; Agentic AI — Module 5: RAG Parameters Deep Dive</title>
 
 <!-- ============================================================
-     CourseSmith whiteboard deck — Module 5 Deep Dive
-     (self-contained; generated from templates/deck/deck-skeleton.html.tmpl)
+     CourseSmith whiteboard deck skeleton (self-contained).
      Style contract: templates/deck/whiteboard-style-guide.md
+     Tokens: Containers for GenAI &amp; Agentic AI 5 RAG Parameters Deep Dive
+             {{module.subtitle}} M5-DD (e.g. M1)
      Zero external requests: reveal.js 5.x runtime + Patrick Hand
      woff2 are inlined below. Keep it that way.
      ============================================================ -->
@@ -91,17 +92,13 @@ footer, header, hgroup, main, menu, nav, section {
     margin:0 0 6px 0;
     line-height:1.15;
   }
-  .reveal h2.t{ font-size:1.75em; }
+  .reveal h2.t{ order:1; font-size:1.75em; }
   .reveal p{ margin:0; line-height:1.3; }
-  .reveal p.s{ font-size:0.95em; color:var(--gray); margin:0 0 8px 0; }
-  .reveal p.takeaway{
-    font-size:0.92em; color:var(--gray);
-    margin:10px auto 0; max-width:1050px;
-  }
-  .reveal p.takeaway::before{ content:"\2192  "; color:var(--ink); font-weight:700; }
-  .reveal svg{ width:100%; flex:1 1 0; min-height:0; max-height:58%; display:block; margin:8px auto 0; }
-  .reveal .kicker{ font-size:.8em; color:var(--gray); letter-spacing:2px; }
-  .reveal .credit{ font-size:.85em; color:var(--gray); margin-top:16px; }
+  .reveal p.s{ order:3; font-size:0.95em; color:var(--gray); margin:0; }
+  .reveal .slides section:first-of-type svg{ min-height:32%; }
+  .reveal svg{ order:2; width:100%; flex:1 1 0; min-height:0; max-height:68%; display:block; margin:auto 0; }
+  .reveal .kicker{ order:0; font-size:.8em; color:var(--gray); letter-spacing:2px; }
+  .reveal .credit{ order:4; font-size:.85em; color:var(--gray); margin-top:16px; }
   .reveal .credit b{ color:var(--ink); font-weight:700; }
   .reveal .pageno{ position:absolute; bottom:14px; right:22px; font-size:.6em; color:#bdbdbd; }
   .reveal .slide-number{ font-family:'Patrick Hand',cursive; }
@@ -136,10 +133,11 @@ footer, header, hgroup, main, menu, nav, section {
 </svg>
 
 <div class="reveal"><div class="slides">
+
 <!-- ============ SLIDE 1 — TITLE ============ -->
 <section data-auto-animate>
   <p class="kicker">MODULE 5 DEEP DIVE &nbsp;·&nbsp; CONTAINERS FOR GENAI &amp; AGENTIC AI</p>
-  <h2 class="t" style="font-size:2.3em">The knobs nobody explained</h2>
+  <h2 class="t" style="font-size:2.1em">The knobs nobody explained</h2>
   <p class="s" style="font-size:1.2em">The lab's defaults were never explained — this deck opens them</p>
   <svg viewBox="0 0 1100 400" role="img" aria-label="Four theme boxes — chunking with size and overlap, top-k deciding how many cards, the similarity metric L2 vs cosine, and context budget num_ctx=4096 — all feeding into one box asking what actually changes">
     <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.6" stroke-linecap="round">
@@ -204,7 +202,6 @@ footer, header, hgroup, main, menu, nav, section {
     <text x="190" y="300" text-anchor="middle" class="lbl-sm" style="font-size:19px">card 1: the fact</text>
     <text x="905" y="300" text-anchor="middle" class="lbl-sm" style="font-size:19px">card 2: the command</text>
   </svg>
-  <p class="takeaway">A retrieved chunk that's too small hands the model the fact without the command two sentences later — precise, but incomplete.</p>
   <div class="pageno">M5-DD·02</div>
 </section>
 
@@ -236,14 +233,13 @@ footer, header, hgroup, main, menu, nav, section {
       <path d="M790,190 C830,190 850,190 890,190" marker-end="url(#ahg)"/>
     </g>
   </svg>
-  <p class="takeaway">A chunk that swallows several topics forces its embedding to represent the average of all of them — a mediocre match for anything specific.</p>
   <div class="pageno">M5-DD·03</div>
 </section>
 
 <!-- ============ SLIDE 4 — DIAGRAM: overlap mechanism ============ -->
 <section>
   <h2 class="t">Overlap photocopies the tail onto the next card</h2>
-  <p class="s">The tail of chunk 1 is copied onto the start of chunk 2 — no fact is ever orphaned</p>
+  <p class="s">The tail of chunk 1 is copied onto chunk 2 — no fact is ever orphaned</p>
   <svg viewBox="0 0 1100 400" role="img" aria-label="One long runbook document splits into chunk 1 and chunk 2, each 500 characters, with a highlighted shared overlap band of the last 50 characters of chunk 1 between them, each chunk arrowing into its own embed-to-vector box and into ChromaDB">
     <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.8" stroke-linecap="round">
       <rect x="60" y="30" width="980" height="70" rx="8"/>
@@ -276,7 +272,6 @@ footer, header, hgroup, main, menu, nav, section {
       <path d="M640,250 C640,290 640,300 640,328" marker-end="url(#ah)"/>
     </g>
   </svg>
-  <p class="takeaway">Overlap exists for facts that land exactly on a chunk boundary — with overlap=50 a boundary fact still appears whole in at least one chunk.</p>
   <div class="pageno">M5-DD·04</div>
 </section>
 
@@ -308,7 +303,6 @@ footer, header, hgroup, main, menu, nav, section {
     <text x="890" y="210" text-anchor="middle" class="lbl-g" style="font-size:19px">~800-char Acme corpus</text>
     <text x="890" y="240" text-anchor="middle" class="lbl-g" style="font-size:19px">~2 runbook sections per chunk</text>
   </svg>
-  <p class="takeaway">The splitter always prefers a paragraph break over a mid-sentence cut — the chunk count you get is a direct function of corpus size vs chunk_size.</p>
   <div class="pageno">M5-DD·05</div>
 </section>
 
@@ -349,7 +343,6 @@ footer, header, hgroup, main, menu, nav, section {
       <path d="M620,320 C740,320 740,220 838,215" marker-end="url(#ah)"/>
     </g>
   </svg>
-  <p class="takeaway">Every retrieved chunk is text the model must read before answering — retrieval doesn't just find information, it spends budget.</p>
   <div class="pageno">M5-DD·06</div>
 </section>
 
@@ -382,7 +375,6 @@ footer, header, hgroup, main, menu, nav, section {
     <text x="825" y="227" text-anchor="middle" class="lbl-sm" style="font-size:19px">chunk 2 — dist 1.0968</text>
     <text x="825" y="292" text-anchor="middle" class="lbl-g" style="font-size:18px">no third chunk to return</text>
   </svg>
-  <p class="takeaway">On a corpus this small, k isn't doing retrieval work at all; on a larger corpus a k this generous would start diluting more than helping.</p>
   <div class="pageno">M5-DD·07</div>
 </section>
 
@@ -418,7 +410,6 @@ footer, header, hgroup, main, menu, nav, section {
     <text x="740" y="240" text-anchor="middle" class="lbl-g" style="font-size:18px">default squared-L2 (Euclidean) distance</text>
     <text x="740" y="310" text-anchor="middle" class="lbl-b" style="font-size:26px" fill="#2e7d32">closer = smaller number</text>
   </svg>
-  <p class="takeaway">Every "Found N relevant chunks" line in the lab is ChromaDB returning the smallest-distance chunks — a distance, not a percentage score.</p>
   <div class="pageno">M5-DD·08</div>
 </section>
 
@@ -449,7 +440,6 @@ footer, header, hgroup, main, menu, nav, section {
     <text x="915" y="225" text-anchor="middle" class="lbl-g" style="font-size:18px">true only when ‖a‖=‖b‖=1</text>
     <text x="915" y="252" text-anchor="middle" class="lbl-g" style="font-size:18px">nomic-embed-text ≈ unit-norm</text>
   </svg>
-  <p class="takeaway">This equivalence is specific to unit-norm vectors — swap in a model that doesn't normalize, and L2 starts rewarding vector length, which cosine ignores.</p>
   <div class="pageno">M5-DD·09</div>
 </section>
 
@@ -480,7 +470,6 @@ footer, header, hgroup, main, menu, nav, section {
       <path d="M955,195 L1008,195" marker-end="url(#ah)"/>
     </g>
   </svg>
-  <p class="takeaway">If the embedding model doesn't distinguish "restart" from "backup" in its vector space, no downstream LLM quality fixes a bad retrieval.</p>
   <div class="pageno">M5-DD·10</div>
 </section>
 
@@ -511,7 +500,6 @@ footer, header, hgroup, main, menu, nav, section {
     <text x="550" y="155" text-anchor="middle" class="lbl-g" style="font-size:19px" fill="#c62828">not comparable</text>
     <text x="550" y="245" text-anchor="middle" class="lbl-g" style="font-size:18px">swap models = full re-ingest</text>
   </svg>
-  <p class="takeaway">Storing embeddings from one model and querying with another doesn't degrade gracefully — it produces meaningless distances, not just worse ones.</p>
   <div class="pageno">M5-DD·11</div>
 </section>
 
@@ -536,7 +524,6 @@ footer, header, hgroup, main, menu, nav, section {
     <text x="685" y="195" text-anchor="middle" class="lbl-b" style="font-size:24px">answer headroom</text>
     <text x="685" y="345" text-anchor="middle" class="lbl-g" style="font-size:18px">real ceiling, independent of qwen2.5:1.5b's native training context</text>
   </svg>
-  <p class="takeaway">num_ctx=4096 is the real ceiling, independent of qwen2.5:1.5b's larger native training context — the app never uses more than this.</p>
   <div class="pageno">M5-DD·12</div>
 </section>
 
@@ -563,7 +550,6 @@ footer, header, hgroup, main, menu, nav, section {
     <text x="125" y="282" text-anchor="start" class="lbl-b" style="font-size:23px">prompt total — ~350–450 tokens (chunk_size=500, k=3)</text>
     <text x="125" y="348" text-anchor="start" class="lbl-b" style="font-size:23px" fill="#2e7d32">headroom for the answer — ~3,650–3,700 tokens</text>
   </svg>
-  <p class="takeaway">There's no pressure on this corpus — but raise k to 10 on chunk_size=1500 and context alone hits ~3,750 tokens, crowding out the answer.</p>
   <div class="pageno">M5-DD·13</div>
 </section>
 
@@ -591,7 +577,6 @@ footer, header, hgroup, main, menu, nav, section {
     <text x="925" y="280" text-anchor="middle" class="lbl-b" style="font-size:22px">the question lives here</text>
     <text x="440" y="310" text-anchor="middle" class="lbl-g" style="font-size:18px">prompt_eval_count=2050</text>
   </svg>
-  <p class="takeaway">On this app's prompt shape — context first, question last — an over-budget prompt loses your earliest retrieved chunks first, not the question.</p>
   <div class="pageno">M5-DD·14</div>
 </section>
 
@@ -615,14 +600,13 @@ footer, header, hgroup, main, menu, nav, section {
     <text x="815" y="210" text-anchor="middle" class="lbl-sm" style="font-size:19px">or hallucinates</text>
     <text x="815" y="270" text-anchor="middle" class="lbl-g" style="font-size:19px">fix: the prompt or the model</text>
   </svg>
-  <p class="takeaway">Confusing the two wastes debugging time — check "View Source Chunks" or query ChromaDB directly before touching the prompt or the model.</p>
   <div class="pageno">M5-DD·15</div>
 </section>
 
 <!-- ============ SLIDE 16 — PIPELINE with broken re-ranker link ============ -->
 <section>
   <h2 class="t">Naive RAG never asks "is the 2nd-best chunk actually better?"</h2>
-  <p class="s">Naive RAG never re-ranks — whatever wins on raw distance goes straight to the model</p>
+  <p class="s">Naive RAG never re-ranks — top distance wins, straight to the model</p>
   <svg viewBox="0 0 1100 340" role="img" aria-label="A pipeline from query through vector search using raw distance only to a crossed-out missing re-ranker box shown dashed, then straight to the LLM with no second look — the gap that M6's agentic retrieval addresses">
     <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.6">
       <rect x="30" y="120" width="220" height="100" rx="10"/>
@@ -645,7 +629,6 @@ footer, header, hgroup, main, menu, nav, section {
       <path d="M600,198 C750,260 900,260 998,190" marker-end="url(#ah)"/>
     </g>
   </svg>
-  <p class="takeaway">A semantically-adjacent-but-wrong chunk can outrank the truly relevant one — that's the class of gap M6's agentic retrieval addresses.</p>
   <div class="pageno">M5-DD·16</div>
 </section>
 
@@ -668,7 +651,6 @@ footer, header, hgroup, main, menu, nav, section {
     <text x="125" y="290" text-anchor="start" class="lbl-b" style="font-size:22px" fill="#2e7d32">confirms §3's claim — not inferred, read straight from the API</text>
     <text x="125" y="320" text-anchor="start" class="lbl-g" style="font-size:18px">no override set in app/main.py</text>
   </svg>
-  <p class="takeaway">No override was ever set in app/main.py — the collection came up on ChromaDB's default, and the API says so directly.</p>
   <div class="pageno">M5-DD·17</div>
 </section>
 
@@ -690,14 +672,13 @@ footer, header, hgroup, main, menu, nav, section {
     <text x="125" y="298" text-anchor="start" class="lbl-b" style="font-size:23px">dist 1.0968 — checkout 503 chunk</text>
     <text x="760" y="235" text-anchor="middle" class="lbl-g" style="font-size:19px">only 2 print — k=3 requested, 2 chunks exist</text>
   </svg>
-  <p class="takeaway">The Streamlit UI never shows you this number — only the resulting text — but this is exactly what ChromaDB ranks on.</p>
   <div class="pageno">M5-DD·18</div>
 </section>
 
 <!-- ============ SLIDE 19 — NUMBERED ROWS: measured norm ============ -->
 <section>
   <h2 class="t">Three sentences, three vectors, norm 1.000000 every time</h2>
-  <p class="s">Three sentences, three vectors, norm 1.000000 every time — measured, not assumed</p>
+  <p class="s">Three vectors, norm 1.000000 every time — measured, not assumed</p>
   <svg viewBox="0 0 1100 380" role="img" aria-label="Numbered rows — three sentence boxes through this app's exact OllamaEmbeddings code path, each arrowing to a result of L2norm equals 1.000000, one flagged 1.000001 as float rounding not a real deviation">
     <g class="lbl-b" text-anchor="middle" fill="#1e1e1e">
       <circle cx="75" cy="65" r="24" fill="var(--p-blue)" stroke="#1e1e1e" stroke-width="2.2"/>
@@ -724,7 +705,6 @@ footer, header, hgroup, main, menu, nav, section {
       <path d="M430,295 L698,295" marker-end="url(#ahg)"/>
     </g>
   </svg>
-  <p class="takeaway">This confirms the unit-norm claim through the app's exact code path, not a general Ollama guarantee — measured, not assumed.</p>
   <div class="pageno">M5-DD·19</div>
 </section>
 
@@ -754,14 +734,13 @@ footer, header, hgroup, main, menu, nav, section {
     <text x="905" y="210" text-anchor="middle" class="lbl-b" style="font-size:23px" fill="#c62828">dist 0.75–1.08 — worst</text>
     <text x="905" y="280" text-anchor="middle" class="lbl-g" style="font-size:18px">every question, same chunk</text>
   </svg>
-  <p class="takeaway">variant-a's tiny chunks isolate the exact restart command; variant-b collapses the whole corpus into one chunk every question retrieves.</p>
   <div class="pageno">M5-DD·20</div>
 </section>
 
 <!-- ============ SLIDE 21 — CLOSING: honesty caveat + takeaways ============ -->
 <section>
   <p class="kicker">MODULE 5 DEEP DIVE &nbsp;·&nbsp; TAKEAWAYS</p>
-  <h2 class="t">On a corpus this small, even the worst chunking still works</h2>
+  <h2 class="t" style="font-size:1.55em">On a corpus this small, even the worst chunking still works</h2>
   <svg viewBox="0 0 1100 380" role="img" aria-label="Five numbered rows listing the five real work takeaways from the deep dive, preceded by the honest small corpus caveat that variant-b's one-chunk-fits-all collapse only looks harmless because this corpus is 823 bytes">
     <g class="lbl-b" text-anchor="middle" fill="#1e1e1e">
       <circle cx="65" cy="35" r="23" fill="var(--p-orange)" stroke="#1e1e1e" stroke-width="2.2"/>
@@ -804,6 +783,7 @@ footer, header, hgroup, main, menu, nav, section {
 </script>
 <script>
   Reveal.initialize({
+    display: 'flex',   // Reveal writes config.display as INLINE style on visible slides — 'block' would kill the flex column/order layout
     width: 1280,
     height: 720,
     margin: 0.04,

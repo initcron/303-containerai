@@ -3,12 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Containers for GenAI &amp; Agentic AI — Module 7 Deep Dive: Agent Knobs Under the Hood</title>
+<title>Containers for GenAI &amp; Agentic AI — Module 7: Agent Knobs Deep Dive</title>
 
 <!-- ============================================================
-     CourseSmith whiteboard deck — Module 7 Deep Dive
-     (self-contained; generated from templates/deck/deck-skeleton.html.tmpl)
+     CourseSmith whiteboard deck skeleton (self-contained).
      Style contract: templates/deck/whiteboard-style-guide.md
+     Tokens: Containers for GenAI &amp; Agentic AI 7 Agent Knobs Deep Dive
+             M7-DD (e.g. M1) — this deck omits module.subtitle (title slide subtitle is custom-authored)
      Zero external requests: reveal.js 5.x runtime + Patrick Hand
      woff2 are inlined below. Keep it that way.
      ============================================================ -->
@@ -91,17 +92,13 @@ footer, header, hgroup, main, menu, nav, section {
     margin:0 0 6px 0;
     line-height:1.15;
   }
-  .reveal h2.t{ font-size:1.75em; }
+  .reveal h2.t{ order:1; font-size:1.75em; }
   .reveal p{ margin:0; line-height:1.3; }
-  .reveal p.s{ font-size:0.95em; color:var(--gray); margin:0 0 8px 0; }
-  .reveal p.takeaway{
-    font-size:0.92em; color:var(--gray);
-    margin:10px auto 0; max-width:1050px;
-  }
-  .reveal p.takeaway::before{ content:"\2192  "; color:var(--ink); font-weight:700; }
-  .reveal svg{ width:100%; flex:1 1 0; min-height:0; max-height:58%; display:block; margin:8px auto 0; }
-  .reveal .kicker{ font-size:.8em; color:var(--gray); letter-spacing:2px; }
-  .reveal .credit{ font-size:.85em; color:var(--gray); margin-top:16px; }
+  .reveal p.s{ order:3; font-size:0.95em; color:var(--gray); margin:0; }
+  .reveal .slides section:first-of-type svg{ min-height:32%; }
+  .reveal svg{ order:2; width:100%; flex:1 1 0; min-height:0; max-height:68%; display:block; margin:auto 0; }
+  .reveal .kicker{ order:0; font-size:.8em; color:var(--gray); letter-spacing:2px; }
+  .reveal .credit{ order:4; font-size:.85em; color:var(--gray); margin-top:16px; }
   .reveal .credit b{ color:var(--ink); font-weight:700; }
   .reveal .pageno{ position:absolute; bottom:14px; right:22px; font-size:.6em; color:#bdbdbd; }
   .reveal .slide-number{ font-family:'Patrick Hand',cursive; }
@@ -136,7 +133,6 @@ footer, header, hgroup, main, menu, nav, section {
 </svg>
 
 <div class="reveal"><div class="slides">
-<!-- ============ SLIDE 1 — TITLE ============ -->
 <section data-auto-animate>
   <p class="kicker">MODULE 7 DEEP DIVE &nbsp;·&nbsp; CONTAINERS FOR GENAI &amp; AGENTIC AI</p>
   <h2 class="t" style="font-size:2.3em">The four knobs nobody explained</h2>
@@ -171,7 +167,6 @@ footer, header, hgroup, main, menu, nav, section {
   <div class="pageno">M7-DD·01</div>
 </section>
 
-<!-- ============ SLIDE 2 — SCENE: musician improvisation ============ -->
 <section>
   <h2 class="t">Low temperature plays the melody exactly as written, every time</h2>
   <p class="s">Low temperature: reads the score exactly. High: improvises, sometimes off-key.</p>
@@ -210,11 +205,9 @@ footer, header, hgroup, main, menu, nav, section {
     <text x="907" y="345" text-anchor="middle" class="lbl-b">temp = 0.9</text>
     <text x="907" y="368" text-anchor="middle" class="lbl-g">improvises, notes scatter</text>
   </svg>
-  <p class="takeaway">An incident-response crew is almost entirely string section — the moments a wrong note is expensive far outnumber the moments creativity helps.</p>
   <div class="pageno">M7-DD·02</div>
 </section>
 
-<!-- ============ SLIDE 3 — NUMBERED ROWS: per-agent table ============ -->
 <section>
   <h2 class="t">Three of four agents pin temperature=0 on purpose</h2>
   <p class="s">crew.py's four llm() call sites, read directly — one exception stands out</p>
@@ -238,11 +231,9 @@ footer, header, hgroup, main, menu, nav, section {
     <text x="115" y="250" text-anchor="start" class="lbl-b">Reviewer &#8212; temp 0</text>
     <text x="115" y="270" text-anchor="start" class="lbl-g">APPROVED/REJECTED is binary; the code branches on it directly</text>
   </svg>
-  <p class="takeaway">The Fixer's 0.2 isn't a missed temperature=0 — it's llm()'s own default, the one call that phrases prose around an already-decided fact rather than deciding one.</p>
   <div class="pageno">M7-DD·03</div>
 </section>
 
-<!-- ============ SLIDE 4 — PIPELINE: temperature cluster ============ -->
 <section>
   <h2 class="t">Raising a classifier's temperature removes repeatability, not adds creativity</h2>
   <p class="s">More temperature on a classifier isn't more capable — it's less repeatable</p>
@@ -271,11 +262,9 @@ footer, header, hgroup, main, menu, nav, section {
     </g>
     <text x="240" y="45" text-anchor="start" class="lbl-g">raise this to 0.9 &#8594; &#167;6 measures it</text>
   </svg>
-  <p class="takeaway">Nothing in this crew calls llm() above 0.2 — every agent's job is to be right, not interesting.</p>
   <div class="pageno">M7-DD·04</div>
 </section>
 
-<!-- ============ SLIDE 5 — SCENE: re-googling ============ -->
 <section>
   <h2 class="t">Someone who never stops re-googling the same question</h2>
   <p class="s">No rule saying "three tries" — the loop can keep going indefinitely</p>
@@ -301,14 +290,12 @@ footer, header, hgroup, main, menu, nav, section {
     <text x="740" y="297" text-anchor="middle" class="lbl-sm" transform="rotate(5 740 293)">"checkout down fix"</text>
     <text x="700" y="355" text-anchor="middle" class="lbl-g">discarded attempts, no stopping rule</text>
   </svg>
-  <p class="takeaway">An agent given a tool and no iteration cap can call it, look, decide it's not good enough, and call it again — burning time and cost with no built-in stopping point.</p>
   <div class="pageno">M7-DD·05</div>
 </section>
 
-<!-- ============ SLIDE 6 — DIAGRAM: ReAct loop ============ -->
 <section>
   <h2 class="t">A ReAct loop can cycle back to "reason" again — until something stops it</h2>
-  <p class="s">The reason &#8594; call &#8594; observe &#8594; decide shape this crew deliberately isn't</p>
+  <p class="s">The reason-call-observe-decide loop this crew deliberately isn't</p>
   <svg viewBox="0 0 1100 340" role="img" aria-label="A cycle diagram: reason leads to call tool leads to observe leads to a decide diamond; the diamond has a no arrow curving back to reason and a yes arrow going to final answer; a dashed iteration cap box floats beside the decide diamond">
     <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="2.4">
       <rect x="40" y="140" width="180" height="70" rx="10" fill="var(--p-blue)"/>
@@ -344,11 +331,9 @@ footer, header, hgroup, main, menu, nav, section {
     <text x="920" y="78" text-anchor="middle" class="lbl-sm">iteration cap</text>
     <text x="920" y="96" text-anchor="middle" class="lbl-sm">(if none: runs until timeout)</text>
   </svg>
-  <p class="takeaway">Without an explicit iteration cap, the cycle only stops when something outside the loop — a timeout, an API error — forces it to.</p>
   <div class="pageno">M7-DD·06</div>
 </section>
 
-<!-- ============ SLIDE 7 — PIPELINE: bounded 5 calls ============ -->
 <section>
   <h2 class="t">This crew costs exactly 5 model calls, always</h2>
   <p class="s">retrieve() runs once — run() has no while loop and no retry branch</p>
@@ -382,11 +367,9 @@ footer, header, hgroup, main, menu, nav, section {
     <text x="550" y="238" text-anchor="middle" class="lbl-b">predictable p99 cost &amp; latency</text>
     <text x="550" y="258" text-anchor="middle" class="lbl-g">no code path runs 10&#215; instead of 1&#215;</text>
   </svg>
-  <p class="takeaway">A bounded pipeline trades the ability to self-correct for a call count you can predict exactly — worth it when an on-call responder needs a bounded answer time, every time.</p>
   <div class="pageno">M7-DD·07</div>
 </section>
 
-<!-- ============ SLIDE 8 — SCENE: relay race baton ============ -->
 <section>
   <h2 class="t">A relay race passes the baton, not the runner's whole race so far</h2>
   <p class="s">Each runner gets only the baton — not the whole race behind them</p>
@@ -430,11 +413,9 @@ footer, header, hgroup, main, menu, nav, section {
     </g>
     <text x="710" y="140" text-anchor="middle" class="lbl-g">baton = one string</text>
   </svg>
-  <p class="takeaway">Every handoff in this crew is one plain string passed forward — no shared history, no structured object, just the baton.</p>
   <div class="pageno">M7-DD·08</div>
 </section>
 
-<!-- ============ SLIDE 9 — TRACE: triage not fed to retrieval ============ -->
 <section>
   <h2 class="t">Triage's classification is printed for you — and thrown away by the code</h2>
   <p class="s">retrieve() uses the raw incident string — never Triage's classification</p>
@@ -463,11 +444,9 @@ footer, header, hgroup, main, menu, nav, section {
     <text x="920" y="65" text-anchor="middle" class="lbl-g">console output for a human</text>
     <text x="920" y="255" text-anchor="middle" class="lbl-g" fill="#2e7d32">the actual query</text>
   </svg>
-  <p class="takeaway">Triage's job in this pipeline is display and an early sanity check — it does not narrow what the Investigator searches for, unless you extend the crew to make it.</p>
   <div class="pageno">M7-DD·09</div>
 </section>
 
-<!-- ============ SLIDE 10 — TWO-PANEL: dilution vs cascade ============ -->
 <section>
   <h2 class="t">Fixed order sidesteps two failure modes a dynamic router doesn't</h2>
   <p class="s">A hard-coded run() order sidesteps both failure modes below</p>
@@ -500,11 +479,9 @@ footer, header, hgroup, main, menu, nav, section {
     <text x="820" y="230" text-anchor="middle" class="lbl-sm">early mistake gets smoothed over</text>
     <text x="820" y="253" text-anchor="middle" class="lbl-g" fill="#c62828">invisible to everything downstream</text>
   </svg>
-  <p class="takeaway">Each hop here passes forward only what the previous stage decided to output — a mistake at one stage stays visible and inspectable at the next, never smoothed over in a re-summary.</p>
   <div class="pageno">M7-DD·10</div>
 </section>
 
-<!-- ============ SLIDE 11 — ANATOMY: two code gates ============ -->
 <section>
   <h2 class="t">Two gates, two Python string checks, zero follow-up prompts</h2>
   <p class="s">Two deterministic string checks — not a second model policing the first</p>
@@ -524,11 +501,9 @@ footer, header, hgroup, main, menu, nav, section {
     <text x="820" y="180" text-anchor="middle" class="lbl-g">on the Reviewer's verdict</text>
     <text x="820" y="205" text-anchor="middle" class="lbl-g" fill="#2e7d32">deterministic — not a 2nd model call</text>
   </svg>
-  <p class="takeaway">A model that hedges — "possibly, but I'm not certain" — fails the gate correctly, because the code isn't parsing intent, it's checking a prefix.</p>
   <div class="pageno">M7-DD·11</div>
 </section>
 
-<!-- ============ SLIDE 12 — PIPELINE: gate placement ============ -->
 <section>
   <h2 class="t">Gate 1 sits after the tool call, Gate 2 sits at final-answer time</h2>
   <p class="s">Where the two real gates physically sit in the pipeline</p>
@@ -569,11 +544,9 @@ footer, header, hgroup, main, menu, nav, section {
     <text x="185" y="253" text-anchor="middle" class="lbl-sm">gate 3: before a tool call</text>
     <text x="185" y="272" text-anchor="middle" class="lbl-g">not needed — query is never LLM-chosen</text>
   </svg>
-  <p class="takeaway">Neither gate trusts the model's raw output as-is — each one runs it through an unambiguous check before that answer changes what happens next.</p>
   <div class="pageno">M7-DD·12</div>
 </section>
 
-<!-- ============ SLIDE 13 — NUMBERED ROWS: observing prompts ============ -->
 <section>
   <h2 class="t">No debug flag — read the profile file and the f-string instead</h2>
   <p class="s">No DEBUG flag — read the profile file plus run()'s f-string instead</p>
@@ -593,11 +566,9 @@ footer, header, hgroup, main, menu, nav, section {
     <text x="115" y="210" text-anchor="start" class="lbl-b">profile + f-string = the complete prompt</text>
     <text x="115" y="230" text-anchor="start" class="lbl-g">nothing else gets concatenated in — no hidden step</text>
   </svg>
-  <p class="takeaway">Between the profile file and run()'s f-strings you can reconstruct the exact prompt any agent saw for any run, without a debug flag the code doesn't have.</p>
   <div class="pageno">M7-DD·13</div>
 </section>
 
-<!-- ============ SLIDE 14 — NUMBERED ROWS: experiment ground rules ============ -->
 <section>
   <h2 class="t">Same incident, three knob variants, always run one at a time</h2>
   <p class="s">Sequential only — parallel runs would hide a knob change inside ordinary noise</p>
@@ -617,11 +588,9 @@ footer, header, hgroup, main, menu, nav, section {
     <text x="115" y="210" text-anchor="start" class="lbl-b">Variant B — relevance gate bypassed</text>
     <text x="115" y="230" text-anchor="start" class="lbl-g">sequential, never parallel</text>
   </svg>
-  <p class="takeaway">Overlapping variants would make it impossible to tell whether a difference in output came from the knob you changed or from ordinary small-model noise.</p>
   <div class="pageno">M7-DD·14</div>
 </section>
 
-<!-- ============ SLIDE 15 — THREE-COLUMN: variant A ============ -->
 <section>
   <h2 class="t">The outcome held at 0.9 — the prose didn't</h2>
   <p class="s">Three real repeats at temp 0.9 — the outcome held, the prose didn't</p>
@@ -648,14 +617,12 @@ footer, header, hgroup, main, menu, nav, section {
     </g>
     <text x="555" y="268" text-anchor="middle" class="lbl-b">OUTCOME: APPROVED — all 3 runs</text>
   </svg>
-  <p class="takeaway">Raising just the Triage temperature made Triage noisier without making the crew's final decision any less reliable — temperature is a per-role knob, not a per-crew one.</p>
   <div class="pageno">M7-DD·15</div>
 </section>
 
-<!-- ============ SLIDE 16 — SCENE: rubber stamp over mismatched runbook ============ -->
 <section>
   <h2 class="t">Bypass one gate and the crew launders a fabricated command through two agents</h2>
-  <p class="s">Gate bypassed: wrong runbook retrieved, Fixer invents a command, Reviewer approves it</p>
+  <p class="s">Gate bypassed: wrong runbook, a fabricated command, approved anyway</p>
   <svg viewBox="0 0 1100 380" role="img" aria-label="A rubber stamp marked approved coming down over a torn mismatched runbook page held together with the wrong staple, with red ink lines bleeding from the stamp mark">
     <g filter="url(#rough)" fill="none" stroke="#1e1e1e" stroke-width="3" stroke-dasharray="9 7">
       <rect x="140" y="100" width="260" height="180" rx="8" fill="var(--p-red)" transform="rotate(-3 270 190)"/>
@@ -679,14 +646,12 @@ footer, header, hgroup, main, menu, nav, section {
     <text x="900" y="280" text-anchor="middle" class="lbl-g" fill="#c62828">fabricated command,</text>
     <text x="900" y="303" text-anchor="middle" class="lbl-g" fill="#c62828">approved anyway</text>
   </svg>
-  <p class="takeaway">Not a destructive command — a fabricated one, laundered through two agents and rubber-stamped APPROVED. This is exactly the unsafe output the gate exists to stop.</p>
   <div class="pageno">M7-DD·16</div>
 </section>
 
-<!-- ============ SLIDE 17 — NUMBERED ROWS: comparison table summary ============ -->
 <section>
   <h2 class="t">The gate pins the marker — remove it and the marker stops being pinned</h2>
-  <p class="s">Wrong runbook repeats every run — but OUTCOME stays stable only while the gate holds</p>
+  <p class="s">Wrong runbook repeats every run — OUTCOME stable only while gate holds</p>
   <svg viewBox="0 0 1100 300" role="img" aria-label="Three numbered rows summarizing baseline approved with five calls, variant A approved across three runs with drifting prose, variant B retrieving the wrong runbook every run while its outcome marker flips between approved and rejected run to run because the gate that pinned it is gone">
     <g class="lbl-b" text-anchor="middle" fill="#1e1e1e">
       <circle cx="70" cy="45" r="22" fill="var(--p-blue)" stroke="#1e1e1e" stroke-width="2"/>
@@ -703,11 +668,9 @@ footer, header, hgroup, main, menu, nav, section {
     <text x="115" y="210" text-anchor="start" class="lbl-b">Variant B — gate removed, wrong runbook every run</text>
     <text x="115" y="230" text-anchor="start" class="lbl-g" fill="#c62828">but OUTCOME itself flips run to run — not stable</text>
   </svg>
-  <p class="takeaway">Variant B is structural AND unstable: wrong runbook every run, but no gate left to pin the verdict — that unpredictability is the finding. The gate, not temperature, was the determinism.</p>
   <div class="pageno">M7-DD·17</div>
 </section>
 
-<!-- ============ SLIDE 18 — CLOSING: numbered rows takeaways ============ -->
 <section>
   <p class="kicker">MODULE 7 DEEP DIVE &nbsp;·&nbsp; TAKEAWAYS</p>
   <h2 class="t">Pin the gates, bound the loop, check what really crosses each hop</h2>
@@ -735,6 +698,7 @@ footer, header, hgroup, main, menu, nav, section {
   <p class="credit">Next: apply these levers to a real crew. &nbsp;·&nbsp; <b>Gourav Shah</b> &nbsp;·&nbsp; School of DevOps &amp; AI</p>
   <div class="pageno">M7-DD·18</div>
 </section>
+
 </div></div>
 
 <script>/* reveal.js 5.x (inlined) */
@@ -750,6 +714,7 @@ footer, header, hgroup, main, menu, nav, section {
 </script>
 <script>
   Reveal.initialize({
+    display: 'flex',   // Reveal writes config.display as INLINE style on visible slides — 'block' would kill the flex column/order layout
     width: 1280,
     height: 720,
     margin: 0.04,

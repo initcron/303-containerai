@@ -22,6 +22,20 @@
      duplicated in-SVG or in the slide's takeaway line before this pass, so no coverage changed.
      Slide count, pagenos, order, palette, fonts, shared defs, and fragments are unchanged. -->
 
+<!-- 2026-07-25 round-3 skeleton regen: per .superpowers/sdd/deck-regen-contract.md, the deck was
+     rebuilt on the new turnkey skeleton (templates/deck/deck-skeleton.html.tmpl) for the anchored
+     layout (title TOP, visual centered in band, subtitle as bottom caption),
+     Reveal.initialize({display:'flex'}) + svg{order:2}, and zero external refs. Content parity:
+     all 18 slides, same order, same pagenos (M3-DD·01–18), same facts/numbers, same SVG scenes
+     carried over verbatim — no viewBox changes needed. The only structural change from the prior
+     file: every `p.takeaway` element was REMOVED from the rendered HTML (17 of them, slides 2–17;
+     slides 1 and 18 never had one) — none were deleted as content, all had already been captured
+     in this spec's Takeaway column since the 2026-07-25 rebalance pass, so the column below
+     already reflects the presenter/narration exit line for every slide. Gates run clean: subtitle
+     audit PASS (worst case 80 chars, slide 1), zero `class="takeaway"`, zero external refs, tags
+     balanced, section count 18 == spec rows 18 == old deck slide count 18 (no splits), headless
+     Chrome `--dump-dom` exit 0 with all 18 pagenos present. -->
+
 This companion doc maps the 18-slide explainer deck (`site/static/decks/03-deepdive.html`) to the
 Module 3 deep-dive page (`site/docs/m3-vllm/deep-dive.md`). Like 3B's deep-dive deck, this page's
 material is dense mechanics (paged memory allocation, scheduler internals, a real flag-by-flag
